@@ -11,7 +11,10 @@ import type {
   ConditionGroup,
   Effect,
   Interaction,
+  ObjectContainerPlacement,
+  ObjectPlacement,
   Room,
+  RoomPlacement,
   StateSchema,
   StateSchemaNode,
   Way,
@@ -92,6 +95,7 @@ export function validateWorldReferences(world: WorldDocument): string[] {
   validateIdGroup("interactionTypes", Object.keys(world.interactionTypes), errors);
   validateIdGroup("rooms", Object.keys(world.rooms), errors);
   validateIdGroup("objects", Object.keys(world.objects), errors);
+  validateIdGroup("placement", Object.keys(world.placement), errors);
 
   if (!(world.player.initialRoom in world.rooms)) {
     errors.push(`player.initialRoom references unknown room "${world.player.initialRoom}"`);
@@ -111,56 +115,89 @@ export function validateWorldReferences(world: WorldDocument): string[] {
 }
 
 function validateObjectPlacements(world: WorldDocument, errors: string[]): void {
-  const placements = new Map<string, string[]>();
-
-  for (const objectId of world.player.initialInventory ?? []) {
+  for (const objectId of Object.keys(world.placement)) {
     if (!(objectId in world.objects)) {
-      errors.push(`player.initialInventory references unknown object "${objectId}"`);
-      continue;
-    }
-
-    addPlacement(placements, objectId, "player.initialInventory");
-  }
-
-  for (const objectId of world.world.offstageObjects ?? []) {
-    if (!(objectId in world.objects)) {
-      errors.push(`world.offstageObjects references unknown object "${objectId}"`);
-      continue;
-    }
-
-    addPlacement(placements, objectId, "world.offstageObjects");
-  }
-
-  for (const [roomId, room] of Object.entries(world.rooms)) {
-    for (const objectId of room.objects ?? []) {
-      if (!(objectId in world.objects)) {
-        continue;
-      }
-
-      addPlacement(placements, objectId, `rooms.${roomId}.objects`);
+      errors.push(`placement.${objectId} references unknown object "${objectId}"`);
     }
   }
 
   for (const objectId of Object.keys(world.objects)) {
-    const objectPlacements = placements.get(objectId) ?? [];
+    if (!(objectId in world.placement)) {
+      errors.push(`objects.${objectId} has no initial placement entry in placement.${objectId}`);
+    }
+  }
 
-    if (objectPlacements.length === 0) {
-      errors.push(
-        `objects.${objectId} has no initial placement; expected exactly one location in rooms.*.objects, player.initialInventory, or world.offstageObjects`
-      );
-      continue;
+  for (const [objectId, placement] of Object.entries(world.placement)) {
+    validatePlacementReference(objectId, placement, world, errors);
+  }
+
+  detectPlacementCycles(world, errors);
+}
+
+function validatePlacementReference(
+  objectId: string,
+  placement: ObjectPlacement,
+  world: WorldDocument,
+  errors: string[]
+): void {
+  if (isRoomPlacement(placement) && !(placement.room in world.rooms)) {
+    errors.push(`placement.${objectId}.room references unknown room "${placement.room}"`);
+  }
+
+  if ("inventory" in placement && placement.inventory !== "player") {
+    errors.push(`placement.${objectId}.inventory must currently be "player"`);
+  }
+
+  if (isObjectPlacement(placement)) {
+    if (!(placement.object in world.objects)) {
+      errors.push(`placement.${objectId}.object references unknown object "${placement.object}"`);
+      return;
     }
 
-    if (objectPlacements.length > 1) {
-      errors.push(`objects.${objectId} has multiple initial placements: ${objectPlacements.join(", ")}`);
+    if (placement.object === objectId) {
+      errors.push(`placement.${objectId}.object cannot reference itself`);
     }
   }
 }
 
-function addPlacement(placements: Map<string, string[]>, objectId: string, location: string): void {
-  const current = placements.get(objectId) ?? [];
-  current.push(location);
-  placements.set(objectId, current);
+function detectPlacementCycles(world: WorldDocument, errors: string[]): void {
+  const visited = new Set<string>();
+  const active = new Set<string>();
+
+  for (const objectId of Object.keys(world.placement)) {
+    visitPlacement(objectId, world, visited, active, errors);
+  }
+}
+
+function visitPlacement(
+  objectId: string,
+  world: WorldDocument,
+  visited: Set<string>,
+  active: Set<string>,
+  errors: string[]
+): void {
+  if (visited.has(objectId)) {
+    return;
+  }
+
+  if (active.has(objectId)) {
+    errors.push(`placement cycle detected at object "${objectId}"`);
+    return;
+  }
+
+  const placement = world.placement[objectId];
+  if (!placement) {
+    return;
+  }
+
+  active.add(objectId);
+
+  if (isObjectPlacement(placement)) {
+    visitPlacement(placement.object, world, visited, active, errors);
+  }
+
+  active.delete(objectId);
+  visited.add(objectId);
 }
 
 function validateRoomReferences(
@@ -170,12 +207,6 @@ function validateRoomReferences(
   errors: string[]
 ): void {
   validateIdGroup(`rooms.${roomId}.ways`, Object.keys(room.ways ?? {}), errors);
-
-  for (const objectId of room.objects ?? []) {
-    if (!(objectId in world.objects)) {
-      errors.push(`rooms.${roomId}.objects references unknown object "${objectId}"`);
-    }
-  }
 
   for (const [wayId, way] of Object.entries(room.ways ?? {})) {
     validateWayReferences(roomId, wayId, way, world, errors);
@@ -415,4 +446,12 @@ function includesType(typeValue: string | string[] | undefined, expected: string
   }
 
   return typeValue.includes(expected);
+}
+
+function isRoomPlacement(placement: ObjectPlacement): placement is RoomPlacement {
+  return "room" in placement;
+}
+
+function isObjectPlacement(placement: ObjectPlacement): placement is ObjectContainerPlacement {
+  return "object" in placement;
 }

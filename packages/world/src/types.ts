@@ -4,17 +4,16 @@ export interface WorldDocument {
   interactionTypes: Record<string, InteractionType>;
   rooms: Record<string, Room>;
   objects: Record<string, WorldObject>;
+  placement: Record<string, ObjectPlacement>;
 }
 
 export interface WorldMeta {
   title: string;
   desc?: string;
-  offstageObjects?: string[];
 }
 
 export interface Player {
   initialRoom: string;
-  initialInventory?: string[];
 }
 
 export interface InteractionType {
@@ -26,7 +25,6 @@ export interface Room {
   title: string;
   desc: string;
   tags?: string[];
-  objects?: string[];
   ways?: Record<string, Way>;
   onEnter?: Effect[];
 }
@@ -48,9 +46,28 @@ export interface WorldObject {
   desc: string;
   aliases?: string[];
   tags?: string[];
+  portable?: boolean;
   stateSchema?: StateSchema;
   state?: Record<string, unknown>;
   interactions?: Record<string, Interaction>;
+}
+
+export type ObjectPlacement = RoomPlacement | InventoryPlacement | OffstagePlacement | ObjectContainerPlacement;
+
+export interface RoomPlacement {
+  room: string;
+}
+
+export interface InventoryPlacement {
+  inventory: "player";
+}
+
+export interface OffstagePlacement {
+  offstage: true;
+}
+
+export interface ObjectContainerPlacement {
+  object: string;
 }
 
 export interface Interaction {

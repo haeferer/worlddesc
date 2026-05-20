@@ -1,11 +1,9 @@
 world:
   title: Der Waldpfad
-  desc: Eine kleine Adventure-Welt mit Wiese, Waldrand und alter Huette.
-  offstageObjects: []
+  desc: Eine kleine Adventure-Welt mit Wiese, Waldrand, Kiste und alter Huette.
 
 player:
   initialRoom: wiese
-  initialInventory: []
 
 interactionTypes:
   examine:
@@ -20,6 +18,9 @@ interactionTypes:
   enter:
     title: Betreten
     desc: Einen Ort betreten.
+  unlock:
+    title: Entriegeln
+    desc: Ein verschlossenes Objekt mit einem passenden Mittel entriegeln.
 
 objects:
   sonne:
@@ -35,6 +36,56 @@ objects:
         result:
           text: Du blinzelst. Das war unangenehm hell.
           knowledge: [sonne_ist_sehr_hell]
+
+  kiste:
+    title: Kiste
+    desc: Eine kleine Holzkiste liegt halb im Gras.
+    aliases: [kiste, holzkiste, truhe]
+    tags: [container, wooden, old]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Kiste ansehen
+        aliases: [kiste ansehen, kiste anschauen]
+        result:
+          text: Die Kiste ist alt, aber noch stabil. Ein kleines Schloss fehlt; sie ist nur zugeklappt.
+      oeffnen:
+        type: open
+        title: Kiste oeffnen
+        aliases: [kiste oeffnen, deckel heben]
+        availableWhen:
+          all:
+            - ref: kiste
+              path: state.closed
+              equals: true
+        effects:
+          - type: set
+            ref: kiste
+            path: state.closed
+            value: false
+        result:
+          text: Du hebst den Deckel. In der Kiste liegt ein kleiner Eisenschluessel.
+
+  schluessel:
+    title: Schluessel
+    desc: Ein kleiner Eisenschluessel mit abgewetztem Bart.
+    aliases: [schluessel, eisenschluessel]
+    tags: [key, metal, small]
+    portable: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Schluessel ansehen
+        aliases: [schluessel ansehen]
+        result:
+          text: Der Bart ist alt gefeilt. Er koennte gut zu einer einfachen Holztuer passen.
 
   huette:
     title: Huette
@@ -61,14 +112,37 @@ objects:
         closed:
           type: boolean
           default: true
+        lockState:
+          type: string
+          enum: [locked, unlocked]
+          default: locked
     interactions:
       ansehen:
         type: examine
         title: Tuer ansehen
         aliases: [tuer ansehen, tuer anschauen]
         result:
-          text: Die Tuer ist alt, verzogen und voller Kratzer.
+          text: Die Tuer ist alt, verzogen und mit einem einfachen Schloss verriegelt.
           knowledge: [tuer_ist_alt]
+      entriegeln:
+        type: unlock
+        title: Tuer entriegeln
+        desc: Die Huettentuer mit dem Schluessel entriegeln.
+        aliases: [tuer aufschliessen, schloss oeffnen, entriegeln]
+        availableWhen:
+          all:
+            - ref: huettenTuer
+              path: state.lockState
+              equals: locked
+        effects:
+          - type: set
+            ref: huettenTuer
+            path: state.lockState
+            value: unlocked
+          - type: say
+            text: Das Schloss klickt leise auf.
+        result:
+          text: Die Huettentuer ist jetzt entriegelt.
       oeffnen:
         type: open
         title: Tuer oeffnen
@@ -80,6 +154,9 @@ objects:
             - ref: huettenTuer
               path: state.closed
               equals: true
+            - ref: huettenTuer
+              path: state.lockState
+              equals: unlocked
         effects:
           - type: set
             ref: huettenTuer
@@ -111,6 +188,7 @@ objects:
     desc: Eine verbeulte Metalllaterne mit russigem Glas.
     aliases: [laterne, lampe, oellampe]
     tags: [light, metal, old]
+    portable: true
     stateSchema:
       type: object
       additionalProperties: false
@@ -157,8 +235,6 @@ rooms:
     title: Wiese
     desc: Eine breite sonnige Wiese. Im Norden liegt der dunkle Wald.
     tags: [outdoor, sunny, grass, calm]
-    objects:
-      - sonne
     ways:
       nord:
         title: Nach Norden
@@ -171,9 +247,6 @@ rooms:
     title: Wiese vor dem Wald
     desc: Du stehst direkt vor dem Waldrand. Neben dir steht eine kleine Huette.
     tags: [outdoor, forest, hut]
-    objects:
-      - huette
-      - huettenTuer
     ways:
       sued:
         title: Nach Sueden
@@ -197,8 +270,6 @@ rooms:
     title: In der Huette
     desc: Ein muffiger, dunkler Raum mit altem Holzgeruch.
     tags: [indoor, dark, wooden, musty]
-    objects:
-      - laterne
     ways:
       raus:
         title: Huette verlassen
@@ -206,3 +277,17 @@ rooms:
         aliases: [raus, hinaus, verlassen, nach draussen]
         target:
           room: wieseVorDemWald
+
+placement:
+  sonne:
+    room: wiese
+  kiste:
+    room: wiese
+  schluessel:
+    object: kiste
+  huette:
+    room: wieseVorDemWald
+  huettenTuer:
+    room: wieseVorDemWald
+  laterne:
+    room: huetteInnen

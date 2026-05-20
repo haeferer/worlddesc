@@ -9,9 +9,10 @@ Das Modell beschreibt eine interaktive, zustandsbasierte Adventure-Welt.
 Es trennt sauber zwischen:
 
 - globaler Weltdefinition
-- Spielerstart und Startbesitz
+- Spielerstart
 - Raeumen als Orte
 - Objekten als benennbare und interagierbare Dinge
+- Platzierung als Aufenthaltsort von Objekten
 - Interaktionstypen als semantische Kategorien
 - Bedingungen fuer Verfuegbarkeit
 - Effekten fuer Weltveraenderungen
@@ -25,23 +26,21 @@ Es trennt sauber zwischen:
 
 - `title`: Name der Welt
 - `desc`: optionale Gesamtbeschreibung
-- `offstageObjects`: optionale Objekt-IDs fuer bewusst nicht aktive Startobjekte
 
 ### Player
 
 `player` beschreibt den Startkontext des Spielers.
 
 - `initialRoom`: ID des Start-Raums
-- `initialInventory`: optionale Liste der Startobjekte im Besitz des Spielers
 
 Interpretation:
 
 - Der Spielerstart ist fachlich nicht Teil des Raums, sondern des Spielerzustands.
-- Besitz wird zunaechst nur als Aufenthaltsort eines Objekts verstanden.
+- Besitz zur Laufzeit ist noch nicht als eigenes Submodell ausgebaut.
 
 ### Interaction Types
 
-`interactionTypes` definiert globale semantische Interaktionstypen wie `examine`, `open` oder `close`.
+`interactionTypes` definiert globale semantische Interaktionstypen wie `examine`, `open`, `close` oder `unlock`.
 
 Zweck:
 
@@ -49,29 +48,22 @@ Zweck:
 - eine Engine kann gleiche Typen aehnlich behandeln
 - die Objektdefinitionen muessen diese Semantik nicht jedes Mal neu erklaeren
 
-Jeder Typ hat aktuell:
-
-- `title`
-- `desc` optional
-
 ### Rooms
 
 `rooms` sind die Orte der Welt. Jeder Raum ist ueber seine ID adressierbar.
 
 Ein Raum hat aktuell:
 
-- `title`: kurzer Anzeigename
-- `desc`: raeumliche oder atmosphaerische Beschreibung
-- `tags`: optionale semantische Marker
-- `objects`: IDs der im Raum sichtbaren/interagierbaren Objekte
-- `ways`: erreichbare Ausgaenge oder Uebergaenge
-- `onEnter`: optionale Effekte beim Betreten
+- `title`
+- `desc`
+- `tags`
+- `ways`
+- `onEnter`
 
 Interpretation:
 
-- Ein Raum ist der primaere Container fuer Sichtbarkeit.
-- Objekte sind global definiert, aber raumweise eingeblendet.
-- Navigation ist explizit ueber `ways` modelliert.
+- Ein Raum beschreibt Atmosphaere, Orientierung und Uebergaenge.
+- Welche Objekte sich wo befinden, steht nicht mehr direkt im Raum, sondern zentral in `placement`.
 - Ein Raum ist nicht selbst Traeger von Besitzlogik.
 
 ### Ways
@@ -82,9 +74,9 @@ Ein Weg hat aktuell:
 
 - `title`
 - `desc`
-- `aliases`: alternative sprachliche Ausdruecke
-- `availableWhen`: optionale Bedingung
-- `target.room`: Zielraum-ID
+- `aliases`
+- `availableWhen`
+- `target.room`
 
 Interpretation:
 
@@ -101,35 +93,54 @@ Ein Objekt hat aktuell:
 - `desc`
 - `aliases`
 - `tags`
-- `stateSchema`: deklarative Beschreibung des erlaubten Zustands
-- `state`: optionale explizite Startwerte, die gegen `stateSchema` validiert werden
-- `interactions`: moegliche Interaktionen mit dem Objekt
+- `portable`
+- `stateSchema`
+- `state`
+- `interactions`
 
 Interpretation:
 
-- Objekte existieren global und koennen in verschiedenen Raeumen referenziert werden.
-- Jedes Objekt braucht zu Beginn genau einen Aufenthaltsort.
-- Zustand ist nicht mehr frei, sondern pro Objekt explizit beschrieben.
-- Defaults kommen aus `stateSchema` und koennen beim Laden materialisiert werden.
-- Typische State-Werte sind booleans, Zahlen, Strings oder kleine Enums.
+- Objekte existieren global und koennen in Bedingungen, Effekten und Platzierungen referenziert werden.
+- Objekte koennen sichtbar, tragbar, enthalten oder rein systemisch sein.
+- Zustand und Aufenthaltsort sind getrennte Konzepte.
 
-### Initiale Objektplatzierung
+### Placement
 
-Jedes Objekt soll beim Start genau einmal verortet sein.
+`placement` beschreibt den initialen Aufenthaltsort jedes Objekts.
+
+Jedes Objekt muss genau einen Eintrag in `placement` haben.
 
 Moegliche Startorte sind aktuell:
 
-- in `rooms[*].objects`
-- in `player.initialInventory`
-- in `world.offstageObjects`
+- `room`: Objekt liegt in einem Raum
+- `inventory`: Objekt liegt im Inventar eines Besitzers, aktuell nur `player`
+- `offstage`: Objekt ist ausserhalb der aktiven Szene
+- `object`: Objekt liegt in einem anderen Objekt
 
 Interpretation:
 
-- `rooms[*].objects` bedeutet sichtbar oder raumgebunden praesent
-- `player.initialInventory` bedeutet im Besitz des Spielers
-- `world.offstageObjects` bedeutet bewusst ausserhalb der aktiven Szene
+- Platzierung ist die zentrale Quelle fuer "wo ist das Objekt?"
+- Container wie Kisten sind damit kein Sonderfall mehr
+- der Loader prueft, dass Platzierungen auf existierende Raeume oder Objekte zeigen
+- Objekt-in-Objekt-Zyklen sind ungueltig
 
-Ein Objekt darf dabei nicht gleichzeitig an mehreren Startorten auftauchen.
+### Beweglichkeit von Objekten
+
+Nicht jedes Objekt, das irgendwo liegt oder steht, soll automatisch in ein Inventar verschoben werden duerfen.
+
+Als einfache erste Regel gibt es dafuer `portable: true`.
+
+Interpretation:
+
+- `portable: true` bedeutet, dass ein Objekt grundsaetzlich ins Inventar bewegt werden darf
+- fehlend oder `false` bedeutet, dass es nicht als tragbares Inventarobjekt gedacht ist
+- die konkrete Erreichbarkeit wird weiterhin ueber Bedingungen modelliert
+
+Beispiel:
+
+- `schluessel.portable: true`
+- `laterne.portable: true`
+- `huettenTuer` ist nicht portable
 
 ### State Schema
 
@@ -142,34 +153,11 @@ Ziel:
 - jeder State-Wert hat einen Default
 - Dinge wie `enum`, Zahlenbereiche oder String-Regeln koennen beschrieben werden
 
-Beispielidee:
+Das Beispiel in `sample/test.world.yaml` zeigt typische Faelle:
 
-```yaml
-stateSchema:
-  type: object
-  additionalProperties: false
-  properties:
-    closed:
-      type: boolean
-      default: true
-    lockState:
-      type: string
-      enum: [unlocked, locked]
-      default: unlocked
-```
-
-Das Beispiel in `sample/test.world.yaml` zeigt inzwischen mehrere typische Faelle:
-
-- `huettenTuer.stateSchema` mit einem einfachen Boolean-Feld
-- `laterne.stateSchema.lightMode` mit `enum: [off, dim, bright]`
-- `laterne.stateSchema.fuelLevel` mit `type: integer`, `minimum` und `maximum`
-
-Wichtig fuer die Interpretation:
-
-- `default` beschreibt den initialen Wert
-- `enum` schraenkt erlaubte Zustandswerte explizit ein
-- Grenzen wie `minimum` und `maximum` machen numerische Zustandsraeume maschinenlesbar
-- `state` kann Defaults optional ueberschreiben, aber nicht ausserhalb des Schemas erweitern
+- `huettenTuer.stateSchema.closed` als Boolean
+- `huettenTuer.stateSchema.lockState` als Enum
+- `laterne.stateSchema.fuelLevel` als Zahl mit Grenzen
 
 ### Interactions
 
@@ -177,19 +165,19 @@ Wichtig fuer die Interpretation:
 
 Eine Interaktion hat aktuell:
 
-- `type`: Referenz auf einen globalen `interactionType`
+- `type`
 - `title`
 - `desc`
-- `intent`: natuerliche Beschreibung der Spielerabsicht
-- `aliases`: alternative Formulierungen
-- `availableWhen`: Bedingung fuer Verfuegbarkeit
-- `effects`: Weltveraenderungen
-- `result`: textuelles und semantisches Ergebnis
+- `intent`
+- `aliases`
+- `availableWhen`
+- `effects`
+- `result`
 
 Interpretation:
 
-- `type` ist die semantische Klasse.
-- Der eigentliche spielerische Ablauf steckt in `availableWhen`, `effects` und `result`.
+- `type` ist die semantische Klasse
+- der eigentliche Ablauf steckt in Bedingungen, Effekten und Resultaten
 
 ### Conditions
 
@@ -197,21 +185,21 @@ Interpretation:
 
 Aktuell unterstuetzt das Modell:
 
-- `all`: alle Bedingungen muessen wahr sein
-- `any`: mindestens eine Bedingung muss wahr sein
-- `not`: eine einzelne Bedingung darf nicht wahr sein
+- `all`
+- `any`
+- `not`
 
 Eine einzelne Bedingung prueft:
 
 - `ref`: Objekt-ID
 - `path`: Pfad innerhalb des Objekts
-- `equals`: exakter Vergleich
-- `contains`: Array enthaelt Wert
+- `equals`
+- `contains`
 
 Interpretation:
 
-- Bedingungen referenzieren derzeit nur Objekte.
-- Dadurch ist Weltlogik ueber Objektzustand modelliert.
+- Bedingungen referenzieren derzeit nur Objekte
+- dadurch ist Weltlogik ueber Objektzustand modelliert
 
 ### Effects
 
@@ -219,15 +207,15 @@ Interpretation:
 
 Aktuell gibt es drei Effektarten:
 
-- `set`: schreibt einen Wert auf `ref` + `path`
-- `say`: gibt zusaetzlichen Text aus
-- `trigger`: loest ein benanntes Event aus
+- `set`
+- `say`
+- `trigger`
 
 Interpretation:
 
-- `set` ist der wichtigste primitive Baustein fuer Zustandsaenderungen.
-- `say` kann fuer unmittelbares Feedback genutzt werden.
-- `trigger` ist ein Erweiterungspunkt fuer Engine-seitige Speziallogik.
+- `set` schreibt auf bestehende deklarierte Objektpfade
+- `say` gibt unmittelbares Zusatzfeedback
+- `trigger` bleibt ein Erweiterungspunkt fuer Engine-seitige Speziallogik
 
 ### Result
 
@@ -235,27 +223,42 @@ Interpretation:
 
 Aktuell:
 
-- `text`: Antworttext
-- `knowledge`: semantische Wissensmarker
-
-Interpretation:
-
-- `knowledge` kann spaeter genutzt werden fuer Erinnerung, Hinweise oder adaptives Prompting.
+- `text`
+- `knowledge`
 
 ## Aktuelle Modelllogik aus dem Beispiel
 
-Die Beispielwelt zeigt bereits ein klares Muster:
+Die Beispielwelt zeigt bereits ein deutlich reichhaltigeres Muster:
 
 - Der Spieler startet ueber `player.initialRoom` im Raum `wiese`.
-- Die Tuer hat Zustand in `object.state.closed`.
-- Die Tuer deklariert ihren Zustand ueber `stateSchema`.
-- Die Laterne zeigt ein reichhaltigeres `stateSchema` mit `enum` und Zahlenbereich.
-- Die Interaktion `oeffnen` ist nur verfuegbar, wenn `closed == true`.
-- Interaktionen koennen auch auf andere deklarierte State-Werte wie `state.lightMode` zugreifen.
-- Der Effekt `set` aendert den Objektzustand.
-- Ein Raum-Weg kann denselben Zustand pruefen und damit Navigation freischalten.
+- Die Kiste steht auf der Wiese ueber `placement.kiste.room`.
+- Der Schluessel liegt in der Kiste ueber `placement.schluessel.object`.
+- Die Huettentuer ist geschlossen und verriegelt.
+- Die Laterne ist tragbar und besitzt einen reicheren Zustand mit Enum und Zahlenbereich.
+- Die Huettentuer kann erst entriegelt und danach geoeffnet werden.
 
-Damit ist das Modell aktuell stark auf "sichtbare Welt + Objektzustand + Bedingungen + Effekte" ausgerichtet.
+Damit ist das Modell aktuell stark auf "Objekte + Platzierung + Objektzustand + Bedingungen + Effekte" ausgerichtet.
+
+## Szenario Kiste, Schluessel, verschlossene Tuer
+
+Das Szenario laesst sich jetzt in der Weltstruktur bereits weitgehend ausdruecken:
+
+- `kiste` ist ein Objekt
+- `schluessel` ist ein tragbares Objekt
+- `placement.schluessel.object: kiste` legt den Schluessel in die Kiste
+- `huettenTuer.stateSchema.lockState` modelliert den Schlosszustand
+- `entriegeln` ist eine eigene Interaktion an der Tuer
+
+Was noch nicht umgesetzt ist:
+
+- ein echter `move`-Effekt fuer Laufzeitwechsel
+- eine standardisierte Bedingung fuer "Objekt ist im Inventar"
+- eine standardisierte Bedingung fuer "Objekt ist in einem Container erreichbar"
+
+Das heisst:
+
+- die statische Weltstruktur passt jetzt schon gut
+- die Laufzeitmechanik fuer Aufheben und Ablegen ist der naechste sinnvolle Ausbauschritt
 
 ## Dokumentationsgrenzen
 

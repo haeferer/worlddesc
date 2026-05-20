@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.org/adventure-world.schema.json",
   "title": "Adventure World Schema",
-  "description": "Schema fuer eine zustandsbasierte Adventure-/Audio-Spielwelt mit Raeumen, Objekten, Interaktionen, Bedingungen und Effekten.",
+  "description": "Schema fuer eine zustandsbasierte Adventure-/Audio-Spielwelt mit Raeumen, Objekten, Platzierung, Interaktionen, Bedingungen und Effekten.",
   "type": "object",
-  "required": ["world", "player", "interactionTypes", "rooms", "objects"],
+  "required": ["world", "player", "interactionTypes", "rooms", "objects", "placement"],
   "additionalProperties": false,
   "properties": {
     "world": {
@@ -36,6 +36,14 @@
       "additionalProperties": {
         "$ref": "#/$defs/object"
       }
+    },
+    "placement": {
+      "type": "object",
+      "description": "Initiale Aufenthaltsorte aller Objekte.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/objectPlacement"
+      }
     }
   },
   "$defs": {
@@ -52,13 +60,6 @@
         "desc": {
           "type": "string",
           "description": "Optionale Beschreibung der Spielwelt."
-        },
-        "offstageObjects": {
-          "type": "array",
-          "description": "Objekte, die zu Beginn weder in einem Raum noch im Inventar liegen, sondern bewusst ausserhalb der Szene starten.",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
@@ -71,13 +72,6 @@
         "initialRoom": {
           "type": "string",
           "description": "ID des Raums, in dem der Spieler startet."
-        },
-        "initialInventory": {
-          "type": "array",
-          "description": "Objekte, die der Spieler zu Beginn besitzt.",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
@@ -113,14 +107,7 @@
         },
         "tags": {
           "type": "array",
-          "description": "Optionale semantische Marker fuer Stimmung, Bedeutung, Themen oder Kategorien. Tags helfen LLMs bei Atmosphaere, Suche und Interpretation. Beispiele: outdoor, dark, forest, danger.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "objects": {
-          "type": "array",
-          "description": "Liste der Objekt-IDs, die in diesem Raum sichtbar und interagierbar sind.",
+          "description": "Optionale semantische Marker fuer Stimmung, Bedeutung, Themen oder Kategorien.",
           "items": {
             "type": "string"
           }
@@ -205,10 +192,14 @@
         },
         "tags": {
           "type": "array",
-          "description": "Optionale semantische Eigenschaften des Objekts. Beispiele: edible, magical, wooden, dangerous.",
+          "description": "Optionale semantische Eigenschaften des Objekts.",
           "items": {
             "type": "string"
           }
+        },
+        "portable": {
+          "type": "boolean",
+          "description": "Ob das Objekt grundsaetzlich ins Inventar bewegt werden darf."
         },
         "stateSchema": {
           "$ref": "#/$defs/stateSchema"
@@ -226,6 +217,36 @@
           }
         }
       }
+    },
+    "objectPlacement": {
+      "type": "object",
+      "description": "Genau ein initialer Aufenthaltsort fuer ein Objekt.",
+      "additionalProperties": false,
+      "properties": {
+        "room": {
+          "type": "string",
+          "description": "Objekt liegt in einem Raum."
+        },
+        "inventory": {
+          "type": "string",
+          "description": "Objekt ist im Inventar eines Besitzers. Aktuell nur `player`."
+        },
+        "offstage": {
+          "type": "boolean",
+          "description": "Objekt ist ausserhalb der aktiven Szene.",
+          "const": true
+        },
+        "object": {
+          "type": "string",
+          "description": "Objekt liegt in einem anderen Objekt."
+        }
+      },
+      "oneOf": [
+        { "required": ["room"] },
+        { "required": ["inventory"] },
+        { "required": ["offstage"] },
+        { "required": ["object"] }
+      ]
     },
     "stateSchema": {
       "type": "object",
@@ -263,9 +284,7 @@
       "properties": {
         "type": {
           "oneOf": [
-            {
-              "type": "string"
-            },
+            { "type": "string" },
             {
               "type": "array",
               "items": {
