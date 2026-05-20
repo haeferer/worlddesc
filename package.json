@@ -1,0 +1,13 @@
+{
+  "name": "@worlddesc/root",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @worlddesc/world",
+    "typecheck": "npm run typecheck -w @worlddesc/world",
+    "checkworld": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkWorld.js"
+  }
+}

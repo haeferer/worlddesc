@@ -1,0 +1,204 @@
+world:
+  title: Der Waldpfad
+  desc: Eine kleine Adventure-Welt mit Wiese, Waldrand und alter Huette.
+  initialRoom: wiese
+
+interactionTypes:
+  examine:
+    title: Ansehen
+    desc: Etwas genauer betrachten.
+  open:
+    title: Oeffnen
+    desc: Ein Objekt oeffnen.
+  close:
+    title: Schliessen
+    desc: Ein Objekt schliessen.
+  enter:
+    title: Betreten
+    desc: Einen Ort betreten.
+
+objects:
+  sonne:
+    title: Sonne
+    desc: Die Sonne steht hell ueber der Wiese.
+    aliases: [sonne, himmel, sonnenlicht]
+    tags: [sky, bright, warm]
+    interactions:
+      ansehen:
+        type: examine
+        title: Sonne ansehen
+        aliases: [sonne ansehen, in die sonne schauen]
+        result:
+          text: Du blinzelst. Das war unangenehm hell.
+          knowledge: [sonne_ist_sehr_hell]
+
+  huette:
+    title: Huette
+    desc: Eine kleine alte Holzhuette am Waldrand.
+    aliases: [huette, haus, holzhuette]
+    tags: [building, wooden, old]
+    interactions:
+      ansehen:
+        type: examine
+        title: Huette ansehen
+        aliases: [huette ansehen, haus anschauen]
+        result:
+          text: Die Huette wirkt alt, aber noch stabil.
+
+  huettenTuer:
+    title: Huettentuer
+    desc: Eine alte verzogene Holztuer.
+    aliases: [tuer, holztuer, huettentuer]
+    tags: [door, wooden, old]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Tuer ansehen
+        aliases: [tuer ansehen, tuer anschauen]
+        result:
+          text: Die Tuer ist alt, verzogen und voller Kratzer.
+          knowledge: [tuer_ist_alt]
+      oeffnen:
+        type: open
+        title: Tuer oeffnen
+        desc: Die Huettentuer oeffnen.
+        intent: Der Spieler moechte die Tuer oeffnen.
+        aliases: [oeffnen, aufmachen, tuer oeffnen]
+        availableWhen:
+          all:
+            - ref: huettenTuer
+              path: state.closed
+              equals: true
+        effects:
+          - type: set
+            ref: huettenTuer
+            path: state.closed
+            value: false
+          - type: say
+            text: Die Tuer quietscht laut auf.
+        result:
+          text: Die Huettentuer ist jetzt offen.
+      schliessen:
+        type: close
+        title: Tuer schliessen
+        aliases: [schliessen, tuer schliessen]
+        availableWhen:
+          all:
+            - ref: huettenTuer
+              path: state.closed
+              equals: false
+        effects:
+          - type: set
+            ref: huettenTuer
+            path: state.closed
+            value: true
+        result:
+          text: Die Tuer faellt dumpf ins Schloss.
+
+  laterne:
+    title: Laterne
+    desc: Eine verbeulte Metalllaterne mit russigem Glas.
+    aliases: [laterne, lampe, oellampe]
+    tags: [light, metal, old]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        fuelLevel:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 60
+        lightMode:
+          type: string
+          enum: [off, dim, bright]
+          default: off
+    interactions:
+      ansehen:
+        type: examine
+        title: Laterne ansehen
+        aliases: [laterne ansehen, lampe anschauen]
+        result:
+          text: Die Laterne ist alt, aber mit etwas Oel noch nutzbar.
+      einschalten:
+        type: open
+        title: Laterne einschalten
+        desc: Die Laterne auf kleiner Flamme anzuenden.
+        aliases: [laterne einschalten, lampe anmachen, licht an]
+        availableWhen:
+          all:
+            - ref: laterne
+              path: state.lightMode
+              equals: off
+            - ref: laterne
+              path: state.fuelLevel
+              equals: 60
+        effects:
+          - type: set
+            ref: laterne
+            path: state.lightMode
+            value: dim
+        result:
+          text: Die Laterne springt mit kleiner Flamme an.
+
+rooms:
+  wiese:
+    title: Wiese
+    desc: Eine breite sonnige Wiese. Im Norden liegt der dunkle Wald.
+    tags: [outdoor, sunny, grass, calm]
+    objects:
+      - sonne
+    ways:
+      nord:
+        title: Nach Norden
+        desc: Zum Waldrand.
+        aliases: [n, nord, nach norden, zum wald]
+        target:
+          room: wieseVorDemWald
+
+  wieseVorDemWald:
+    title: Wiese vor dem Wald
+    desc: Du stehst direkt vor dem Waldrand. Neben dir steht eine kleine Huette.
+    tags: [outdoor, forest, hut]
+    objects:
+      - huette
+      - huettenTuer
+    ways:
+      sued:
+        title: Nach Sueden
+        desc: Zurueck auf die offene Wiese.
+        aliases: [s, sued, sueden, nach sueden, zurueck]
+        target:
+          room: wiese
+      huette:
+        title: Huette betreten
+        desc: Durch die Tuer gelangst du in die Huette.
+        aliases: [huette betreten, in die huette gehen, hineingehen]
+        availableWhen:
+          all:
+            - ref: huettenTuer
+              path: state.closed
+              equals: false
+        target:
+          room: huetteInnen
+
+  huetteInnen:
+    title: In der Huette
+    desc: Ein muffiger, dunkler Raum mit altem Holzgeruch.
+    tags: [indoor, dark, wooden, musty]
+    objects:
+      - laterne
+    ways:
+      raus:
+        title: Huette verlassen
+        desc: Zurueck nach draussen zum Waldrand.
+        aliases: [raus, hinaus, verlassen, nach draussen]
+        target:
+          room: wieseVorDemWald

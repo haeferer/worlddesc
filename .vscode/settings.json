@@ -1,0 +1,12 @@
+{
+  "yaml.schemas": {
+    "./schema/world.schema.json": [
+      "*.world.yaml",
+      "*.world.yml"
+    ]
+  },
+  "files.associations": {
+    "*.world.yaml": "yaml",
+    "*.world.yml": "yaml"
+  }
+}
