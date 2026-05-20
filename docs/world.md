@@ -9,6 +9,7 @@ Das Modell beschreibt eine interaktive, zustandsbasierte Adventure-Welt.
 Es trennt sauber zwischen:
 
 - globaler Weltdefinition
+- Spielerstart und Startbesitz
 - Raeumen als Orte
 - Objekten als benennbare und interagierbare Dinge
 - Interaktionstypen als semantische Kategorien
@@ -24,7 +25,19 @@ Es trennt sauber zwischen:
 
 - `title`: Name der Welt
 - `desc`: optionale Gesamtbeschreibung
+- `offstageObjects`: optionale Objekt-IDs fuer bewusst nicht aktive Startobjekte
+
+### Player
+
+`player` beschreibt den Startkontext des Spielers.
+
 - `initialRoom`: ID des Start-Raums
+- `initialInventory`: optionale Liste der Startobjekte im Besitz des Spielers
+
+Interpretation:
+
+- Der Spielerstart ist fachlich nicht Teil des Raums, sondern des Spielerzustands.
+- Besitz wird zunaechst nur als Aufenthaltsort eines Objekts verstanden.
 
 ### Interaction Types
 
@@ -59,6 +72,7 @@ Interpretation:
 - Ein Raum ist der primaere Container fuer Sichtbarkeit.
 - Objekte sind global definiert, aber raumweise eingeblendet.
 - Navigation ist explizit ueber `ways` modelliert.
+- Ein Raum ist nicht selbst Traeger von Besitzlogik.
 
 ### Ways
 
@@ -94,9 +108,28 @@ Ein Objekt hat aktuell:
 Interpretation:
 
 - Objekte existieren global und koennen in verschiedenen Raeumen referenziert werden.
+- Jedes Objekt braucht zu Beginn genau einen Aufenthaltsort.
 - Zustand ist nicht mehr frei, sondern pro Objekt explizit beschrieben.
 - Defaults kommen aus `stateSchema` und koennen beim Laden materialisiert werden.
 - Typische State-Werte sind booleans, Zahlen, Strings oder kleine Enums.
+
+### Initiale Objektplatzierung
+
+Jedes Objekt soll beim Start genau einmal verortet sein.
+
+Moegliche Startorte sind aktuell:
+
+- in `rooms[*].objects`
+- in `player.initialInventory`
+- in `world.offstageObjects`
+
+Interpretation:
+
+- `rooms[*].objects` bedeutet sichtbar oder raumgebunden praesent
+- `player.initialInventory` bedeutet im Besitz des Spielers
+- `world.offstageObjects` bedeutet bewusst ausserhalb der aktiven Szene
+
+Ein Objekt darf dabei nicht gleichzeitig an mehreren Startorten auftauchen.
 
 ### State Schema
 
@@ -213,6 +246,7 @@ Interpretation:
 
 Die Beispielwelt zeigt bereits ein klares Muster:
 
+- Der Spieler startet ueber `player.initialRoom` im Raum `wiese`.
 - Die Tuer hat Zustand in `object.state.closed`.
 - Die Tuer deklariert ihren Zustand ueber `stateSchema`.
 - Die Laterne zeigt ein reichhaltigeres `stateSchema` mit `enum` und Zahlenbereich.

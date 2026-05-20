@@ -61,6 +61,22 @@ Typische Beispiele:
 - Hebel
 - Kiste
 
+### Startinventar und Besitz
+
+Das Modell kann bereits ein einfaches Inventar als Besitzrelation ausdruecken.
+
+Moeglich sind aktuell:
+
+- Startobjekte des Spielers ueber `player.initialInventory`
+- Objekte ausserhalb der aktiven Szene ueber `world.offstageObjects`
+- eindeutige Startplatzierung pro Objekt
+
+Interpretation:
+
+- Ein Objekt ist zu Beginn entweder in einem Raum, im Inventar oder offstage.
+- Inventar ist derzeit kein eigener Objektcontainer mit Slots oder Gewicht.
+- Besitz bedeutet nur, dass dasselbe Weltobjekt initial beim Spieler liegt.
+
 ### Objektzustand
 
 Objekte koennen einen deklarierten Zustand mit `stateSchema` besitzen.
@@ -211,8 +227,9 @@ Noch nicht explizit modelliert sind:
 
 - Aufheben
 - Ablegen
-- Besitzverhaeltnisse
+- Besitzwechsel zur Laufzeit
 - Ausruestungsslots
+- Tragbarkeit als eigene Regel
 
 Das liesse sich spaeter wahrscheinlich ueber zusaetzliche Objekt- oder Spielerzustandsmodelle erweitern.
 
@@ -255,5 +272,6 @@ Besonders gut passt es fuer:
 - Bedingungen
 - Zustandswechsel
 - sprachnahe Interaktionen
+- einfachen Startbesitz
 
-Noch nicht im Zentrum stehen dagegen Inventar, NPC-Dialogsysteme und umfassende globale Simulation.
+Noch nicht im Zentrum stehen dagegen Inventar zur Laufzeit, NPC-Dialogsysteme und umfassende globale Simulation.

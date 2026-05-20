@@ -26,6 +26,7 @@ Validierung:
 
 - `npm run checkworld` prueft standardmaessig `sample/test.world.yaml`
 - `npm run checkworld -- <pfad-zur-world>` prueft eine konkrete Datei
+- dabei werden auch Startplatzierung, Inventar-Referenzen und Offstage-Objekte geprueft
 
 Geplanter Startpunkt:
 

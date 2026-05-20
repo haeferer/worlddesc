@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { ErrorObject, ValidateFunction } from "ajv";
 import Ajv2020 from "ajv/dist/2020.js";
 import { parse } from "yaml";
@@ -34,6 +34,7 @@ const ajv = new Ajv2020Ctor({
   allErrors: true,
   strict: false
 });
+
 const stateAjv = new Ajv2020Ctor({
   allErrors: true,
   strict: false,
@@ -92,9 +93,11 @@ export function validateWorldReferences(world: WorldDocument): string[] {
   validateIdGroup("rooms", Object.keys(world.rooms), errors);
   validateIdGroup("objects", Object.keys(world.objects), errors);
 
-  if (!(world.world.initialRoom in world.rooms)) {
-    errors.push(`world.initialRoom references unknown room "${world.world.initialRoom}"`);
+  if (!(world.player.initialRoom in world.rooms)) {
+    errors.push(`player.initialRoom references unknown room "${world.player.initialRoom}"`);
   }
+
+  validateObjectPlacements(world, errors);
 
   for (const [objectId, object] of Object.entries(world.objects)) {
     validateObjectReferences(objectId, object, world, errors);
@@ -105,6 +108,59 @@ export function validateWorldReferences(world: WorldDocument): string[] {
   }
 
   return errors;
+}
+
+function validateObjectPlacements(world: WorldDocument, errors: string[]): void {
+  const placements = new Map<string, string[]>();
+
+  for (const objectId of world.player.initialInventory ?? []) {
+    if (!(objectId in world.objects)) {
+      errors.push(`player.initialInventory references unknown object "${objectId}"`);
+      continue;
+    }
+
+    addPlacement(placements, objectId, "player.initialInventory");
+  }
+
+  for (const objectId of world.world.offstageObjects ?? []) {
+    if (!(objectId in world.objects)) {
+      errors.push(`world.offstageObjects references unknown object "${objectId}"`);
+      continue;
+    }
+
+    addPlacement(placements, objectId, "world.offstageObjects");
+  }
+
+  for (const [roomId, room] of Object.entries(world.rooms)) {
+    for (const objectId of room.objects ?? []) {
+      if (!(objectId in world.objects)) {
+        continue;
+      }
+
+      addPlacement(placements, objectId, `rooms.${roomId}.objects`);
+    }
+  }
+
+  for (const objectId of Object.keys(world.objects)) {
+    const objectPlacements = placements.get(objectId) ?? [];
+
+    if (objectPlacements.length === 0) {
+      errors.push(
+        `objects.${objectId} has no initial placement; expected exactly one location in rooms.*.objects, player.initialInventory, or world.offstageObjects`
+      );
+      continue;
+    }
+
+    if (objectPlacements.length > 1) {
+      errors.push(`objects.${objectId} has multiple initial placements: ${objectPlacements.join(", ")}`);
+    }
+  }
+}
+
+function addPlacement(placements: Map<string, string[]>, objectId: string, location: string): void {
+  const current = placements.get(objectId) ?? [];
+  current.push(location);
+  placements.set(objectId, current);
 }
 
 function validateRoomReferences(
@@ -243,6 +299,11 @@ function validateEffectReference(
 
     if (!(effect.ref in world.objects)) {
       errors.push(`${location}.ref references unknown object "${effect.ref}"`);
+      return;
+    }
+
+    if (!hasPath(world.objects[effect.ref], effect.path)) {
+      errors.push(`${location}.path references missing path "${effect.path}" on object "${effect.ref}"`);
     }
   }
 
@@ -319,10 +380,8 @@ function validateStateSchemaNode(
   const properties = node.properties;
   const hasProperties = isRecord(properties);
 
-  if (isRoot) {
-    if (node.type !== "object") {
-      errors.push(`${location}.type must be "object"`);
-    }
+  if (isRoot && node.type !== "object") {
+    errors.push(`${location}.type must be "object"`);
   }
 
   if (hasProperties) {

@@ -1,7 +1,11 @@
 world:
   title: Der Waldpfad
   desc: Eine kleine Adventure-Welt mit Wiese, Waldrand und alter Huette.
+  offstageObjects: []
+
+player:
   initialRoom: wiese
+  initialInventory: []
 
 interactionTypes:
   examine:

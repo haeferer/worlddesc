@@ -1,5 +1,6 @@
 export interface WorldDocument {
   world: WorldMeta;
+  player: Player;
   interactionTypes: Record<string, InteractionType>;
   rooms: Record<string, Room>;
   objects: Record<string, WorldObject>;
@@ -8,7 +9,12 @@ export interface WorldDocument {
 export interface WorldMeta {
   title: string;
   desc?: string;
+  offstageObjects?: string[];
+}
+
+export interface Player {
   initialRoom: string;
+  initialInventory?: string[];
 }
 
 export interface InteractionType {

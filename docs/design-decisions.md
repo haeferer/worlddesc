@@ -20,13 +20,16 @@ Beim Laden einer World-Datei wird nicht nur das JSON Schema angewendet, sondern 
 
 Aktuell geprueft:
 
-- `world.initialRoom` muss auf einen existierenden Raum zeigen
+- `player.initialRoom` muss auf einen existierenden Raum zeigen
+- `player.initialInventory[*]` muss existierende Objekte referenzieren
+- `world.offstageObjects[*]` muss existierende Objekte referenzieren
 - `rooms[*].objects[*]` muessen existierende Objekte referenzieren
 - `rooms[*].ways[*].target.room` muss auf einen existierenden Raum zeigen
 - `interaction.type` muss auf einen existierenden `interactionType` zeigen
 - `availableWhen`-Bedingungen muessen existierende Objekte referenzieren
 - Bedingungspfade muessen auf dem referenzierten Objekt existieren
 - `set`-Effekte muessen ein existierendes Zielobjekt referenzieren
+- jedes Objekt braucht genau eine initiale Platzierung
 
 Motivation:
 
@@ -97,6 +100,55 @@ Beispiele fuer raumbezogene Zustaende, die zunaechst als Objekte modelliert werd
 - aktiver Mechanismus in einem Raum
 
 Ein eigener Raumzustand wird erst dann relevant, wenn sich spaeter viele wirklich nicht-objekthafte Ortszustaende sammeln.
+
+### Inventar ist vorerst reine Besitzrelation
+
+Inventar wird aktuell nicht als eigener Containertyp modelliert, sondern als Besitz des Spielers.
+
+Regeln:
+
+- `player.initialInventory` referenziert normale Objekt-IDs
+- dieselben Objekte duerfen nicht gleichzeitig in `rooms[*].objects` auftauchen
+- Objekte koennen alternativ in `world.offstageObjects` starten
+- jedes Objekt muss initial genau einmal verortet sein
+
+Motivation:
+
+- Besitz wird als Aufenthaltsort desselben Objekts verstanden
+- das Modell bleibt nah an der bestehenden Objektlogik
+- spaetere Erweiterungen wie Tragbarkeit, Container oder andere Besitzer bleiben moeglich
+
+Beispiele:
+
+- ein Schluessel startet im Inventar des Spielers
+- eine Laterne startet in einem Raum
+- ein spaeter auftauchendes Objekt startet in `world.offstageObjects`
+
+### Ortswechsel sollen spaeter ueber `move` modelliert werden
+
+Fuer kuenftige Besitz- und Platzierungswechsel soll kein ganzer Satz spezialisierter Effektarten wie `pickup`, `drop`, `spawn` oder `despawn` eingefuehrt werden.
+
+Stattdessen ist ein generischer, aber eng begrenzter `move`-Effekt vorgesehen.
+
+Gedachte Zielrichtung:
+
+- Raum nach Inventar
+- Inventar nach Raum
+- Raum nach Offstage
+- Offstage nach Raum
+
+Motivation:
+
+- alle Platzierungswechsel folgen derselben Grundlogik
+- das Modell bleibt konsistent mit der Regel, dass Objekte einen Aufenthaltsort haben
+- Validierung bleibt klar, wenn nur bekannte Zielkontexte erlaubt sind
+- spaetere Erweiterungen wie weitere Besitzer oder Container bleiben moeglich
+
+Wichtige Einschraenkung:
+
+- `move` ist kein freier Universalbefehl
+- er soll nur fuer wohldefinierte Orts- und Besitzwechsel genutzt werden
+- Zieltypen muessen spaeter strukturiert und eindeutig modelliert werden
 
 ### IDs folgen aktuell `camelCase`
 

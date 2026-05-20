@@ -4,19 +4,15 @@
   "title": "Adventure World Schema",
   "description": "Schema fuer eine zustandsbasierte Adventure-/Audio-Spielwelt mit Raeumen, Objekten, Interaktionen, Bedingungen und Effekten.",
   "type": "object",
-  "required": [
-    "world",
-    "interactionTypes",
-    "rooms",
-    "objects"
-  ],
+  "required": ["world", "player", "interactionTypes", "rooms", "objects"],
   "additionalProperties": false,
-
   "properties": {
     "world": {
       "$ref": "#/$defs/world"
     },
-
+    "player": {
+      "$ref": "#/$defs/player"
+    },
     "interactionTypes": {
       "type": "object",
       "description": "Globale semantische Interaktionstypen fuer Engine und LLM.",
@@ -25,7 +21,6 @@
         "$ref": "#/$defs/interactionType"
       }
     },
-
     "rooms": {
       "type": "object",
       "description": "Alle Raeume der Welt.",
@@ -34,7 +29,6 @@
         "$ref": "#/$defs/room"
       }
     },
-
     "objects": {
       "type": "object",
       "description": "Globale Objektinstanzen der Welt.",
@@ -44,77 +38,79 @@
       }
     }
   },
-
   "$defs": {
-
     "world": {
       "type": "object",
       "description": "Globale Informationen ueber die Spielwelt.",
-      "required": [
-        "title",
-        "initialRoom"
-      ],
+      "required": ["title"],
       "additionalProperties": false,
-
       "properties": {
         "title": {
           "type": "string",
           "description": "Titel der Spielwelt."
         },
-
         "desc": {
           "type": "string",
           "description": "Optionale Beschreibung der Spielwelt."
         },
-
-        "initialRoom": {
-          "type": "string",
-          "description": "ID des Raums, in dem das Spiel startet."
+        "offstageObjects": {
+          "type": "array",
+          "description": "Objekte, die zu Beginn weder in einem Raum noch im Inventar liegen, sondern bewusst ausserhalb der Szene starten.",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
-
+    "player": {
+      "type": "object",
+      "description": "Startkontext des Spielers.",
+      "required": ["initialRoom"],
+      "additionalProperties": false,
+      "properties": {
+        "initialRoom": {
+          "type": "string",
+          "description": "ID des Raums, in dem der Spieler startet."
+        },
+        "initialInventory": {
+          "type": "array",
+          "description": "Objekte, die der Spieler zu Beginn besitzt.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "interactionType": {
       "type": "object",
       "description": "Semantischer Grundtyp einer Interaktion.",
-      "required": [
-        "title"
-      ],
+      "required": ["title"],
       "additionalProperties": false,
-
       "properties": {
         "title": {
           "type": "string",
           "description": "Kurzname des Interaktionstyps."
         },
-
         "desc": {
           "type": "string",
           "description": "Beschreibung der Bedeutung dieses Typs."
         }
       }
     },
-
     "room": {
       "type": "object",
       "description": "Ein Raum oder Ort der Welt.",
-      "required": [
-        "title",
-        "desc"
-      ],
+      "required": ["title", "desc"],
       "additionalProperties": false,
-
       "properties": {
         "title": {
           "type": "string",
           "description": "Kurzname des Raums."
         },
-
         "desc": {
           "type": "string",
           "description": "Beschreibung des Raums."
         },
-
         "tags": {
           "type": "array",
           "description": "Optionale semantische Marker fuer Stimmung, Bedeutung, Themen oder Kategorien. Tags helfen LLMs bei Atmosphaere, Suche und Interpretation. Beispiele: outdoor, dark, forest, danger.",
@@ -122,7 +118,6 @@
             "type": "string"
           }
         },
-
         "objects": {
           "type": "array",
           "description": "Liste der Objekt-IDs, die in diesem Raum sichtbar und interagierbar sind.",
@@ -130,7 +125,6 @@
             "type": "string"
           }
         },
-
         "ways": {
           "type": "object",
           "description": "Moegliche Wege oder Uebergaenge in andere Raeume.",
@@ -138,7 +132,6 @@
             "$ref": "#/$defs/way"
           }
         },
-
         "onEnter": {
           "type": "array",
           "description": "Optionale Effekte beim Betreten des Raums.",
@@ -148,28 +141,20 @@
         }
       }
     },
-
     "way": {
       "type": "object",
       "description": "Ein Weg oder Ausgang aus einem Raum.",
-      "required": [
-        "title",
-        "desc",
-        "target"
-      ],
+      "required": ["title", "desc", "target"],
       "additionalProperties": false,
-
       "properties": {
         "title": {
           "type": "string",
           "description": "Kurzname des Weges."
         },
-
         "desc": {
           "type": "string",
           "description": "Beschreibung des Weges."
         },
-
         "aliases": {
           "type": "array",
           "description": "Alternative Sprachformulierungen fuer Navigation.",
@@ -177,25 +162,19 @@
             "type": "string"
           }
         },
-
         "target": {
           "$ref": "#/$defs/roomTarget"
         },
-
         "availableWhen": {
           "$ref": "#/$defs/conditionGroup"
         }
       }
     },
-
     "roomTarget": {
       "type": "object",
       "description": "Referenz auf einen Zielraum.",
-      "required": [
-        "room"
-      ],
+      "required": ["room"],
       "additionalProperties": false,
-
       "properties": {
         "room": {
           "type": "string",
@@ -203,27 +182,20 @@
         }
       }
     },
-
     "object": {
       "type": "object",
       "description": "Ein globales Weltobjekt.",
-      "required": [
-        "title",
-        "desc"
-      ],
+      "required": ["title", "desc"],
       "additionalProperties": false,
-
       "properties": {
         "title": {
           "type": "string",
           "description": "Kurzname des Objekts."
         },
-
         "desc": {
           "type": "string",
           "description": "Beschreibung des Objekts."
         },
-
         "aliases": {
           "type": "array",
           "description": "Alternative Begriffe fuer Sprachsteuerung.",
@@ -231,7 +203,6 @@
             "type": "string"
           }
         },
-
         "tags": {
           "type": "array",
           "description": "Optionale semantische Eigenschaften des Objekts. Beispiele: edible, magical, wooden, dangerous.",
@@ -239,17 +210,14 @@
             "type": "string"
           }
         },
-
         "stateSchema": {
           "$ref": "#/$defs/stateSchema"
         },
-
         "state": {
           "type": "object",
           "description": "Optionale explizite Startwerte fuer den Objektzustand. Die erlaubte Struktur kommt aus stateSchema.",
           "additionalProperties": true
         },
-
         "interactions": {
           "type": "object",
           "description": "Interaktionen, die der Spieler mit diesem Objekt ausfuehren kann.",
@@ -259,14 +227,10 @@
         }
       }
     },
-
     "stateSchema": {
       "type": "object",
       "description": "JSON-Schema-artige Beschreibung des Objektzustands. Defaults werden beim Laden materialisiert.",
-      "required": [
-        "type",
-        "properties"
-      ],
+      "required": ["type", "properties"],
       "additionalProperties": true,
       "properties": {
         "type": {
@@ -292,7 +256,6 @@
         }
       }
     },
-
     "stateSchemaNode": {
       "type": "object",
       "description": "Teil eines zustandsbezogenen JSON Schemas.",
@@ -358,37 +321,28 @@
         }
       }
     },
-
     "interaction": {
       "type": "object",
       "description": "Eine Interaktion mit einem Objekt.",
-      "required": [
-        "title"
-      ],
+      "required": ["title"],
       "additionalProperties": false,
-
       "properties": {
-
         "type": {
           "type": "string",
           "description": "Optionaler globaler semantischer Interaktionstyp."
         },
-
         "title": {
           "type": "string",
           "description": "Kurzname der Interaktion."
         },
-
         "desc": {
           "type": "string",
           "description": "Beschreibung der Interaktion."
         },
-
         "intent": {
           "type": "string",
           "description": "Natuerliche Beschreibung der Spielerabsicht fuer LLMs."
         },
-
         "aliases": {
           "type": "array",
           "description": "Alternative Sprachformulierungen.",
@@ -396,11 +350,9 @@
             "type": "string"
           }
         },
-
         "availableWhen": {
           "$ref": "#/$defs/conditionGroup"
         },
-
         "effects": {
           "type": "array",
           "description": "Effekte oder Weltveraenderungen dieser Interaktion.",
@@ -408,24 +360,20 @@
             "$ref": "#/$defs/effect"
           }
         },
-
         "result": {
           "$ref": "#/$defs/result"
         }
       }
     },
-
     "result": {
       "type": "object",
       "description": "Rueckgabe oder Antwort einer Interaktion.",
       "additionalProperties": false,
-
       "properties": {
         "text": {
           "type": "string",
           "description": "Antworttext fuer den Spieler."
         },
-
         "knowledge": {
           "type": "array",
           "description": "Wissensmarker, die der Spieler danach kennt.",
@@ -435,60 +383,43 @@
         }
       }
     },
-
     "effect": {
       "type": "object",
       "description": "Weltveraenderung oder Nebeneffekt.",
-      "required": [
-        "type"
-      ],
+      "required": ["type"],
       "additionalProperties": false,
-
       "properties": {
-
         "type": {
           "type": "string",
           "description": "Art des Effekts.",
-          "enum": [
-            "set",
-            "say",
-            "trigger"
-          ]
+          "enum": ["set", "say", "trigger"]
         },
-
         "ref": {
           "type": "string",
           "description": "Referenz auf ein Zielobjekt."
         },
-
         "path": {
           "type": "string",
           "description": "Pfad innerhalb des Zielobjekts."
         },
-
         "value": {
           "description": "Neuer Wert."
         },
-
         "text": {
           "type": "string",
           "description": "Text fuer say-Effekte."
         },
-
         "event": {
           "type": "string",
           "description": "Name eines Trigger-Events."
         }
       }
     },
-
     "conditionGroup": {
       "type": "object",
       "description": "Logische Gruppierung von Bedingungen.",
       "additionalProperties": false,
-
       "properties": {
-
         "all": {
           "type": "array",
           "description": "Alle Bedingungen muessen wahr sein.",
@@ -496,7 +427,6 @@
             "$ref": "#/$defs/condition"
           }
         },
-
         "any": {
           "type": "array",
           "description": "Mindestens eine Bedingung muss wahr sein.",
@@ -504,38 +434,28 @@
             "$ref": "#/$defs/condition"
           }
         },
-
         "not": {
           "$ref": "#/$defs/condition"
         }
       }
     },
-
     "condition": {
       "type": "object",
       "description": "Eine einzelne Bedingung.",
-      "required": [
-        "ref",
-        "path"
-      ],
+      "required": ["ref", "path"],
       "additionalProperties": false,
-
       "properties": {
-
         "ref": {
           "type": "string",
           "description": "Referenz auf ein Objekt."
         },
-
         "path": {
           "type": "string",
           "description": "Pfad innerhalb des Objekts."
         },
-
         "equals": {
           "description": "Exakter Vergleichswert."
         },
-
         "contains": {
           "description": "Prueft, ob ein Array den Wert enthaelt."
         }
