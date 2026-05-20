@@ -98,4 +98,52 @@ describe("WorldRuntime", () => {
       "entriegeln"
     ]);
   });
+
+  it("reaches the inside of the hut end-to-end", async () => {
+    const runtime = await loadSampleRuntime();
+
+    runtime.executeInteraction("kiste", "oeffnen");
+    runtime.executeInteraction("schluessel", "nehmen");
+    runtime.executeWay("nord");
+    runtime.executeInteraction("huettenTuer", "entriegeln");
+    runtime.executeInteraction("huettenTuer", "oeffnen");
+    runtime.executeWay("huette");
+
+    expect(runtime.getCurrentRoomId()).toBe("huetteInnen");
+    expect(runtime.getRoomObjectIds()).toEqual(["laterne"]);
+    expect(runtime.listAvailableWays().map((item) => item.wayId)).toEqual(["raus"]);
+  });
+
+  it("does not allow entering the dark forest without the lantern", async () => {
+    const runtime = await loadSampleRuntime();
+
+    runtime.executeInteraction("kiste", "oeffnen");
+    runtime.executeInteraction("schluessel", "nehmen");
+    runtime.executeWay("nord");
+    runtime.executeInteraction("huettenTuer", "entriegeln");
+    runtime.executeInteraction("huettenTuer", "oeffnen");
+
+    expect(runtime.canUseWay("nord", "wieseVorDemWald")).toBe(false);
+  });
+
+  it("allows entering the dark forest with a lit lantern", async () => {
+    const runtime = await loadSampleRuntime();
+
+    runtime.executeInteraction("kiste", "oeffnen");
+    runtime.executeInteraction("schluessel", "nehmen");
+    runtime.executeWay("nord");
+    runtime.executeInteraction("huettenTuer", "entriegeln");
+    runtime.executeInteraction("huettenTuer", "oeffnen");
+    runtime.executeWay("huette");
+    runtime.executeInteraction("laterne", "nehmen");
+    runtime.executeInteraction("laterne", "einschalten");
+    runtime.executeWay("raus");
+
+    expect(runtime.canUseWay("nord")).toBe(true);
+
+    runtime.executeWay("nord");
+
+    expect(runtime.getCurrentRoomId()).toBe("dunklerWald");
+    expect(runtime.listAvailableWays().map((item) => item.wayId)).toEqual(["sued"]);
+  });
 });

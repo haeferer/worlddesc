@@ -234,6 +234,22 @@ objects:
         aliases: [laterne ansehen, lampe anschauen]
         result:
           text: Die Laterne ist alt, aber mit etwas Oel noch nutzbar.
+      nehmen:
+        type: take
+        title: Laterne nehmen
+        aliases: [laterne nehmen, lampe nehmen, einpacken]
+        availableWhen:
+          all:
+            - ref: laterne
+              placement:
+                room: huetteInnen
+        effects:
+          - type: move
+            ref: laterne
+            to:
+              inventory: player
+        result:
+          text: Du nimmst die Laterne mit. Ohne Licht willst du hier nicht wieder hinaus.
       einschalten:
         type: open
         title: Laterne einschalten
@@ -273,6 +289,24 @@ rooms:
     desc: Du stehst direkt vor dem Waldrand. Neben dir steht eine kleine Huette.
     tags: [outdoor, forest, hut]
     ways:
+      nord:
+        title: In den dunklen Wald
+        desc: Nur mit Licht wagst du dich zwischen die dunklen Baeume.
+        aliases: [nord, in den wald, wald betreten, tiefer in den wald]
+        availableWhen:
+          all:
+            - ref: laterne
+              placement:
+                inventory: player
+          any:
+            - ref: laterne
+              path: state.lightMode
+              equals: dim
+            - ref: laterne
+              path: state.lightMode
+              equals: bright
+        target:
+          room: dunklerWald
       sued:
         title: Nach Sueden
         desc: Zurueck auf die offene Wiese.
@@ -300,6 +334,18 @@ rooms:
         title: Huette verlassen
         desc: Zurueck nach draussen zum Waldrand.
         aliases: [raus, hinaus, verlassen, nach draussen]
+        target:
+          room: wieseVorDemWald
+
+  dunklerWald:
+    title: Dunkler Wald
+    desc: Zwischen dichten Stammen und nassem Boden verschluckt die Dunkelheit fast jedes Geraeusch.
+    tags: [outdoor, forest, dark, eerie]
+    ways:
+      sued:
+        title: Zurueck zum Waldrand
+        desc: Der sichere Rueckweg fuehrt zurueck zur Huette am Waldrand.
+        aliases: [sued, zurueck, rueckzug, zum waldrand]
         target:
           room: wieseVorDemWald
 
