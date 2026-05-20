@@ -86,7 +86,7 @@ export interface Result {
   knowledge?: string[];
 }
 
-export type Effect = SetEffect | SayEffect | TriggerEffect;
+export type Effect = SetEffect | SayEffect | TriggerEffect | MoveEffect;
 
 export interface SetEffect {
   type: "set";
@@ -105,6 +105,12 @@ export interface TriggerEffect {
   event?: string;
 }
 
+export interface MoveEffect {
+  type: "move";
+  ref?: string;
+  to?: ObjectPlacement;
+}
+
 export interface ConditionGroup {
   all?: Condition[];
   any?: Condition[];
@@ -113,10 +119,13 @@ export interface ConditionGroup {
 
 export interface Condition {
   ref: string;
-  path: string;
+  path?: string;
   equals?: unknown;
   contains?: unknown;
+  placement?: PlacementCondition;
 }
+
+export type PlacementCondition = RoomPlacement | InventoryPlacement | OffstagePlacement | ObjectContainerPlacement;
 
 export interface StateSchema {
   type: "object";

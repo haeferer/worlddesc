@@ -31,7 +31,9 @@ Aktuell geprueft:
 - `interaction.type` muss auf einen existierenden `interactionType` zeigen
 - `availableWhen`-Bedingungen muessen existierende Objekte referenzieren
 - Bedingungspfade muessen auf dem referenzierten Objekt existieren
+- Placement-Bedingungen muessen auf gueltige Raeume, Besitzer oder Objekte zeigen
 - `set`-Effekte muessen ein existierendes Zielobjekt referenzieren
+- `move`-Effekte muessen ein existierendes Zielobjekt und ein gueltiges Ziel haben
 
 ### Objektzustand wird ueber `stateSchema` deklariert
 
@@ -132,6 +134,13 @@ Wichtige Einschraenkung:
 - er soll nur fuer wohldefinierte Orts- und Besitzwechsel genutzt werden
 - Zieltypen muessen strukturiert und eindeutig modelliert werden
 
+Aktueller Stand:
+
+- `move` ist jetzt als Effektart im Modell und in der Runtime vorhanden
+- unterstuetzt werden derzeit Ziele nach `room`, `inventory`, `offstage` und `object`
+- Moves ins Inventar setzen `portable: true` voraus
+- Objekt-in-Objekt-Zyklen werden verhindert
+
 ### IDs folgen aktuell `camelCase`
 
 Die kanonische Schreibweise fuer IDs ist derzeit `camelCase`.
@@ -147,6 +156,5 @@ Das gilt fuer:
 
 ## Offene Entscheidungen
 
-- Wie genau eine Laufzeitbedingung fuer "Objekt ist im Inventar" modelliert werden soll
-- Wie `move` strukturiert aussehen soll
+- Ob wir zusaetzliche spezialisierte Komfortbedingungen fuer Placement brauchen
 - Ob `ref` spaeter neben Objekten auch `rooms` oder globale `world`-Werte adressieren darf

@@ -18,6 +18,9 @@ interactionTypes:
   enter:
     title: Betreten
     desc: Einen Ort betreten.
+  take:
+    title: Nehmen
+    desc: Ein tragbares Objekt aufnehmen.
   unlock:
     title: Entriegeln
     desc: Ein verschlossenes Objekt mit einem passenden Mittel entriegeln.
@@ -86,6 +89,25 @@ objects:
         aliases: [schluessel ansehen]
         result:
           text: Der Bart ist alt gefeilt. Er koennte gut zu einer einfachen Holztuer passen.
+      nehmen:
+        type: take
+        title: Schluessel nehmen
+        aliases: [schluessel nehmen, aufheben, einstecken]
+        availableWhen:
+          all:
+            - ref: schluessel
+              placement:
+                object: kiste
+            - ref: kiste
+              path: state.closed
+              equals: false
+        effects:
+          - type: move
+            ref: schluessel
+            to:
+              inventory: player
+        result:
+          text: Du nimmst den kleinen Eisenschluessel an dich.
 
   huette:
     title: Huette
@@ -134,6 +156,9 @@ objects:
             - ref: huettenTuer
               path: state.lockState
               equals: locked
+            - ref: schluessel
+              placement:
+                inventory: player
         effects:
           - type: set
             ref: huettenTuer

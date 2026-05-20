@@ -32,11 +32,29 @@ describe("WorldRuntime", () => {
     });
   });
 
+  it("moves portable objects from open containers into inventory", async () => {
+    const runtime = await loadSampleRuntime();
+
+    runtime.executeInteraction("kiste", "oeffnen");
+
+    expect(runtime.listAvailableInteractions("schluessel").map((item) => item.interactionId)).toEqual([
+      "ansehen",
+      "nehmen"
+    ]);
+
+    runtime.executeInteraction("schluessel", "nehmen");
+
+    expect(runtime.getInventoryObjectIds()).toEqual(["schluessel"]);
+    expect(runtime.getContainedObjectIds("kiste")).toEqual([]);
+  });
+
   it("respects conditional way availability", async () => {
     const runtime = await loadSampleRuntime();
 
     expect(runtime.canUseWay("huette", "wieseVorDemWald")).toBe(false);
 
+    runtime.executeInteraction("kiste", "oeffnen");
+    runtime.executeInteraction("schluessel", "nehmen");
     runtime.executeWay("nord");
     runtime.executeInteraction("huettenTuer", "entriegeln");
     runtime.executeInteraction("huettenTuer", "oeffnen");
@@ -47,6 +65,8 @@ describe("WorldRuntime", () => {
   it("filters interactions by current state", async () => {
     const runtime = await loadSampleRuntime();
 
+    runtime.executeInteraction("kiste", "oeffnen");
+    runtime.executeInteraction("schluessel", "nehmen");
     runtime.executeWay("nord");
 
     expect(runtime.listAvailableInteractions("huettenTuer").map((item) => item.interactionId)).toEqual([
@@ -59,6 +79,23 @@ describe("WorldRuntime", () => {
     expect(runtime.listAvailableInteractions("huettenTuer").map((item) => item.interactionId)).toEqual([
       "ansehen",
       "oeffnen"
+    ]);
+  });
+
+  it("requires the key in inventory before unlocking the door", async () => {
+    const runtime = await loadSampleRuntime();
+
+    runtime.executeWay("nord");
+    expect(runtime.listAvailableInteractions("huettenTuer").map((item) => item.interactionId)).toEqual(["ansehen"]);
+
+    runtime.executeWay("sued");
+    runtime.executeInteraction("kiste", "oeffnen");
+    runtime.executeInteraction("schluessel", "nehmen");
+    runtime.executeWay("nord");
+
+    expect(runtime.listAvailableInteractions("huettenTuer").map((item) => item.interactionId)).toEqual([
+      "ansehen",
+      "entriegeln"
     ]);
   });
 });

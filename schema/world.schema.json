@@ -411,7 +411,7 @@
         "type": {
           "type": "string",
           "description": "Art des Effekts.",
-          "enum": ["set", "say", "trigger"]
+          "enum": ["set", "say", "trigger", "move"]
         },
         "ref": {
           "type": "string",
@@ -431,6 +431,9 @@
         "event": {
           "type": "string",
           "description": "Name eines Trigger-Events."
+        },
+        "to": {
+          "$ref": "#/$defs/objectPlacement"
         }
       }
     },
@@ -461,7 +464,7 @@
     "condition": {
       "type": "object",
       "description": "Eine einzelne Bedingung.",
-      "required": ["ref", "path"],
+      "required": ["ref"],
       "additionalProperties": false,
       "properties": {
         "ref": {
@@ -477,8 +480,15 @@
         },
         "contains": {
           "description": "Prueft, ob ein Array den Wert enthaelt."
+        },
+        "placement": {
+          "$ref": "#/$defs/objectPlacement"
         }
-      }
+      },
+      "anyOf": [
+        { "required": ["path"] },
+        { "required": ["placement"] }
+      ]
     }
   }
 }

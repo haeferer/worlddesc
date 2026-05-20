@@ -192,7 +192,8 @@ Aktuell unterstuetzt das Modell:
 Eine einzelne Bedingung prueft:
 
 - `ref`: Objekt-ID
-- `path`: Pfad innerhalb des Objekts
+- `path`: optionaler Pfad innerhalb des Objekts
+- `placement`: optionaler Aufenthaltsort des Objekts
 - `equals`
 - `contains`
 
@@ -208,12 +209,14 @@ Interpretation:
 Aktuell gibt es drei Effektarten:
 
 - `set`
+- `move`
 - `say`
 - `trigger`
 
 Interpretation:
 
 - `set` schreibt auf bestehende deklarierte Objektpfade
+- `move` aendert den Aufenthaltsort eines Objekts
 - `say` gibt unmittelbares Zusatzfeedback
 - `trigger` bleibt ein Erweiterungspunkt fuer Engine-seitige Speziallogik
 
@@ -247,18 +250,21 @@ Das Szenario laesst sich jetzt in der Weltstruktur bereits weitgehend ausdruecke
 - `schluessel` ist ein tragbares Objekt
 - `placement.schluessel.object: kiste` legt den Schluessel in die Kiste
 - `huettenTuer.stateSchema.lockState` modelliert den Schlosszustand
+- `schluessel.nehmen` kann den Schluessel per `move` ins Inventar legen
+- `entriegeln` kann ueber eine Placement-Bedingung verlangen, dass der Schluessel im Inventar liegt
 - `entriegeln` ist eine eigene Interaktion an der Tuer
 
-Was noch nicht umgesetzt ist:
+Was noch nicht komplett ausgebaut ist:
 
-- ein echter `move`-Effekt fuer Laufzeitwechsel
-- eine standardisierte Bedingung fuer "Objekt ist im Inventar"
-- eine standardisierte Bedingung fuer "Objekt ist in einem Container erreichbar"
+- generische Standardaktionen fuer Aufheben oder Ablegen
+- weitergehende Besitz- oder Containerregeln
+- komplexere Placement-Bedingungen jenseits der aktuellen Zieltypen
 
 Das heisst:
 
-- die statische Weltstruktur passt jetzt schon gut
-- die Laufzeitmechanik fuer Aufheben und Ablegen ist der naechste sinnvolle Ausbauschritt
+- die statische Weltstruktur passt
+- einfache Laufzeitwechsel ueber `move` passen ebenfalls
+- der naechste Ausbaupunkt ist eher Komfort und Allgemeinheit als die Grundmechanik selbst
 
 ## Dokumentationsgrenzen
 

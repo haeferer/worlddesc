@@ -3,6 +3,7 @@ import type {
   ConditionGroup,
   Effect,
   Interaction,
+  ObjectPlacement,
   Room,
   Way,
   WorldDocument,
@@ -146,8 +147,12 @@ function validateConditionReference(
     return;
   }
 
-  if (!hasObjectPath(target, condition.path)) {
+  if (condition.path && !hasObjectPath(target, condition.path)) {
     errors.push(`${location}.path references missing path "${condition.path}" on object "${condition.ref}"`);
+  }
+
+  if (condition.placement) {
+    validatePlacementTargetReference(condition.placement, world, `${location}.placement`, errors);
   }
 }
 
@@ -178,12 +183,50 @@ function validateEffectReference(
     }
   }
 
+  if (effect.type === "move") {
+    if (!effect.ref) {
+      errors.push(`${location}.ref is required for move effects`);
+      return;
+    }
+
+    if (!(effect.ref in world.objects)) {
+      errors.push(`${location}.ref references unknown object "${effect.ref}"`);
+      return;
+    }
+
+    if (!effect.to) {
+      errors.push(`${location}.to is required for move effects`);
+      return;
+    }
+
+    validatePlacementTargetReference(effect.to, world, `${location}.to`, errors);
+  }
+
   if (effect.type === "say" && !effect.text) {
     errors.push(`${location}.text is required for say effects`);
   }
 
   if (effect.type === "trigger" && !effect.event) {
     errors.push(`${location}.event is required for trigger effects`);
+  }
+}
+
+function validatePlacementTargetReference(
+  placement: ObjectPlacement,
+  world: WorldDocument,
+  location: string,
+  errors: string[]
+): void {
+  if ("room" in placement && !(placement.room in world.rooms)) {
+    errors.push(`${location}.room references unknown room "${placement.room}"`);
+  }
+
+  if ("object" in placement && !(placement.object in world.objects)) {
+    errors.push(`${location}.object references unknown object "${placement.object}"`);
+  }
+
+  if ("inventory" in placement && placement.inventory !== "player") {
+    errors.push(`${location}.inventory must currently be "player"`);
   }
 }
 

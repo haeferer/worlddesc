@@ -1,6 +1,10 @@
 import type { RuntimeWorldState } from "../types.js";
 
-export function getObjectPathValue(state: RuntimeWorldState, objectId: string, path: string): unknown {
+export function getObjectPathValue(state: RuntimeWorldState, objectId: string, path: string | undefined): unknown {
+  if (!path) {
+    return undefined;
+  }
+
   const root = buildObjectRuntimeView(state, objectId);
   return getPathValue(root, path);
 }

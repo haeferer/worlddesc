@@ -22,6 +22,14 @@ export function evaluateConditionGroup(state: RuntimeWorldState, group: Conditio
 }
 
 function evaluateCondition(state: RuntimeWorldState, condition: Condition): boolean {
+  if (condition.placement && !matchesPlacement(state, condition.ref, condition.placement)) {
+    return false;
+  }
+
+  if (!condition.path) {
+    return condition.placement !== undefined;
+  }
+
   const value = getObjectPathValue(state, condition.ref, condition.path);
 
   if ("equals" in condition) {
@@ -33,4 +41,34 @@ function evaluateCondition(state: RuntimeWorldState, condition: Condition): bool
   }
 
   return Boolean(value);
+}
+
+function matchesPlacement(
+  state: RuntimeWorldState,
+  objectId: string,
+  expected: NonNullable<Condition["placement"]>
+): boolean {
+  const actual = state.placements[objectId];
+
+  if (!actual) {
+    return false;
+  }
+
+  if ("room" in expected) {
+    return "room" in actual && actual.room === expected.room;
+  }
+
+  if ("inventory" in expected) {
+    return "inventory" in actual && actual.inventory === expected.inventory;
+  }
+
+  if ("offstage" in expected) {
+    return "offstage" in actual && actual.offstage === true;
+  }
+
+  if ("object" in expected) {
+    return "object" in actual && actual.object === expected.object;
+  }
+
+  return false;
 }

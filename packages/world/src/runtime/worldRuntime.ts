@@ -79,7 +79,7 @@ export class WorldRuntime {
   }
 
   isObjectAccessible(objectId: string): boolean {
-    return this.isObjectInCurrentRoom(objectId) || this.isObjectInInventory(objectId);
+    return this.isPlacementAccessible(this.stateValue.placements[objectId]);
   }
 
   listAvailableWays(roomId = this.stateValue.playerRoom): RuntimeWay[] {
@@ -123,7 +123,7 @@ export class WorldRuntime {
     const say: string[] = [];
     const triggers: string[] = [];
     this.stateValue.playerRoom = definition.target.room;
-    applyEffects(this.stateValue, this.world.rooms[definition.target.room].onEnter ?? [], say, triggers);
+    applyEffects(this.world, this.stateValue, this.world.rooms[definition.target.room].onEnter ?? [], say, triggers);
 
     return {
       way: { roomId, wayId, definition },
@@ -155,7 +155,7 @@ export class WorldRuntime {
       (knowledge) => !this.stateValue.knowledge.includes(knowledge)
     );
 
-    applyEffects(this.stateValue, definition.effects ?? [], say, triggers);
+    applyEffects(this.world, this.stateValue, definition.effects ?? [], say, triggers);
     this.stateValue.knowledge.push(...knowledgeGained);
 
     return {
@@ -166,6 +166,36 @@ export class WorldRuntime {
       triggers,
       state: this.state
     };
+  }
+
+  private isPlacementAccessible(placement: WorldDocument["placement"][string] | undefined): boolean {
+    if (!placement) {
+      return false;
+    }
+
+    if ("room" in placement) {
+      return placement.room === this.stateValue.playerRoom;
+    }
+
+    if ("inventory" in placement) {
+      return placement.inventory === "player";
+    }
+
+    if ("offstage" in placement) {
+      return false;
+    }
+
+    if ("object" in placement) {
+      const containerPlacement = this.stateValue.placements[placement.object];
+      if (!this.isPlacementAccessible(containerPlacement)) {
+        return false;
+      }
+
+      const containerState = this.stateValue.objectStates[placement.object];
+      return containerState?.closed !== true;
+    }
+
+    return false;
   }
 }
 

@@ -52,8 +52,11 @@ Aktuell geprueft:
 - `interaction.type` zeigt auf einen existierenden `interactionType`
 - `availableWhen.ref` zeigt auf ein existierendes Objekt
 - `availableWhen.path` zeigt auf einen existierenden Objektpfad
+- `availableWhen.placement` zeigt auf gueltige Platzierungsziele
 - `set.ref` zeigt auf ein existierendes Objekt
 - `set.path` zeigt auf einen existierenden Objektpfad
+- `move.ref` zeigt auf ein existierendes Objekt
+- `move.to` zeigt auf gueltige Platzierungsziele
 
 ### 4. IDs formal pruefen
 
@@ -128,8 +131,7 @@ Bedeutung heute:
 
 Wichtig:
 
-- es gibt noch keine fertige Laufzeitmechanik, die `portable` automatisch ausfuehrt
-- `portable` ist aktuell eine modellierte Regel, noch kein eigener Bewegungsprozess
+- `portable` wirkt jetzt in der Runtime als Schutzregel fuer Moves ins Inventar
 
 ### 9. Objektinteraktionen beschreiben
 
@@ -159,6 +161,13 @@ Unterstuetzte Vergleichsarten:
 
 - `equals`
 - `contains`
+
+Unterstuetzte Platzierungspruefungen:
+
+- Objekt liegt in einem Raum
+- Objekt liegt im Inventar des Spielers
+- Objekt liegt offstage
+- Objekt liegt in einem anderen Objekt
 
 Das erlaubt heute schon Regeln wie:
 
@@ -192,7 +201,24 @@ Damit kann eine World-Instanz:
 - sichtbares oder gesprochenes Feedback erzeugen
 - semantische Wissensmarker anhaengen
 
-### 13. Trigger als Hook beschreiben
+### 13. Ortswechsel durch `move` ausfuehren
+
+Als konkrete Weltveraenderung ist jetzt auch `move` unterstuetzt.
+
+Damit kann eine Interaktion:
+
+- ein Objekt in einen Raum bewegen
+- ein Objekt ins Inventar des Spielers bewegen
+- ein Objekt offstage setzen
+- ein Objekt in ein anderes Objekt bewegen
+
+Zur Laufzeit geprueft wird dabei:
+
+- Zielkontext ist strukturell gueltig
+- Inventar-Moves erfordern `portable: true`
+- Objekt-in-Objekt-Zyklen duerfen nicht entstehen
+
+### 14. Trigger als Hook beschreiben
 
 `trigger` ist aktuell als Effektart im Modell vorhanden.
 
@@ -205,7 +231,7 @@ Wichtig:
 - der Loader validiert nur die Struktur
 - eine konkrete Engine-Semantik fuer Trigger ist aktuell noch nicht implementiert
 
-### 14. World per CLI pruefen
+### 15. World per CLI pruefen
 
 Die World kann ueber den Root-Befehl validiert werden.
 
@@ -221,7 +247,7 @@ Damit werden aktuell ausgefuehrt:
 - Schema-Validierung
 - Referenzpruefung
 
-### 15. Runtime-Instanz erzeugen
+### 16. Runtime-Instanz erzeugen
 
 Eine geladene World kann jetzt in eine Laufzeitinstanz ueberfuehrt werden.
 
@@ -235,7 +261,7 @@ Relevante Stelle:
 
 - [runtime.ts](C:/remoterep/worlddesc/packages/world/src/runtime.ts:1)
 
-### 16. Laufzeitstatus lesen
+### 17. Laufzeitstatus lesen
 
 Die Runtime kann den aktuellen Zustand der Weltinstanz auslesen.
 
@@ -257,7 +283,7 @@ Typische Abfragen:
 - `getContainedObjectIds("kiste")`
 - `getObjectState("huettenTuer")`
 
-### 17. Verfuegbare Wege zur Laufzeit ermitteln
+### 18. Verfuegbare Wege zur Laufzeit ermitteln
 
 Die Runtime kann aus dem aktuellen Raum alle momentan begehbaren Wege ermitteln.
 
@@ -271,7 +297,7 @@ Typische Nutzung:
 - Navigation in einer Engine vorbereiten
 - LLM nur die gerade moeglichen Wege anbieten
 
-### 18. Verfuegbare Objektinteraktionen zur Laufzeit ermitteln
+### 19. Verfuegbare Objektinteraktionen zur Laufzeit ermitteln
 
 Die Runtime kann fuer ein zugaengliches Objekt alle aktuell moeglichen Interaktionen bestimmen.
 
@@ -283,10 +309,11 @@ Unterstuetzt:
 
 Wichtig:
 
-- aktuell gelten nur direkte Raumobjekte und Inventarobjekte als zugaenglich
-- Containerinhalte werden noch nicht automatisch als zugaenglich behandelt
+- direkte Raumobjekte und Inventarobjekte sind zugaenglich
+- Containerinhalte werden zugaenglich, wenn ihr Container selbst zugaenglich und nicht `closed: true` ist
+- Placement-Bedingungen werden zur Laufzeit ausgewertet
 
-### 19. Wege ausfuehren
+### 20. Wege ausfuehren
 
 Die Runtime kann einen verfuegbaren Weg wirklich benutzen.
 
@@ -296,7 +323,7 @@ Unterstuetzt:
 - Ausfuehrung von `onEnter`-Effekten des Zielraums
 - Rueckgabe von `say`-Texten und `trigger`-Events
 
-### 20. Objektinteraktionen ausfuehren
+### 21. Objektinteraktionen ausfuehren
 
 Die Runtime kann eine verfuegbare Interaktion an einem zugaenglichen Objekt ausfuehren.
 
@@ -304,6 +331,7 @@ Unterstuetzt:
 
 - Verfuegbarkeitspruefung
 - Ausfuehrung von `set`
+- Ausfuehrung von `move`
 - Sammeln von `say`
 - Sammeln von `trigger`
 - Uebernahme von `result.text`
@@ -313,7 +341,7 @@ Das bedeutet:
 
 - der deklarierte Weltzustand wird jetzt nicht nur beschrieben, sondern auch wirklich angewendet
 
-### 21. Zustandsuebergaenge verfolgen
+### 22. Zustandsuebergaenge verfolgen
 
 Nach einer ausgefuehrten Interaktion oder einem Weg steht der neue Weltzustand in der Runtime direkt zur Verfuegung.
 
@@ -326,18 +354,14 @@ Unterstuetzt:
 Typisches Beispiel:
 
 - `kiste.oeffnen` setzt `kiste.state.closed` von `true` auf `false`
+- `schluessel.nehmen` bewegt den Schluessel von `object: kiste` nach `inventory: player`
 
 ## Noch nicht unterstuetzte Operationen
 
 Diese Dinge sind fachlich vorbereitet oder angedacht, aber aktuell noch nicht als Operation implementiert:
 
-- `move`-Effekt fuer Ortswechsel
-- Laufzeitwechsel von Raum nach Inventar
-- Laufzeitwechsel von Objekt nach Inventar
 - generische Inventaroperationen wie `pickup` oder `drop`
-- Bedingung "Objekt ist im Inventar"
-- Bedingung "Objekt liegt in Objekt X"
-- automatische Sichtbarkeitsableitung oder Zugaenglichkeit fuer Containerinhalte
+- automatische Ableitung sprachlicher Standardinteraktionen fuer Moves
 - Engine-Ausfuehrung von `trigger`
 
 ## Kurzfazit
@@ -351,6 +375,7 @@ Aktuell unterstuetzt die World-Instanz bereits:
 - initiale Platzierung
 - bedingte Interaktionen
 - `set`-basierte Zustandsaenderung
+- `move`-basierte Platzierungsaenderung
 - textuelles und semantisches Feedback
 - Runtime-Instanziierung
 - Laufzeitnavigation
