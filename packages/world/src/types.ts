@@ -143,3 +143,38 @@ export interface StateSchemaNode {
   additionalProperties?: boolean;
   [key: string]: unknown;
 }
+
+export interface RuntimeWorldState {
+  playerRoom: string;
+  placements: Record<string, ObjectPlacement>;
+  objectStates: Record<string, Record<string, unknown> | undefined>;
+  knowledge: string[];
+}
+
+export interface RuntimeWay {
+  roomId: string;
+  wayId: string;
+  definition: Way;
+}
+
+export interface RuntimeInteraction {
+  objectId: string;
+  interactionId: string;
+  definition: Interaction;
+}
+
+export interface InteractionExecution {
+  interaction: RuntimeInteraction;
+  text?: string;
+  say: string[];
+  knowledgeGained: string[];
+  triggers: string[];
+  state: RuntimeWorldState;
+}
+
+export interface WayExecution {
+  way: RuntimeWay;
+  say: string[];
+  triggers: string[];
+  state: RuntimeWorldState;
+}

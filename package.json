@@ -8,6 +8,7 @@
   "scripts": {
     "build": "npm run build -w @worlddesc/world",
     "typecheck": "npm run typecheck -w @worlddesc/world",
-    "checkworld": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkWorld.js"
+    "checkworld": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkWorld.js",
+    "test": "npm run test -w @worlddesc/world"
   }
 }

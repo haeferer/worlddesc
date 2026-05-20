@@ -221,6 +221,112 @@ Damit werden aktuell ausgefuehrt:
 - Schema-Validierung
 - Referenzpruefung
 
+### 15. Runtime-Instanz erzeugen
+
+Eine geladene World kann jetzt in eine Laufzeitinstanz ueberfuehrt werden.
+
+Unterstuetzt:
+
+- Erzeugen einer Runtime aus der World-Struktur
+- Startzustand aus `player.initialRoom`, `placement` und materialisierten Objekt-States
+- optionales Ueberschreiben eines Initialzustands
+
+Relevante Stelle:
+
+- [runtime.ts](C:/remoterep/worlddesc/packages/world/src/runtime.ts:1)
+
+### 16. Laufzeitstatus lesen
+
+Die Runtime kann den aktuellen Zustand der Weltinstanz auslesen.
+
+Unterstuetzt:
+
+- aktueller Spielerraum
+- aktueller Objektzustand
+- aktuelle Platzierung eines Objekts
+- Inventarobjekte
+- direkte Raumobjekte
+- direkte Containerinhalte
+- aktueller Knowledge-Stand
+
+Typische Abfragen:
+
+- `getCurrentRoomId()`
+- `getRoomObjectIds()`
+- `getInventoryObjectIds()`
+- `getContainedObjectIds("kiste")`
+- `getObjectState("huettenTuer")`
+
+### 17. Verfuegbare Wege zur Laufzeit ermitteln
+
+Die Runtime kann aus dem aktuellen Raum alle momentan begehbaren Wege ermitteln.
+
+Unterstuetzt:
+
+- Bedingungspruefung fuer `ways[*].availableWhen`
+- Rueckgabe der aktuell nutzbaren Wege
+
+Typische Nutzung:
+
+- Navigation in einer Engine vorbereiten
+- LLM nur die gerade moeglichen Wege anbieten
+
+### 18. Verfuegbare Objektinteraktionen zur Laufzeit ermitteln
+
+Die Runtime kann fuer ein zugaengliches Objekt alle aktuell moeglichen Interaktionen bestimmen.
+
+Unterstuetzt:
+
+- Objekt muss aktuell zugaenglich sein
+- Bedingungspruefung fuer `interactions[*].availableWhen`
+- Rueckgabe der verfuegbaren Interaktionen
+
+Wichtig:
+
+- aktuell gelten nur direkte Raumobjekte und Inventarobjekte als zugaenglich
+- Containerinhalte werden noch nicht automatisch als zugaenglich behandelt
+
+### 19. Wege ausfuehren
+
+Die Runtime kann einen verfuegbaren Weg wirklich benutzen.
+
+Unterstuetzt:
+
+- Wechsel von `playerRoom`
+- Ausfuehrung von `onEnter`-Effekten des Zielraums
+- Rueckgabe von `say`-Texten und `trigger`-Events
+
+### 20. Objektinteraktionen ausfuehren
+
+Die Runtime kann eine verfuegbare Interaktion an einem zugaenglichen Objekt ausfuehren.
+
+Unterstuetzt:
+
+- Verfuegbarkeitspruefung
+- Ausfuehrung von `set`
+- Sammeln von `say`
+- Sammeln von `trigger`
+- Uebernahme von `result.text`
+- Uebernahme neuer `knowledge`-Marker
+
+Das bedeutet:
+
+- der deklarierte Weltzustand wird jetzt nicht nur beschrieben, sondern auch wirklich angewendet
+
+### 21. Zustandsuebergaenge verfolgen
+
+Nach einer ausgefuehrten Interaktion oder einem Weg steht der neue Weltzustand in der Runtime direkt zur Verfuegung.
+
+Unterstuetzt:
+
+- veraenderte Objektzustaende
+- veraenderter Spielerraum
+- angereicherter Knowledge-Stand
+
+Typisches Beispiel:
+
+- `kiste.oeffnen` setzt `kiste.state.closed` von `true` auf `false`
+
 ## Noch nicht unterstuetzte Operationen
 
 Diese Dinge sind fachlich vorbereitet oder angedacht, aber aktuell noch nicht als Operation implementiert:
@@ -231,7 +337,7 @@ Diese Dinge sind fachlich vorbereitet oder angedacht, aber aktuell noch nicht al
 - generische Inventaroperationen wie `pickup` oder `drop`
 - Bedingung "Objekt ist im Inventar"
 - Bedingung "Objekt liegt in Objekt X"
-- automatische Sichtbarkeitsableitung fuer Containerinhalte
+- automatische Sichtbarkeitsableitung oder Zugaenglichkeit fuer Containerinhalte
 - Engine-Ausfuehrung von `trigger`
 
 ## Kurzfazit
@@ -246,5 +352,8 @@ Aktuell unterstuetzt die World-Instanz bereits:
 - bedingte Interaktionen
 - `set`-basierte Zustandsaenderung
 - textuelles und semantisches Feedback
+- Runtime-Instanziierung
+- Laufzeitnavigation
+- Laufzeitinteraktionen
 
 Noch nicht voll unterstuetzt ist die eigentliche Laufzeitmechanik fuer Besitz- und Ortswechsel. Genau dort liegt der naechste sinnvolle Ausbauschritt.

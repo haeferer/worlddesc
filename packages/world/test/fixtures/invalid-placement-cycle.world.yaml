@@ -1,0 +1,28 @@
+world:
+  title: Cycle Test
+
+player:
+  initialRoom: start
+
+interactionTypes:
+  examine:
+    title: Ansehen
+
+objects:
+  a:
+    title: A
+    desc: A
+  b:
+    title: B
+    desc: B
+
+rooms:
+  start:
+    title: Start
+    desc: Start
+
+placement:
+  a:
+    object: b
+  b:
+    object: a
