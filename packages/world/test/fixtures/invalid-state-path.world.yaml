@@ -1,0 +1,44 @@
+world:
+  title: Invalid State Path Test
+
+player:
+  initialRoom: start
+
+interactionTypes:
+  open:
+    title: Oeffnen
+
+objects:
+  box:
+    title: Box
+    desc: Eine kleine Box.
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+    interactions:
+      oeffnen:
+        type: open
+        title: Box oeffnen
+        availableWhen:
+          all:
+            - ref: box
+              path: state.clsoed
+              equals: true
+        effects:
+          - type: set
+            ref: box
+            path: state.closed
+            value: false
+
+rooms:
+  start:
+    title: Start
+    desc: Start
+
+placement:
+  box:
+    room: start

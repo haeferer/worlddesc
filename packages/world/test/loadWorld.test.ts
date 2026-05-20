@@ -31,4 +31,11 @@ describe("loadWorldDocument", () => {
     expect(() => loadWorldDocument(source)).toThrowError(WorldValidationError);
     expect(() => loadWorldDocument(source)).toThrowError(/placement cycle detected/);
   });
+
+  it("rejects invalid state paths against stateSchema", async () => {
+    const source = await readFixture("./fixtures/invalid-state-path.world.yaml");
+
+    expect(() => loadWorldDocument(source)).toThrowError(WorldValidationError);
+    expect(() => loadWorldDocument(source)).toThrowError(/state\.clsoed/);
+  });
 });

@@ -11,6 +11,7 @@ import type {
 } from "../types.js";
 import { validateIdGroup } from "./idValidation.js";
 import { validateObjectPlacements } from "./placementValidation.js";
+import { isValidRuntimeObjectPath } from "./pathValidation.js";
 
 export function validateWorldReferences(
   world: WorldDocument,
@@ -147,7 +148,7 @@ function validateConditionReference(
     return;
   }
 
-  if (condition.path && !hasObjectPath(target, condition.path)) {
+  if (condition.path && !isValidRuntimeObjectPath(target, condition.path)) {
     errors.push(`${location}.path references missing path "${condition.path}" on object "${condition.ref}"`);
   }
 
@@ -178,7 +179,7 @@ function validateEffectReference(
       return;
     }
 
-    if (!hasObjectPath(world.objects[effect.ref], effect.path)) {
+    if (!isValidRuntimeObjectPath(world.objects[effect.ref], effect.path)) {
       errors.push(`${location}.path references missing path "${effect.path}" on object "${effect.ref}"`);
     }
   }
@@ -228,23 +229,4 @@ function validatePlacementTargetReference(
   if ("inventory" in placement && placement.inventory !== "player") {
     errors.push(`${location}.inventory must currently be "player"`);
   }
-}
-
-function hasObjectPath(target: WorldObject, path: string): boolean {
-  const segments = path.split(".").filter(Boolean);
-  let current: unknown = target;
-
-  for (const segment of segments) {
-    if (!isRecord(current) || !(segment in current)) {
-      return false;
-    }
-
-    current = current[segment];
-  }
-
-  return true;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
