@@ -13,6 +13,7 @@ Wichtige Dateien:
 
 - `schema/world.schema.json`
 - `sample/test.world.yaml`
+- `sample/interaction-lab.world.yaml`
 - `docs/world.md`
 - `docs/llm-interface.md`
 - `docs/worldusage.md`
@@ -29,6 +30,11 @@ Validierung:
 - `npm run checkworld` prueft standardmaessig `sample/test.world.yaml`
 - `npm run checkworld -- <pfad-zur-world>` prueft eine konkrete Datei
 - dabei werden auch Startplatzierung, Inventar-Referenzen und Offstage-Objekte geprueft
+
+Beispielwelten:
+
+- `sample/test.world.yaml` ist die kleine Adventure-Referenzwelt
+- `sample/interaction-lab.world.yaml` ist eine kompakte Mechanik-/Interface-Welt fuer Ambiguitaeten, Containerzugriff und offene Aktionsfragen
 
 Geplanter Startpunkt:
 

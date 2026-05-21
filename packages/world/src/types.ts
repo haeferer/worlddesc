@@ -77,6 +77,55 @@ export interface Interaction {
   intent?: string;
   aliases?: string[];
   availableWhen?: ConditionGroup;
+  input?: InteractionInput;
+  onSuccess?: InteractionOutcome;
+  onFailure?: InteractionOutcome;
+  effects?: Effect[];
+  result?: Result;
+}
+
+export type InteractionInput = TextInteractionInput | SelectInteractionInput | NumberInteractionInput;
+
+export interface TextInteractionInput {
+  mode: "text";
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  equals?: string;
+  applyInputTo?: InputTarget;
+}
+
+export interface SelectInteractionInput {
+  mode: "select";
+  required?: boolean;
+  options: SelectOption[];
+  equals?: string;
+  applyInputTo?: InputTarget;
+}
+
+export interface NumberInteractionInput {
+  mode: "number";
+  required?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  equals?: number;
+  applyInputTo?: InputTarget;
+}
+
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+export interface InputTarget {
+  ref?: string;
+  path?: string;
+}
+
+export interface InteractionOutcome {
   effects?: Effect[];
   result?: Result;
 }
@@ -178,6 +227,7 @@ export interface InteractionExecution {
   say: string[];
   knowledgeGained: string[];
   triggers: string[];
+  branch: "default" | "success" | "failure";
   state: RuntimeWorldState;
 }
 

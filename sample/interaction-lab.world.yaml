@@ -1,0 +1,495 @@
+world:
+  title: Interaktionslabor
+  desc: Eine kompakte Beispielwelt fuer Ambiguitaeten, Containerzugriff und offene Interface-Fragen.
+
+player:
+  initialRoom: werkraum
+
+interactionTypes:
+  examine:
+    title: Ansehen
+    desc: Etwas genauer betrachten.
+  open:
+    title: Oeffnen
+    desc: Ein Objekt oeffnen.
+  close:
+    title: Schliessen
+    desc: Ein Objekt schliessen.
+  take:
+    title: Nehmen
+    desc: Ein tragbares Objekt aufnehmen.
+  toggle:
+    title: Umlegen
+    desc: Einen Schalter oder Hebel betaetigen.
+  input:
+    title: Eingeben
+    desc: Eine kurze strukturierte Eingabe machen.
+
+objects:
+  roteKiste:
+    title: Rote Kiste
+    desc: Eine rote Blechkiste mit stumpfem Deckel.
+    aliases: [rote kiste, blechkiste]
+    tags: [container, metal, red]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Rote Kiste ansehen
+        aliases: [rote kiste ansehen, kiste ansehen]
+        result:
+          text: Die rote Kiste ist alt, aber noch dicht.
+      oeffnen:
+        type: open
+        title: Rote Kiste oeffnen
+        aliases: [rote kiste oeffnen, kiste oeffnen]
+        availableWhen:
+          all:
+            - ref: roteKiste
+              path: state.closed
+              equals: true
+        effects:
+          - type: set
+            ref: roteKiste
+            path: state.closed
+            value: false
+        result:
+          text: Der Deckel springt auf. Darin liegt eine Kupfermuenze.
+
+  blaueKiste:
+    title: Blaue Kiste
+    desc: Eine blaue Holzkiste mit losem Scharnier.
+    aliases: [blaue kiste, holzkiste blau]
+    tags: [container, wooden, blue]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Blaue Kiste ansehen
+        aliases: [blaue kiste ansehen]
+        result:
+          text: Das Holz ist rau und schon an mehreren Stellen gesplittert.
+      oeffnen:
+        type: open
+        title: Blaue Kiste oeffnen
+        aliases: [blaue kiste oeffnen]
+        availableWhen:
+          all:
+            - ref: blaueKiste
+              path: state.closed
+              equals: true
+        effects:
+          - type: set
+            ref: blaueKiste
+            path: state.closed
+            value: false
+        result:
+          text: Die blaue Kiste ist leer.
+
+  kupferMuenze:
+    title: Kupfermuenze
+    desc: Eine kleine, angelaufene Kupfermuenze.
+    aliases: [muenze, kupfermuenze]
+    tags: [coin, small, metal]
+    portable: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Muenze ansehen
+        aliases: [muenze ansehen]
+        result:
+          text: Die Praegung ist fast vollstaendig abgerieben.
+      nehmen:
+        type: take
+        title: Muenze nehmen
+        aliases: [muenze nehmen, aufheben]
+        availableWhen:
+          all:
+            - ref: kupferMuenze
+              placement:
+                object: roteKiste
+            - ref: roteKiste
+              path: state.closed
+              equals: false
+        effects:
+          - type: move
+            ref: kupferMuenze
+            to:
+              inventory: player
+        result:
+          text: Du steckst die Kupfermuenze ein.
+
+  glasVitrine:
+    title: Glasvitrine
+    desc: Eine schmale Glasvitrine mit kleinem Drehverschluss.
+    aliases: [vitrine, glasvitrine]
+    tags: [container, glass, cabinet]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Vitrine ansehen
+        aliases: [vitrine ansehen, glas ansehen]
+        result:
+          text: Hinter dem Glas schimmert etwas Silbernes.
+      oeffnen:
+        type: open
+        title: Vitrine oeffnen
+        aliases: [vitrine oeffnen]
+        availableWhen:
+          all:
+            - ref: glasVitrine
+              path: state.closed
+              equals: true
+            - ref: hebel
+              path: state.position
+              equals: up
+        effects:
+          - type: set
+            ref: glasVitrine
+            path: state.closed
+            value: false
+        result:
+          text: Die Vitrine schwingt offen.
+      schliessen:
+        type: close
+        title: Vitrine schliessen
+        aliases: [vitrine schliessen]
+        availableWhen:
+          all:
+            - ref: glasVitrine
+              path: state.closed
+              equals: false
+        effects:
+          - type: set
+            ref: glasVitrine
+            path: state.closed
+            value: true
+        result:
+          text: Die Glasscheibe faellt wieder zu.
+
+  silberRing:
+    title: Silberring
+    desc: Ein schmaler Silberring mit matter Innenkante.
+    aliases: [ring, silberring]
+    tags: [ring, silver, small]
+    portable: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Ring ansehen
+        aliases: [ring ansehen]
+        result:
+          text: Der Ring ist schlicht, aber sorgfaeltig gearbeitet.
+      nehmen:
+        type: take
+        title: Ring nehmen
+        aliases: [ring nehmen]
+        availableWhen:
+          all:
+            - ref: silberRing
+              placement:
+                object: glasVitrine
+            - ref: glasVitrine
+              path: state.closed
+              equals: false
+        effects:
+          - type: move
+            ref: silberRing
+            to:
+              inventory: player
+        result:
+          text: Du nimmst den Silberring aus der Vitrine.
+
+  hebel:
+    title: Hebel
+    desc: Ein kurzer Messinghebel ragt aus der Wand.
+    aliases: [hebel, schalter]
+    tags: [switch, brass, wall]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        position:
+          type: string
+          enum: [down, up]
+          default: down
+    interactions:
+      ansehen:
+        type: examine
+        title: Hebel ansehen
+        aliases: [hebel ansehen]
+        result:
+          text: Der Hebel ist mit der Vitrine verbunden.
+      umlegen:
+        type: toggle
+        title: Hebel umlegen
+        aliases: [hebel umlegen, schalter umlegen]
+        availableWhen:
+          all:
+            - ref: hebel
+              path: state.position
+              equals: down
+        effects:
+          - type: set
+            ref: hebel
+            path: state.position
+            value: up
+          - type: say
+            text: Ein leises Klicken kommt aus der Vitrine.
+        result:
+          text: Der Hebel rastet oben ein.
+
+  notiz:
+    title: Notiz
+    desc: Ein mehrfach gefalteter Zettel liegt auf dem Werktisch.
+    aliases: [notiz, zettel]
+    tags: [paper, note]
+    interactions:
+      lesen:
+        type: examine
+        title: Notiz lesen
+        aliases: [notiz lesen, zettel lesen]
+        result:
+          text: "Auf der Notiz steht in krakeliger Schrift: 4862."
+          knowledge: [code_4862]
+
+  safe:
+    title: Safe
+    desc: Ein kleiner Wandsafe mit Zahlenwalze und schwerer Tuer.
+    aliases: [safe, wandsafe, tresor]
+    tags: [container, metal, code, secure]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+        locked:
+          type: boolean
+          default: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Safe ansehen
+        aliases: [safe ansehen, tresor ansehen]
+        result:
+          text: Vier Ziffern muessen hier offenbar exakt passen.
+      codeEingeben:
+        type: input
+        title: Code eingeben
+        desc: Eine vierstellige Zahlenfolge in den Safe eingeben.
+        intent: Der Spieler moechte eine kurze Zahlenfolge eingeben.
+        aliases: [code eingeben, zahl eingeben, safe code]
+        input:
+          mode: text
+          required: true
+          pattern: '^\d{4}$'
+          equals: "4862"
+        onSuccess:
+          effects:
+            - type: set
+              ref: safe
+              path: state.locked
+              value: false
+            - type: say
+              text: Im Inneren des Safes klickt ein Bolzen zurueck.
+          result:
+            text: Der richtige Code. Der Safe ist jetzt entriegelt.
+            knowledge: [safe_entriegelt]
+        onFailure:
+          result:
+            text: Der Safe bleibt stumm. Das war nicht der richtige Code.
+      oeffnen:
+        type: open
+        title: Safe oeffnen
+        aliases: [safe oeffnen, tresor oeffnen]
+        availableWhen:
+          all:
+            - ref: safe
+              path: state.closed
+              equals: true
+            - ref: safe
+              path: state.locked
+              equals: false
+        effects:
+          - type: set
+            ref: safe
+            path: state.closed
+            value: false
+        result:
+          text: Die schwere Safetuer schwingt langsam auf.
+
+  modusSchalter:
+    title: Modusschalter
+    desc: Ein runder Drehschalter mit fuenf klar markierten Positionen.
+    aliases: [modusschalter, drehschalter, schalter]
+    tags: [switch, selector, panel]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        mode:
+          type: string
+          enum: [aus, an, bereit, sonder, boom]
+          default: aus
+    interactions:
+      ansehen:
+        type: examine
+        title: Modusschalter ansehen
+        aliases: [modusschalter ansehen, drehschalter ansehen]
+        result:
+          text: Die Positionen sind mit Aus, An, Bereit, Sonder und Boom beschriftet.
+      modusWaehlen:
+        type: input
+        title: Modus waehlen
+        desc: Eine der klar beschrifteten Schalterpositionen waehlen.
+        aliases: [modus waehlen, schalter stellen]
+        input:
+          mode: select
+          required: true
+          applyInputTo:
+            ref: modusSchalter
+            path: state.mode
+          options:
+            - value: aus
+              label: Aus
+            - value: an
+              label: An
+            - value: bereit
+              label: Bereit
+            - value: sonder
+              label: Sonder
+            - value: boom
+              label: Boom
+        onSuccess:
+          result:
+            text: Der Drehschalter rastet in die gewaehlte Position.
+        onFailure:
+          result:
+            text: Diese Schalterposition gibt es hier nicht.
+
+  thermostat:
+    title: Thermostat
+    desc: Ein schlichtes Thermostat mit kleiner Skala in Grad Celsius.
+    aliases: [thermostat, temperaturregler, regler]
+    tags: [control, temperature, panel]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        targetTemperature:
+          type: number
+          minimum: 10
+          maximum: 40
+          default: 20
+    interactions:
+      ansehen:
+        type: examine
+        title: Thermostat ansehen
+        aliases: [thermostat ansehen, regler ansehen]
+        result:
+          text: Die Skala reicht von 10 bis 40 Grad Celsius.
+      temperaturSetzen:
+        type: input
+        title: Temperatur setzen
+        desc: Eine Zieltemperatur in Grad Celsius einstellen.
+        aliases: [temperatur setzen, temperatur einstellen]
+        input:
+          mode: number
+          required: true
+          applyInputTo:
+            ref: thermostat
+            path: state.targetTemperature
+          min: 10
+          max: 40
+          step: 0.5
+          unit: celsius
+        onSuccess:
+          result:
+            text: Das Thermostat springt auf den gewuenschten Wert.
+        onFailure:
+          result:
+            text: Dieser Wert liegt ausserhalb der moeglichen Skala.
+
+  messingSchluessel:
+    title: Messingschluessel
+    desc: Ein kantiger Messingschluessel mit frischer Feilspur.
+    aliases: [messingschluessel, schluessel]
+    tags: [key, brass, small]
+    portable: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Messingschluessel ansehen
+        aliases: [messingschluessel ansehen, schluessel ansehen]
+        result:
+          text: Der Schluessel wirkt deutlich neuer als die anderen Dinge hier.
+      nehmen:
+        type: take
+        title: Messingschluessel nehmen
+        aliases: [messingschluessel nehmen, schluessel nehmen]
+        availableWhen:
+          all:
+            - ref: messingSchluessel
+              placement:
+                object: safe
+            - ref: safe
+              path: state.closed
+              equals: false
+        effects:
+          - type: move
+            ref: messingSchluessel
+            to:
+              inventory: player
+        result:
+          text: Du nimmst den Messingschluessel aus dem Safe.
+
+rooms:
+  werkraum:
+    title: Werkraum
+    desc: Ein enger Werkraum mit Kisten, Vitrine, Hebel, Safe und mehreren Reglern am Werktisch.
+    tags: [indoor, workshop, cramped]
+
+placement:
+  roteKiste:
+    room: werkraum
+  blaueKiste:
+    room: werkraum
+  kupferMuenze:
+    object: roteKiste
+  glasVitrine:
+    room: werkraum
+  silberRing:
+    object: glasVitrine
+  hebel:
+    room: werkraum
+  notiz:
+    room: werkraum
+  safe:
+    room: werkraum
+  modusSchalter:
+    room: werkraum
+  thermostat:
+    room: werkraum
+  messingSchluessel:
+    object: safe

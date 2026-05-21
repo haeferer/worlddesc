@@ -1,5 +1,7 @@
 import type {
   InteractionExecution,
+  InteractionInput,
+  InteractionOutcome,
   RuntimeInteraction,
   RuntimeWay,
   RuntimeWorldState,
@@ -8,7 +10,7 @@ import type {
 } from "../types.js";
 import { applyEffects } from "./applyEffects.js";
 import { evaluateConditionGroup } from "./evaluateConditions.js";
-import { buildInitialObjectStates, unique } from "./runtimeHelpers.js";
+import { buildInitialObjectStates, setObjectPathValue, unique } from "./runtimeHelpers.js";
 
 export class WorldRuntime {
   readonly world: WorldDocument;
@@ -133,7 +135,7 @@ export class WorldRuntime {
     };
   }
 
-  executeInteraction(objectId: string, interactionId: string): InteractionExecution {
+  executeInteraction(objectId: string, interactionId: string, additionalText?: string): InteractionExecution {
     const object = this.world.objects[objectId];
     const definition = object?.interactions?.[interactionId];
 
@@ -151,19 +153,30 @@ export class WorldRuntime {
 
     const say: string[] = [];
     const triggers: string[] = [];
-    const knowledgeGained = unique(definition.result?.knowledge ?? []).filter(
+    const branchResult = resolveInteractionOutcome(definition, additionalText);
+    const knowledgeGained = unique(branchResult.outcome?.result?.knowledge ?? definition.result?.knowledge ?? []).filter(
       (knowledge) => !this.stateValue.knowledge.includes(knowledge)
     );
 
-    applyEffects(this.world, this.stateValue, definition.effects ?? [], say, triggers);
+    if (branchResult.success && branchResult.normalizedValue !== undefined && definition.input?.applyInputTo) {
+      setObjectPathValue(
+        this.stateValue,
+        definition.input.applyInputTo.ref ?? objectId,
+        definition.input.applyInputTo.path ?? "",
+        branchResult.normalizedValue
+      );
+    }
+
+    applyEffects(this.world, this.stateValue, branchResult.outcome?.effects ?? definition.effects ?? [], say, triggers);
     this.stateValue.knowledge.push(...knowledgeGained);
 
     return {
       interaction: { objectId, interactionId, definition },
-      text: definition.result?.text,
+      text: branchResult.outcome?.result?.text ?? definition.result?.text,
       say,
       knowledgeGained,
       triggers,
+      branch: branchResult.branch,
       state: this.state
     };
   }
@@ -201,4 +214,148 @@ export class WorldRuntime {
 
 export function createWorldRuntime(world: WorldDocument, initialState?: Partial<RuntimeWorldState>): WorldRuntime {
   return new WorldRuntime(world, initialState);
+}
+
+function resolveInteractionOutcome(
+  definition: RuntimeInteraction["definition"],
+  additionalText: string | undefined
+): {
+  branch: InteractionExecution["branch"];
+  outcome?: InteractionOutcome;
+  success: boolean;
+  normalizedValue?: string | number;
+} {
+  if (!definition.input) {
+    return {
+      branch: "default",
+      success: true
+    };
+  }
+
+  const evaluation = evaluateInteractionInput(definition.input, additionalText);
+  const success = evaluation.success;
+  return success
+    ? {
+        branch: "success",
+        outcome: definition.onSuccess,
+        success: true,
+        normalizedValue: evaluation.normalizedValue
+      }
+    : {
+        branch: "failure",
+        outcome: definition.onFailure,
+        success: false
+      };
+}
+
+function evaluateInteractionInput(
+  input: InteractionInput,
+  additionalText: string | undefined
+): { success: boolean; normalizedValue?: string | number } {
+  if (input.mode === "text") {
+    return evaluateTextInteractionInput(input, additionalText);
+  }
+
+  if (input.mode === "select") {
+    return evaluateSelectInteractionInput(input, additionalText);
+  }
+
+  return evaluateNumberInteractionInput(input, additionalText);
+}
+
+function evaluateTextInteractionInput(
+  input: Extract<InteractionInput, { mode: "text" }>,
+  additionalText: string | undefined
+): { success: boolean; normalizedValue?: string } {
+  const value = additionalText ?? "";
+
+  if (input.required !== false && value.length === 0) {
+    return { success: false };
+  }
+
+  if (input.minLength !== undefined && value.length < input.minLength) {
+    return { success: false };
+  }
+
+  if (input.maxLength !== undefined && value.length > input.maxLength) {
+    return { success: false };
+  }
+
+  if (input.pattern && !new RegExp(input.pattern).test(value)) {
+    return { success: false };
+  }
+
+  if (input.equals !== undefined && value !== input.equals) {
+    return { success: false };
+  }
+
+  return {
+    success: true,
+    normalizedValue: value
+  };
+}
+
+function evaluateSelectInteractionInput(
+  input: Extract<InteractionInput, { mode: "select" }>,
+  additionalText: string | undefined
+): { success: boolean; normalizedValue?: string } {
+  const value = additionalText ?? "";
+
+  if (input.required !== false && value.length === 0) {
+    return { success: false };
+  }
+
+  const allowedValues = new Set(input.options.map((option) => option.value));
+  if (!allowedValues.has(value)) {
+    return { success: false };
+  }
+
+  if (input.equals !== undefined && value !== input.equals) {
+    return { success: false };
+  }
+
+  return {
+    success: true,
+    normalizedValue: value
+  };
+}
+
+function evaluateNumberInteractionInput(
+  input: Extract<InteractionInput, { mode: "number" }>,
+  additionalText: string | undefined
+): { success: boolean; normalizedValue?: number } {
+  const value = additionalText ?? "";
+
+  if (input.required !== false && value.length === 0) {
+    return { success: false };
+  }
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return { success: false };
+  }
+
+  if (input.min !== undefined && parsed < input.min) {
+    return { success: false };
+  }
+
+  if (input.max !== undefined && parsed > input.max) {
+    return { success: false };
+  }
+
+  if (input.step !== undefined && input.min !== undefined) {
+    const steps = (parsed - input.min) / input.step;
+    if (Math.abs(steps - Math.round(steps)) > 1e-9) {
+      return { success: false };
+    }
+  }
+
+  if (input.equals !== undefined && parsed !== input.equals) {
+    return { success: false };
+  }
+
+  return {
+    success: true,
+    normalizedValue: parsed
+  };
 }

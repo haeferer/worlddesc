@@ -159,6 +159,13 @@ Das Beispiel in `sample/test.world.yaml` zeigt typische Faelle:
 - `huettenTuer.stateSchema.lockState` als Enum
 - `laterne.stateSchema.fuelLevel` als Zahl mit Grenzen
 
+Die zweite Beispielwelt `sample/interaction-lab.world.yaml` nutzt dasselbe Modell fuer eine technischere Demonstration:
+
+- zwei gleichzeitig oeffenbare Container fuer Ambiguitaeten
+- eine Vitrine mit sichtbar werdendem, spaeter wieder unzugaenglichem Inhalt
+- eine Notiz als reine Wissensquelle
+- ein Safe mit echter Codeeingabe ueber `additionalText`
+
 ### Interactions
 
 `interactions` beschreiben konkrete Spielerhandlungen an einem Objekt.
@@ -171,6 +178,9 @@ Eine Interaktion hat aktuell:
 - `intent`
 - `aliases`
 - `availableWhen`
+- `input`
+- `onSuccess`
+- `onFailure`
 - `effects`
 - `result`
 
@@ -178,6 +188,31 @@ Interpretation:
 
 - `type` ist die semantische Klasse
 - der eigentliche Ablauf steckt in Bedingungen, Effekten und Resultaten
+- parameterisierte Interaktionen koennen zusaetzlich eine deklarative Eingaberegel und getrennte Erfolgs-/Misserfolgszweige tragen
+
+### Parameterisierte Interaktionen
+
+Das Modell kann jetzt auch Interaktionen ausdruecken, die eine kurze strukturierte Eingabe benoetigen.
+
+Aktuell ist dafuer vorgesehen:
+
+- `input.mode: text`
+- `input.mode: select`
+- `input.mode: number`
+- optionale Regeln wie `required`, `pattern`, `minLength`, `maxLength` und `equals`
+- bei `select` zusaetzlich eine feste `options`-Menge
+- bei `number` zusaetzlich `min`, `max`, `step` und optional `unit`
+- optional `applyInputTo` als deklaratives Ziel fuer den validierten Eingabewert
+- `onSuccess` fuer den Erfolgszweig
+- `onFailure` fuer den Misserfolgszweig
+
+Interpretation:
+
+- die Eingabe kommt ueber `PlayerActionCommand.additionalText`
+- die Runtime prueft diese Eingabe gegen die deklarative Regel
+- ein erfolgreich validierter Eingabewert kann ueber `applyInputTo` in einen normalen State-Pfad geschrieben werden
+- Erfolg und Misserfolg bleiben Teil derselben normalen Interaktionslogik
+- die Player-Sicht kann damit spaeter genau ausweisen, ob eine Interaktion Freitext, eine feste Auswahl oder einen Zahlenwert erwartet
 
 ### Conditions
 
@@ -241,6 +276,8 @@ Die Beispielwelt zeigt bereits ein deutlich reichhaltigeres Muster:
 - Die Huettentuer kann erst entriegelt und danach geoeffnet werden.
 
 Damit ist das Modell aktuell stark auf "Objekte + Platzierung + Objektzustand + Bedingungen + Effekte" ausgerichtet.
+
+Ergaenzend zeigt `sample/interaction-lab.world.yaml`, dass dasselbe Modell auch fuer bewusst technische Interface-Szenarien taugt, in denen weniger Weltatmosphaere und mehr Aktionsaufloesung, Ambiguitaet und Spielerwissen im Vordergrund stehen.
 
 ## Szenario Kiste, Schluessel, verschlossene Tuer
 

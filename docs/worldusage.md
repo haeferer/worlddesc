@@ -201,6 +201,35 @@ Damit kann eine World-Instanz:
 - sichtbares oder gesprochenes Feedback erzeugen
 - semantische Wissensmarker anhaengen
 
+### 12a. Parameterisierte Interaktionen auswerten
+
+Interaktionen koennen jetzt eine kurze strukturierte Eingabe verlangen.
+
+Unterstuetzt:
+
+- `input.mode: text`
+- `input.mode: select`
+- `input.mode: number`
+- `required`
+- `minLength`
+- `maxLength`
+- `pattern`
+- `equals`
+- `options`
+- `min`
+- `max`
+- `step`
+- `unit`
+- `applyInputTo`
+- getrennte `onSuccess`- und `onFailure`-Zweige
+
+Bedeutung heute:
+
+- `PlayerActionCommand.additionalText` wird an die Runtime weitergereicht
+- die Runtime prueft die Eingabe gegen die deklarative Regel
+- bei Erfolg kann der validierte Wert deklarativ in Objektzustand geschrieben werden
+- je nach Ergebnis werden unterschiedliche `effects` und `result`-Inhalte ausgefuehrt
+
 ### 13. Ortswechsel durch `move` ausfuehren
 
 Als konkrete Weltveraenderung ist jetzt auch `move` unterstuetzt.
@@ -363,9 +392,21 @@ Diese Dinge sind fachlich vorbereitet oder angedacht, aber aktuell noch nicht al
 - generische Inventaroperationen wie `pickup` oder `drop`
 - automatische Ableitung sprachlicher Standardinteraktionen fuer Moves
 - Engine-Ausfuehrung von `trigger`
-- getrennte Player-Memory- oder Perception-Schicht
-- spielerperspektivische LLM-Fassade auf die Runtime
+- voll implementierte Player-Memory- oder Perception-Schicht
+- voll ausgereifte spielerperspektivische `PlayerWorldView` auf die Runtime
 - Persistenz von Runtime plus Spielerwissen
+
+Wichtig:
+
+- eine erste `PlayerWorldView` ist bereits vorhanden
+- sie liefert aktuelle Szene, sichtbare Objekte, Inventar, Wege, aufbereitete Texte und neue Wahrnehmungsereignisse
+- die Aktionsabwicklung arbeitet im Kern mit strukturierten Spielerkommandos
+- eine separate Hilfsschicht kann diese Kommandos deterministisch aus Text, Aliasen und Hints ableiten
+- `additionalText` wird bereits bis in normale Interaktionen durchgereicht und dort fuer deklarative Eingaberegeln ausgewertet
+- sichtbare Interaktionen koennen jetzt auch ihre erwartete Eingabeform samt Metadaten an die Player-Sicht liefern
+- Fehlschlaege werden dabei bereits strukturiert mit Fehlercodes wie `unknown-object`, `unknown-action`, `object-not-accessible` oder `action-not-available` zurueckgegeben
+- die Textaufloesung kann neben `resolved` und `unresolved` auch bewusst `ambiguous` liefern, inklusive Kandidatenliste
+- die Schicht ist damit als Basis nutzbar, aber noch nicht die spaetere vollstaendige Spieler- oder LLM-Fassade
 
 ## Kurzfazit
 

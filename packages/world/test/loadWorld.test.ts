@@ -25,6 +25,14 @@ describe("loadWorldDocument", () => {
     });
   });
 
+  it("loads the interaction lab sample", async () => {
+    const source = await readFixture("../../../sample/interaction-lab.world.yaml");
+    const world = loadWorldDocument(source);
+
+    expect(world.player.initialRoom).toBe("werkraum");
+    expect(world.objects.safe.interactions?.codeEingeben?.type).toBe("input");
+  });
+
   it("rejects placement cycles", async () => {
     const source = await readFixture("./fixtures/invalid-placement-cycle.world.yaml");
 

@@ -372,9 +372,153 @@
         "availableWhen": {
           "$ref": "#/$defs/conditionGroup"
         },
+        "input": {
+          "$ref": "#/$defs/interactionInput"
+        },
+        "onSuccess": {
+          "$ref": "#/$defs/interactionOutcome"
+        },
+        "onFailure": {
+          "$ref": "#/$defs/interactionOutcome"
+        },
         "effects": {
           "type": "array",
           "description": "Effekte oder Weltveraenderungen dieser Interaktion.",
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        }
+      }
+    },
+    "interactionInput": {
+      "description": "Deklarative Eingaberegel fuer parameterisierte Interaktionen.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["mode"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "text"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "minLength": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maxLength": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pattern": {
+              "type": "string"
+            },
+            "equals": {
+              "type": "string"
+            },
+            "applyInputTo": {
+              "$ref": "#/$defs/inputTarget"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["mode", "options"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "select"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "options": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/selectOption"
+              }
+            },
+            "equals": {
+              "type": "string"
+            },
+            "applyInputTo": {
+              "$ref": "#/$defs/inputTarget"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["mode"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "number"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "step": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unit": {
+              "type": "string"
+            },
+            "equals": {
+              "type": "number"
+            },
+            "applyInputTo": {
+              "$ref": "#/$defs/inputTarget"
+            }
+          }
+        }
+      ]
+    },
+    "inputTarget": {
+      "type": "object",
+      "required": ["ref", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "selectOption": {
+      "type": "object",
+      "required": ["value", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      }
+    },
+    "interactionOutcome": {
+      "type": "object",
+      "description": "Ausgang eines parameterisierten Interaktionszweigs.",
+      "additionalProperties": false,
+      "properties": {
+        "effects": {
+          "type": "array",
           "items": {
             "$ref": "#/$defs/effect"
           }

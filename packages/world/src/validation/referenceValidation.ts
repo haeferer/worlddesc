@@ -3,6 +3,7 @@ import type {
   ConditionGroup,
   Effect,
   Interaction,
+  InteractionOutcome,
   ObjectPlacement,
   Room,
   Way,
@@ -107,9 +108,26 @@ function validateInteractionReferences(
     errors
   );
 
+  if (interaction.input) {
+    validateInteractionInput(interaction, world, `objects.${objectId}.interactions.${interactionId}`, errors);
+  }
+
   for (const [index, effect] of (interaction.effects ?? []).entries()) {
     validateEffectReference(effect, world, `objects.${objectId}.interactions.${interactionId}.effects[${index}]`, errors);
   }
+
+  validateInteractionOutcomeReferences(
+    interaction.onSuccess,
+    world,
+    `objects.${objectId}.interactions.${interactionId}.onSuccess`,
+    errors
+  );
+  validateInteractionOutcomeReferences(
+    interaction.onFailure,
+    world,
+    `objects.${objectId}.interactions.${interactionId}.onFailure`,
+    errors
+  );
 }
 
 function validateConditionGroupReferences(
@@ -228,5 +246,98 @@ function validatePlacementTargetReference(
 
   if ("inventory" in placement && placement.inventory !== "player") {
     errors.push(`${location}.inventory must currently be "player"`);
+  }
+}
+
+function validateInteractionOutcomeReferences(
+  outcome: InteractionOutcome | undefined,
+  world: WorldDocument,
+  location: string,
+  errors: string[]
+): void {
+  if (!outcome) {
+    return;
+  }
+
+  for (const [index, effect] of (outcome.effects ?? []).entries()) {
+    validateEffectReference(effect, world, `${location}.effects[${index}]`, errors);
+  }
+}
+
+function validateInteractionInput(interaction: Interaction, world: WorldDocument, location: string, errors: string[]): void {
+  if (interaction.effects || interaction.result) {
+    errors.push(`${location} must use onSuccess/onFailure instead of top-level effects/result when input is defined`);
+  }
+
+  if (!interaction.onSuccess && !interaction.onFailure) {
+    errors.push(`${location} must define onSuccess or onFailure when input is defined`);
+  }
+
+  if (interaction.input?.mode === "text" && interaction.input.minLength !== undefined && interaction.input.maxLength !== undefined) {
+    if (interaction.input.minLength > interaction.input.maxLength) {
+      errors.push(`${location}.input.minLength must not be greater than maxLength`);
+    }
+  }
+
+  if (interaction.input?.mode === "text" && interaction.input.pattern) {
+    try {
+      new RegExp(interaction.input.pattern);
+    } catch {
+      errors.push(`${location}.input.pattern is not a valid regular expression`);
+    }
+  }
+
+  if (interaction.input?.mode === "select") {
+    const seenValues = new Set<string>();
+    for (const option of interaction.input.options) {
+      if (seenValues.has(option.value)) {
+        errors.push(`${location}.input.options contains duplicate value "${option.value}"`);
+      }
+      seenValues.add(option.value);
+    }
+
+    if (interaction.input.equals !== undefined && !seenValues.has(interaction.input.equals)) {
+      errors.push(`${location}.input.equals must be one of the declared select option values`);
+    }
+  }
+
+  if (interaction.input?.mode === "number") {
+    if (interaction.input.min !== undefined && interaction.input.max !== undefined && interaction.input.min > interaction.input.max) {
+      errors.push(`${location}.input.min must not be greater than max`);
+    }
+
+    if (interaction.input.step !== undefined && interaction.input.step <= 0) {
+      errors.push(`${location}.input.step must be greater than 0`);
+    }
+
+    if (interaction.input.equals !== undefined) {
+      if (interaction.input.min !== undefined && interaction.input.equals < interaction.input.min) {
+        errors.push(`${location}.input.equals must not be smaller than min`);
+      }
+
+      if (interaction.input.max !== undefined && interaction.input.equals > interaction.input.max) {
+        errors.push(`${location}.input.equals must not be greater than max`);
+      }
+    }
+  }
+
+  if (interaction.input?.applyInputTo) {
+    if (!interaction.input.applyInputTo.ref) {
+      errors.push(`${location}.input.applyInputTo.ref is required`);
+    } else if (!(interaction.input.applyInputTo.ref in world.objects)) {
+      errors.push(`${location}.input.applyInputTo.ref references unknown object "${interaction.input.applyInputTo.ref}"`);
+    }
+
+    if (!interaction.input.applyInputTo.path) {
+      errors.push(`${location}.input.applyInputTo.path is required`);
+    } else if (
+      interaction.input.applyInputTo.ref &&
+      world.objects[interaction.input.applyInputTo.ref] &&
+      !isValidRuntimeObjectPath(world.objects[interaction.input.applyInputTo.ref], interaction.input.applyInputTo.path)
+    ) {
+      errors.push(
+        `${location}.input.applyInputTo.path references missing path "${interaction.input.applyInputTo.path}" on object "${interaction.input.applyInputTo.ref}"`
+      );
+    }
   }
 }

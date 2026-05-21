@@ -17,7 +17,7 @@ describe("WorldRuntime", () => {
     const runtime = await loadSampleRuntime();
 
     expect(runtime.getCurrentRoomId()).toBe("wiese");
-    expect(runtime.getRoomObjectIds()).toEqual(["sonne", "kiste"]);
+    expect(runtime.getRoomObjectIds()).toEqual(["sonne", "kiste", "beutel"]);
     expect(runtime.getContainedObjectIds("kiste")).toEqual(["schluessel"]);
   });
 

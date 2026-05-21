@@ -182,6 +182,79 @@ Konsequenz:
 - "weiss der Spieler das schon?" gehoert nicht in den normalen Objektzustand
 - diese Informationen sollen spaeter in einer separaten Memory- oder Perception-Schicht liegen
 
+### Zwischen Runtime und LLM soll erst eine Player-Sicht liegen
+
+Bevor spaeter eine eigentliche LLM-Fassade entsteht, soll zunaechst eine allgemeine Spielersicht modelliert werden.
+
+Geplante Trennung:
+
+- `WorldRuntime` bleibt technische Engine-Schnittstelle
+- `PlayerWorldView` wird die gefilterte Sicht fuer Spielerperspektive
+- eine spaetere `LLMWorldView` ist hoechstens eine weitere, darauf aufbauende Fassade
+
+Motivation:
+
+- dieselbe Spielersicht kann fuer UI, Tests und spaetere LLM-Anbindung genutzt werden
+- Spielerwissen und Weltwissen bleiben klar getrennt
+- die Runtime muss nicht gleichzeitig Engine- und Spieler-API sein
+- aufbereitete Texte und neue Ereignisse werden von Anfang an als eigener Teil dieser Sicht geplant
+
+### Spieleraktionen sollen strukturiert in die Engine gehen
+
+Die eigentliche Player- und spaetere LLM-nahe Schnittstelle soll keine freien Texte direkt an die Weltlogik uebergeben.
+
+Stattdessen sollen strukturierte Kommandos verwendet werden, zum Beispiel:
+
+- Interaktion mit `objectId` und `actionId`
+- Wegnutzung mit `actionId`
+- optional freies Zusatzfeld wie `additionalText`
+
+Motivation:
+
+- Sprachaufloesung bleibt ausserhalb der Weltlogik
+- die Engine bleibt deterministisch und testbar
+- ein spaeteres LLM kann genau die Rolle des Uebersetzers von Sprache zu strukturierter Aktion uebernehmen
+
+Konsequenz:
+
+- Mehrdeutigkeiten sollen nicht heimlich erraten werden
+- stattdessen sollen sie als strukturierte Kandidaten sichtbar werden
+- Fehlschlaege sollen ebenfalls mit stabilen Fehlercodes an die aufrufende Schicht zurueckgehen
+
+### Strukturierte Eingabe bleibt Teil normaler Interaktionen
+
+Parameterisierte Eingaben wie Codes oder kurze Antworten sollen keinen eigenen parallelen API- oder Runtime-Zweig erhalten.
+
+Stattdessen gilt:
+
+- `additionalText` ist Teil des normalen `PlayerActionCommand`
+- Interaktionen koennen optional ein deklaratives `input` beschreiben
+- ein validierter Eingabewert kann optional ueber `applyInputTo` in normalen Objektzustand geschrieben werden
+- Erfolg und Misserfolg laufen ueber `onSuccess` und `onFailure`
+
+Motivation:
+
+- keine zweite Sonderarchitektur neben normalen Interaktionen
+- dieselben Tests, Rueckgabetypen und Runtime-Pfade bleiben nutzbar
+- das spaetere LLM kann strukturierte Eingaben liefern, ohne selbst Weltlogik auswerten zu muessen
+
+### Player-Sicht soll klein und fachlich aufgeteilt wachsen
+
+Die spaetere Spielersicht soll nicht als einzelne grosse Runtime-Datei entstehen.
+
+Geplante fachliche Aufteilung:
+
+- Vertragstypen fuer die Sicht
+- Memory-Logik fuer bekanntes Wissen und bereits gelieferte Inhalte
+- Event-Logik fuer neue Wahrnehmungen
+- eine schmale Fassade fuer die eigentliche Player-API
+
+Motivation:
+
+- weniger Monsterfunktionen
+- klarere Tests pro Verantwortungsbereich
+- spaetere LLM-Anbindung bleibt auf einer stabilen, kleinen API statt auf verteilten Runtime-Details
+
 ### IDs folgen aktuell `camelCase`
 
 Die kanonische Schreibweise fuer IDs ist derzeit `camelCase`.

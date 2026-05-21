@@ -1,6 +1,6 @@
 world:
   title: Der Waldpfad
-  desc: Eine kleine Adventure-Welt mit Wiese, Waldrand, Kiste und alter Huette.
+  desc: Eine kleine Adventure-Welt mit Wiese, Waldrand, Beutel, Kiste und alter Huette.
 
 player:
   initialRoom: wiese
@@ -75,6 +75,42 @@ objects:
             value: false
         result:
           text: Du hebst den Deckel. In der Kiste liegt ein kleiner Eisenschluessel.
+
+  beutel:
+    title: Beutel
+    desc: Ein schmaler Lederbeutel liegt zusammengeknotet im Gras.
+    aliases: [beutel, lederbeutel, sack]
+    tags: [container, leather, small]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Beutel ansehen
+        aliases: [beutel ansehen, beutel anschauen]
+        result:
+          text: Das Leder ist trocken, aber noch nicht bruechig.
+      oeffnen:
+        type: open
+        title: Beutel oeffnen
+        aliases: [beutel oeffnen, knoten loesen]
+        availableWhen:
+          all:
+            - ref: beutel
+              path: state.closed
+              equals: true
+        effects:
+          - type: set
+            ref: beutel
+            path: state.closed
+            value: false
+        result:
+          text: Du loest den Knoten. Der Beutel ist leer, aber sauber verarbeitet.
 
   schluessel:
     title: Schluessel
@@ -353,6 +389,8 @@ placement:
   sonne:
     room: wiese
   kiste:
+    room: wiese
+  beutel:
     room: wiese
   schluessel:
     object: kiste

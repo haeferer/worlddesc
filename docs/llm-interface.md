@@ -205,6 +205,166 @@ Wichtig daran:
 - `getNewPerceptionEvents()` liefert nur neue Beobachtungen
 - `performPlayerIntent()` kapselt die eigentliche Weltinteraktion
 
+## Naechster Zwischenschritt: `PlayerWorldView`
+
+Bevor es ueberhaupt ein `LLMWorldView` gibt, ist eine neutralere Spielersicht sinnvoll:
+
+- `WorldRuntime` bleibt die objektive technische API
+- `PlayerWorldView` wird die erste gefilterte Sicht auf dieselbe Runtime
+- das spaetere LLM spricht dann nicht direkt mit der Runtime, sondern mit dieser Spielersicht oder einer kleinen Ableitung davon
+
+Damit bleibt die Reihenfolge sauber:
+
+1. World
+2. Runtime
+3. Player Memory / Perception
+4. PlayerWorldView
+5. spaeter optional LLMWorldView
+
+Ziel dabei:
+
+- die Runtime muss nicht so tun, als waere sie schon eine Spieler-API
+- die Spielersicht wird als eigene fachliche Schicht explizit
+- dieselbe Sicht kann spaeter sowohl fuer UI als auch fuer ein LLM verwendet werden
+
+Eine erste TypeScript-Skizze dafuer liegt jetzt im Modul `packages/world/src/playerView/`.
+Eine minimale lauffaehige Fassade existiert dort ebenfalls bereits.
+
+### Zielbild fuer die Runtime-Schnittstelle
+
+Die Runtime bleibt die objektive Engine-Schnittstelle:
+
+```ts
+interface WorldRuntimePort {
+  getCurrentRoomId(): string;
+  getCurrentRoom(): Room;
+  getPlacement(objectId: string): ObjectPlacement | undefined;
+  getObjectState(objectId: string): Record<string, unknown> | undefined;
+  getKnowledge(): string[];
+  getRoomObjectIds(roomId?: string): string[];
+  getInventoryObjectIds(): string[];
+  getContainedObjectIds(containerId: string): string[];
+  isObjectAccessible(objectId: string): boolean;
+  listAvailableWays(roomId?: string): RuntimeWay[];
+  listAvailableInteractions(objectId: string): RuntimeInteraction[];
+  executeWay(wayId: string, roomId?: string): WayExecution;
+  executeInteraction(objectId: string, interactionId: string): InteractionExecution;
+}
+```
+
+### Zielbild fuer die Spielersicht
+
+Die Spielersicht beschreibt, was auf Spielerseite wirklich konsumierbar ist:
+
+```ts
+interface PlayerWorldView {
+  getCurrentScene(): PlayerSceneView;
+  getKnownObject(objectId: string): KnownObjectView | null;
+  getNewEvents(): PerceptionEvent[];
+  performAction(action: PlayerActionCommand): PlayerActionResultView;
+}
+```
+
+Wichtig:
+
+- `PlayerSceneView` ist eine aufbereitete, gefilterte Szene
+- `KnownObjectView` enthaelt nur bereits bekanntes Objektwissen
+- `PerceptionEvent` trennt neue Beobachtungen von dauerhaftem Weltzustand
+- `performAction()` ist absichtlich spielernah und nicht engine-intern gedacht
+- `performAction()` selbst arbeitet mit strukturierten Kommandos statt Freitext
+- eine optionale Hilfsschicht darf Aktionen deterministisch ueber Aliasse, Titel und Hints aufloesen, ohne schon freie Sprachinterpretation zu sein
+
+### Strukturierte Spieleraktionen
+
+Die eigentliche Player-Schnittstelle soll nicht mit Freitext arbeiten, sondern mit expliziten Kommandos.
+
+Zum Beispiel:
+
+```ts
+type PlayerActionCommand =
+  | {
+      kind: "interaction";
+      objectId: string;
+      actionId: string;
+      additionalText?: string;
+    }
+  | {
+      kind: "way";
+      actionId: string;
+    };
+```
+
+Das ist die passende Zielrichtung fuer die spaetere LLM-Anbindung:
+
+- das LLM liest die Spielersicht
+- das LLM uebersetzt freie Sprache in `PlayerActionCommand`
+- die World-/Player-API fuehrt nur noch strukturierte Befehle aus
+
+Konsequenz:
+
+- Sprachverstehen bleibt ausserhalb der Weltlogik
+- die Engine bleibt deterministisch und testbar
+- Felder wie `additionalText` koennen spaeter Dinge wie Codes, freie Antworten oder kurze Eingaben transportieren
+
+Wichtig dabei:
+
+- `additionalText` ist kein separater Freitext-Kanal in die Weltlogik
+- es ist nur ein strukturierter Parameter an einer normalen Interaktion
+- die Welt selbst entscheidet deklarativ, ob und wie diese Eingabe ausgewertet wird
+
+Fuer die Assistenzschicht ist dabei wichtig:
+
+- die Player-Sicht kann pro Interaktion sichtbar machen, ob `text`, `select` oder `number` erwartet wird
+- bei `select` kann sie die festen Optionen liefern
+- bei `number` kann sie Bereich, Schrittweite und Einheit liefern
+
+### Strukturierte Fehler und Ambiguitaeten
+
+Damit UI oder spaeter ein LLM sinnvoll nachfassen koennen, sollte die Schnittstelle nicht nur Erfolg oder Misserfolg kennen.
+
+Aktueller Zuschnitt:
+
+- `performAction()` liefert bei Fehlschlaegen strukturierte Fehlercodes
+- die optionale Textaufloesung liefert bei Mehrdeutigkeit explizite Kandidaten
+
+Das erlaubt spaeter Rueckfragen wie:
+
+- "Welches Objekt meinst du genau?"
+- "Diese Aktion ist gerade nicht verfuegbar."
+- "Dieses Objekt kannst du im Moment noch nicht erreichen."
+
+### Was in der Spielersicht von Anfang an mitgedacht werden soll
+
+Fuer dieses Projekt sind nicht nur rohe Objekt- und Weglisten wichtig, sondern bewusst auch aufbereitete Texte und neue Ereignisse.
+
+Deshalb enthaelt das Zielmodell bereits:
+
+- `preparedTexts` auf Szenen- und Objektebene
+- `newEvents` auf Szenenebene
+- `knownTexts` und `knownKnowledge` auf Objektebene
+
+Diese Inhalte sind wichtig, damit die spaetere Assistenzschicht nicht rohe Weltdaten selbst in eine spielernahe Darstellung uebersetzen muss.
+
+## Empfohlene Dateiaufteilung
+
+Damit diese Schicht spaeter nicht in eine einzige grosse Datei kippt, ist sie bewusst als kleines Modul vorbereitet:
+
+- `playerView/types.ts`
+- `playerView/memory.ts`
+- `playerView/events.ts`
+- `playerView/scene.ts`
+- `playerView/playerWorldView.ts`
+- `playerView/actionResolution.ts`
+
+Gedachte Verantwortung:
+
+- `types.ts`: oeffentliche Vertragsdefinitionen
+- `memory.ts`: Spielerwissen und Deliverystatus
+- `events.ts`: Wahrnehmungsereignisse und deren Aufbereitung
+- `scene.ts`: Aufbau einer spielerseitigen Szene aus Runtime plus Memory
+- `playerWorldView.ts`: schmale Fassade auf Runtime und Memory
+- `actionResolution.ts`: optionale deterministische Text-zu-Kommando-Aufloesung
+
 ## Persistenz
 
 Die Weltdefinition selbst sollte nicht pro Spieler gespeichert werden.
