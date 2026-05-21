@@ -179,8 +179,6 @@ Eine Interaktion hat aktuell:
 - `aliases`
 - `availableWhen`
 - `input`
-- `onSuccess`
-- `onFailure`
 - `effects`
 - `result`
 
@@ -188,7 +186,7 @@ Interpretation:
 
 - `type` ist die semantische Klasse
 - der eigentliche Ablauf steckt in Bedingungen, Effekten und Resultaten
-- parameterisierte Interaktionen koennen zusaetzlich eine deklarative Eingaberegel und getrennte Erfolgs-/Misserfolgszweige tragen
+- parameterisierte Interaktionen koennen zusaetzlich eine deklarative Eingaberegel mit `cases` und `default` tragen
 
 ### Parameterisierte Interaktionen
 
@@ -199,19 +197,20 @@ Aktuell ist dafuer vorgesehen:
 - `input.mode: text`
 - `input.mode: select`
 - `input.mode: number`
-- optionale Regeln wie `required`, `pattern`, `minLength`, `maxLength` und `equals`
+- optionale Formregeln wie `required`, `pattern`, `minLength` und `maxLength`
 - bei `select` zusaetzlich eine feste `options`-Menge
-- bei `number` zusaetzlich `min`, `max`, `step` und optional `unit`
+- bei `number` zusaetzlich Formgrenzen wie `min`, `max`, `step` und optional `unit`
 - optional `applyInputTo` als deklaratives Ziel fuer den validierten Eingabewert
-- `onSuccess` fuer den Erfolgszweig
-- `onFailure` fuer den Misserfolgszweig
+- `cases` fuer spezifische Treffer, zum Beispiel ueber `equals` oder Zahlenbereiche
+- `default` als Fallback-Zweig
 
 Interpretation:
 
 - die Eingabe kommt ueber `PlayerActionCommand.additionalText`
 - die Runtime prueft diese Eingabe gegen die deklarative Regel
 - ein erfolgreich validierter Eingabewert kann ueber `applyInputTo` in einen normalen State-Pfad geschrieben werden
-- Erfolg und Misserfolg bleiben Teil derselben normalen Interaktionslogik
+- spezifische Werte oder Bereiche koennen ueber `cases` unterschiedlich behandelt werden
+- `default` bleibt der gemeinsame Fallback fuer alles, was keinen Case trifft
 - die Player-Sicht kann damit spaeter genau ausweisen, ob eine Interaktion Freitext, eine feste Auswahl oder einen Zahlenwert erwartet
 
 ### Conditions

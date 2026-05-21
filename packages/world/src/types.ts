@@ -78,8 +78,6 @@ export interface Interaction {
   aliases?: string[];
   availableWhen?: ConditionGroup;
   input?: InteractionInput;
-  onSuccess?: InteractionOutcome;
-  onFailure?: InteractionOutcome;
   effects?: Effect[];
   result?: Result;
 }
@@ -92,16 +90,18 @@ export interface TextInteractionInput {
   minLength?: number;
   maxLength?: number;
   pattern?: string;
-  equals?: string;
   applyInputTo?: InputTarget;
+  cases?: InputCase[];
+  default?: InteractionOutcome;
 }
 
 export interface SelectInteractionInput {
   mode: "select";
   required?: boolean;
   options: SelectOption[];
-  equals?: string;
   applyInputTo?: InputTarget;
+  cases?: InputCase[];
+  default?: InteractionOutcome;
 }
 
 export interface NumberInteractionInput {
@@ -111,8 +111,9 @@ export interface NumberInteractionInput {
   max?: number;
   step?: number;
   unit?: string;
-  equals?: number;
   applyInputTo?: InputTarget;
+  cases?: InputCase[];
+  default?: InteractionOutcome;
 }
 
 export interface SelectOption {
@@ -123,6 +124,15 @@ export interface SelectOption {
 export interface InputTarget {
   ref?: string;
   path?: string;
+}
+
+export interface InputCase {
+  id?: string;
+  equals?: string | number;
+  min?: number;
+  max?: number;
+  effects?: Effect[];
+  result?: Result;
 }
 
 export interface InteractionOutcome {
@@ -227,7 +237,8 @@ export interface InteractionExecution {
   say: string[];
   knowledgeGained: string[];
   triggers: string[];
-  branch: "default" | "success" | "failure";
+  branch: "default" | "case";
+  matchedCaseId?: string;
   state: RuntimeWorldState;
 }
 

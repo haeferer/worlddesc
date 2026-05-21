@@ -375,12 +375,6 @@
         "input": {
           "$ref": "#/$defs/interactionInput"
         },
-        "onSuccess": {
-          "$ref": "#/$defs/interactionOutcome"
-        },
-        "onFailure": {
-          "$ref": "#/$defs/interactionOutcome"
-        },
         "effects": {
           "type": "array",
           "description": "Effekte oder Weltveraenderungen dieser Interaktion.",
@@ -418,11 +412,17 @@
             "pattern": {
               "type": "string"
             },
-            "equals": {
-              "type": "string"
-            },
             "applyInputTo": {
               "$ref": "#/$defs/inputTarget"
+            },
+            "cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/inputCase"
+              }
+            },
+            "default": {
+              "$ref": "#/$defs/interactionOutcome"
             }
           }
         },
@@ -444,11 +444,17 @@
                 "$ref": "#/$defs/selectOption"
               }
             },
-            "equals": {
-              "type": "string"
-            },
             "applyInputTo": {
               "$ref": "#/$defs/inputTarget"
+            },
+            "cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/inputCase"
+              }
+            },
+            "default": {
+              "$ref": "#/$defs/interactionOutcome"
             }
           }
         },
@@ -476,15 +482,51 @@
             "unit": {
               "type": "string"
             },
-            "equals": {
-              "type": "number"
-            },
             "applyInputTo": {
               "$ref": "#/$defs/inputTarget"
+            },
+            "cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/inputCase"
+              }
+            },
+            "default": {
+              "$ref": "#/$defs/interactionOutcome"
             }
           }
         }
       ]
+    },
+    "inputCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "equals": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" }
+          ]
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        }
+      }
     },
     "inputTarget": {
       "type": "object",

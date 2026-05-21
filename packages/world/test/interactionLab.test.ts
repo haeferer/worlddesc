@@ -191,7 +191,7 @@ describe("interaction-lab sample", () => {
 
     const result = runtime.executeInteraction("safe", "codeEingeben", "1111");
 
-    expect(result.branch).toBe("failure");
+    expect(result.branch).toBe("default");
     expect(result.text).toMatch(/nicht der richtige code/i);
     expect(runtime.getObjectState("safe")).toEqual({
       closed: true,
@@ -204,7 +204,8 @@ describe("interaction-lab sample", () => {
 
     const codeResult = runtime.executeInteraction("safe", "codeEingeben", "4862");
 
-    expect(codeResult.branch).toBe("success");
+    expect(codeResult.branch).toBe("case");
+    expect(codeResult.matchedCaseId).toBe("correctCode");
     expect(codeResult.text).toMatch(/entriegelt/i);
     expect(codeResult.say).toEqual(["Im Inneren des Safes klickt ein Bolzen zurueck."]);
     expect(runtime.getObjectState("safe")).toEqual({
@@ -261,12 +262,13 @@ describe("interaction-lab sample", () => {
     const success = runtime.executeInteraction("thermostat", "temperaturSetzen", "37");
     const failure = runtime.executeInteraction("thermostat", "temperaturSetzen", "41");
 
-    expect(success.branch).toBe("success");
+    expect(success.branch).toBe("case");
+    expect(success.matchedCaseId).toBe("validTemperature");
     expect(success.text).toMatch(/gewuenschten wert/i);
     expect(runtime.getObjectState("thermostat")).toEqual({
       targetTemperature: 37
     });
-    expect(failure.branch).toBe("failure");
+    expect(failure.branch).toBe("default");
     expect(failure.text).toMatch(/ausserhalb/i);
     expect(runtime.getObjectState("thermostat")).toEqual({
       targetTemperature: 37
@@ -279,12 +281,13 @@ describe("interaction-lab sample", () => {
     const success = runtime.executeInteraction("modusSchalter", "modusWaehlen", "boom");
     const failure = runtime.executeInteraction("modusSchalter", "modusWaehlen", "party");
 
-    expect(success.branch).toBe("success");
-    expect(success.text).toMatch(/rastet/i);
+    expect(success.branch).toBe("case");
+    expect(success.matchedCaseId).toBe("modeBoom");
+    expect(success.text).toMatch(/auf boom/i);
     expect(runtime.getObjectState("modusSchalter")).toEqual({
       mode: "boom"
     });
-    expect(failure.branch).toBe("failure");
+    expect(failure.branch).toBe("default");
     expect(failure.text).toMatch(/gibt es hier nicht/i);
     expect(runtime.getObjectState("modusSchalter")).toEqual({
       mode: "boom"

@@ -304,21 +304,22 @@ objects:
           mode: text
           required: true
           pattern: '^\d{4}$'
-          equals: "4862"
-        onSuccess:
-          effects:
-            - type: set
-              ref: safe
-              path: state.locked
-              value: false
-            - type: say
-              text: Im Inneren des Safes klickt ein Bolzen zurueck.
-          result:
-            text: Der richtige Code. Der Safe ist jetzt entriegelt.
-            knowledge: [safe_entriegelt]
-        onFailure:
-          result:
-            text: Der Safe bleibt stumm. Das war nicht der richtige Code.
+          cases:
+            - id: correctCode
+              equals: "4862"
+              effects:
+                - type: set
+                  ref: safe
+                  path: state.locked
+                  value: false
+                - type: say
+                  text: Im Inneren des Safes klickt ein Bolzen zurueck.
+              result:
+                text: Der richtige Code. Der Safe ist jetzt entriegelt.
+                knowledge: [safe_entriegelt]
+          default:
+            result:
+              text: Der Safe bleibt stumm. Das war nicht der richtige Code.
       oeffnen:
         type: open
         title: Safe oeffnen
@@ -381,12 +382,30 @@ objects:
               label: Sonder
             - value: boom
               label: Boom
-        onSuccess:
-          result:
-            text: Der Drehschalter rastet in die gewaehlte Position.
-        onFailure:
-          result:
-            text: Diese Schalterposition gibt es hier nicht.
+          cases:
+            - id: modeAus
+              equals: aus
+              result:
+                text: Der Drehschalter rastet auf Aus.
+            - id: modeAn
+              equals: an
+              result:
+                text: Der Drehschalter rastet auf An.
+            - id: modeBereit
+              equals: bereit
+              result:
+                text: Der Drehschalter rastet auf Bereit.
+            - id: modeSonder
+              equals: sonder
+              result:
+                text: Der Drehschalter rastet auf Sonder.
+            - id: modeBoom
+              equals: boom
+              result:
+                text: Der Drehschalter rastet auf Boom.
+          default:
+            result:
+              text: Diese Schalterposition gibt es hier nicht.
 
   thermostat:
     title: Thermostat
@@ -424,12 +443,15 @@ objects:
           max: 40
           step: 0.5
           unit: celsius
-        onSuccess:
-          result:
-            text: Das Thermostat springt auf den gewuenschten Wert.
-        onFailure:
-          result:
-            text: Dieser Wert liegt ausserhalb der moeglichen Skala.
+          cases:
+            - id: validTemperature
+              min: 10
+              max: 40
+              result:
+                text: Das Thermostat springt auf den gewuenschten Wert.
+          default:
+            result:
+              text: Dieser Wert liegt ausserhalb der moeglichen Skala.
 
   messingSchluessel:
     title: Messingschluessel

@@ -214,21 +214,22 @@ Unterstuetzt:
 - `minLength`
 - `maxLength`
 - `pattern`
-- `equals`
 - `options`
 - `min`
 - `max`
 - `step`
 - `unit`
 - `applyInputTo`
-- getrennte `onSuccess`- und `onFailure`-Zweige
+- `cases`
+- `default`
 
 Bedeutung heute:
 
 - `PlayerActionCommand.additionalText` wird an die Runtime weitergereicht
 - die Runtime prueft die Eingabe gegen die deklarative Regel
 - bei Erfolg kann der validierte Wert deklarativ in Objektzustand geschrieben werden
-- je nach Ergebnis werden unterschiedliche `effects` und `result`-Inhalte ausgefuehrt
+- spezifische Eingabewerte oder Zahlenbereiche koennen ueber `cases` mit Matchern wie `equals`, `min` und `max` unterschiedliche `effects` und `result`-Inhalte ausloesen
+- `default` bildet den Fallback fuer nicht getroffene Cases oder ungueltige Eingaben
 
 ### 13. Ortswechsel durch `move` ausfuehren
 

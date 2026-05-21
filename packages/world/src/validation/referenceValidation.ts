@@ -2,6 +2,7 @@ import type {
   Condition,
   ConditionGroup,
   Effect,
+  InputCase,
   Interaction,
   InteractionOutcome,
   ObjectPlacement,
@@ -115,19 +116,6 @@ function validateInteractionReferences(
   for (const [index, effect] of (interaction.effects ?? []).entries()) {
     validateEffectReference(effect, world, `objects.${objectId}.interactions.${interactionId}.effects[${index}]`, errors);
   }
-
-  validateInteractionOutcomeReferences(
-    interaction.onSuccess,
-    world,
-    `objects.${objectId}.interactions.${interactionId}.onSuccess`,
-    errors
-  );
-  validateInteractionOutcomeReferences(
-    interaction.onFailure,
-    world,
-    `objects.${objectId}.interactions.${interactionId}.onFailure`,
-    errors
-  );
 }
 
 function validateConditionGroupReferences(
@@ -266,11 +254,7 @@ function validateInteractionOutcomeReferences(
 
 function validateInteractionInput(interaction: Interaction, world: WorldDocument, location: string, errors: string[]): void {
   if (interaction.effects || interaction.result) {
-    errors.push(`${location} must use onSuccess/onFailure instead of top-level effects/result when input is defined`);
-  }
-
-  if (!interaction.onSuccess && !interaction.onFailure) {
-    errors.push(`${location} must define onSuccess or onFailure when input is defined`);
+    errors.push(`${location} must use input.cases/default instead of top-level effects/result when input is defined`);
   }
 
   if (interaction.input?.mode === "text" && interaction.input.minLength !== undefined && interaction.input.maxLength !== undefined) {
@@ -295,10 +279,6 @@ function validateInteractionInput(interaction: Interaction, world: WorldDocument
       }
       seenValues.add(option.value);
     }
-
-    if (interaction.input.equals !== undefined && !seenValues.has(interaction.input.equals)) {
-      errors.push(`${location}.input.equals must be one of the declared select option values`);
-    }
   }
 
   if (interaction.input?.mode === "number") {
@@ -308,16 +288,6 @@ function validateInteractionInput(interaction: Interaction, world: WorldDocument
 
     if (interaction.input.step !== undefined && interaction.input.step <= 0) {
       errors.push(`${location}.input.step must be greater than 0`);
-    }
-
-    if (interaction.input.equals !== undefined) {
-      if (interaction.input.min !== undefined && interaction.input.equals < interaction.input.min) {
-        errors.push(`${location}.input.equals must not be smaller than min`);
-      }
-
-      if (interaction.input.max !== undefined && interaction.input.equals > interaction.input.max) {
-        errors.push(`${location}.input.equals must not be greater than max`);
-      }
     }
   }
 
@@ -340,4 +310,57 @@ function validateInteractionInput(interaction: Interaction, world: WorldDocument
       );
     }
   }
+
+  for (const [index, inputCase] of (interaction.input?.cases ?? []).entries()) {
+    validateInputCase(inputCase, interaction, world, `${location}.input.cases[${index}]`, errors);
+  }
+
+  validateInteractionOutcomeReferences(interaction.input?.default, world, `${location}.input.default`, errors);
+}
+
+function validateInputCase(
+  inputCase: InputCase,
+  interaction: Interaction,
+  world: WorldDocument,
+  location: string,
+  errors: string[]
+): void {
+  if (inputCase.equals === undefined && inputCase.min === undefined && inputCase.max === undefined) {
+    errors.push(`${location} must define at least one matcher`);
+  }
+
+  if (interaction.input?.mode !== "number" && (inputCase.min !== undefined || inputCase.max !== undefined)) {
+    errors.push(`${location}.min/max are only supported for number inputs`);
+  }
+
+  if (interaction.input?.mode === "number") {
+    if (typeof inputCase.equals === "string") {
+      errors.push(`${location}.equals must be numeric for number inputs`);
+    }
+
+    if (inputCase.min !== undefined && inputCase.max !== undefined && inputCase.min > inputCase.max) {
+      errors.push(`${location}.min must not be greater than max`);
+    }
+  }
+
+  if (interaction.input?.mode !== "number" && typeof inputCase.equals === "number") {
+    errors.push(`${location}.equals must be a string for text/select inputs`);
+  }
+
+  if (interaction.input?.mode === "select" && typeof inputCase.equals === "string") {
+    const allowedValues = new Set(interaction.input.options.map((option) => option.value));
+    if (!allowedValues.has(inputCase.equals)) {
+      errors.push(`${location}.equals must be one of the declared select option values`);
+    }
+  }
+
+  validateInteractionOutcomeReferences(
+    {
+      effects: inputCase.effects,
+      result: inputCase.result
+    },
+    world,
+    location,
+    errors
+  );
 }

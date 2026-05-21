@@ -230,7 +230,7 @@ Stattdessen gilt:
 - `additionalText` ist Teil des normalen `PlayerActionCommand`
 - Interaktionen koennen optional ein deklaratives `input` beschreiben
 - ein validierter Eingabewert kann optional ueber `applyInputTo` in normalen Objektzustand geschrieben werden
-- Erfolg und Misserfolg laufen ueber `onSuccess` und `onFailure`
+- verzweigte Reaktionen auf Eingaben laufen ueber `cases` und `default`
 
 Motivation:
 

@@ -1,7 +1,7 @@
 import type {
+  InputCase,
   InteractionExecution,
   InteractionInput,
-  InteractionOutcome,
   RuntimeInteraction,
   RuntimeWay,
   RuntimeWorldState,
@@ -154,7 +154,7 @@ export class WorldRuntime {
     const say: string[] = [];
     const triggers: string[] = [];
     const branchResult = resolveInteractionOutcome(definition, additionalText);
-    const knowledgeGained = unique(branchResult.outcome?.result?.knowledge ?? definition.result?.knowledge ?? []).filter(
+    const knowledgeGained = unique(branchResult.result?.knowledge ?? definition.result?.knowledge ?? []).filter(
       (knowledge) => !this.stateValue.knowledge.includes(knowledge)
     );
 
@@ -167,16 +167,17 @@ export class WorldRuntime {
       );
     }
 
-    applyEffects(this.world, this.stateValue, branchResult.outcome?.effects ?? definition.effects ?? [], say, triggers);
+    applyEffects(this.world, this.stateValue, branchResult.effects ?? definition.effects ?? [], say, triggers);
     this.stateValue.knowledge.push(...knowledgeGained);
 
     return {
       interaction: { objectId, interactionId, definition },
-      text: branchResult.outcome?.result?.text ?? definition.result?.text,
+      text: branchResult.result?.text ?? definition.result?.text,
       say,
       knowledgeGained,
       triggers,
       branch: branchResult.branch,
+      matchedCaseId: branchResult.matchedCaseId,
       state: this.state
     };
   }
@@ -221,31 +222,50 @@ function resolveInteractionOutcome(
   additionalText: string | undefined
 ): {
   branch: InteractionExecution["branch"];
-  outcome?: InteractionOutcome;
   success: boolean;
   normalizedValue?: string | number;
+  matchedCaseId?: string;
+  effects?: RuntimeInteraction["definition"]["effects"];
+  result?: RuntimeInteraction["definition"]["result"];
 } {
   if (!definition.input) {
     return {
       branch: "default",
-      success: true
+      success: true,
+      effects: definition.effects,
+      result: definition.result
     };
   }
 
   const evaluation = evaluateInteractionInput(definition.input, additionalText);
-  const success = evaluation.success;
-  return success
-    ? {
-        branch: "success",
-        outcome: definition.onSuccess,
-        success: true,
-        normalizedValue: evaluation.normalizedValue
-      }
-    : {
-        branch: "failure",
-        outcome: definition.onFailure,
-        success: false
-      };
+  if (!evaluation.success) {
+    return {
+      branch: "default",
+      success: false,
+      result: definition.input.default?.result,
+      effects: definition.input.default?.effects
+    };
+  }
+
+  const matchedCase = findMatchingInputCase(definition.input, evaluation.normalizedValue);
+  if (matchedCase) {
+    return {
+      branch: "case",
+      success: true,
+      normalizedValue: evaluation.normalizedValue,
+      matchedCaseId: matchedCase.id,
+      effects: matchedCase.effects,
+      result: matchedCase.result
+    };
+  }
+
+  return {
+    branch: "default",
+    success: true,
+    normalizedValue: evaluation.normalizedValue,
+    effects: definition.input.default?.effects,
+    result: definition.input.default?.result
+  };
 }
 
 function evaluateInteractionInput(
@@ -285,10 +305,6 @@ function evaluateTextInteractionInput(
     return { success: false };
   }
 
-  if (input.equals !== undefined && value !== input.equals) {
-    return { success: false };
-  }
-
   return {
     success: true,
     normalizedValue: value
@@ -307,10 +323,6 @@ function evaluateSelectInteractionInput(
 
   const allowedValues = new Set(input.options.map((option) => option.value));
   if (!allowedValues.has(value)) {
-    return { success: false };
-  }
-
-  if (input.equals !== undefined && value !== input.equals) {
     return { success: false };
   }
 
@@ -350,12 +362,51 @@ function evaluateNumberInteractionInput(
     }
   }
 
-  if (input.equals !== undefined && parsed !== input.equals) {
-    return { success: false };
-  }
-
   return {
     success: true,
     normalizedValue: parsed
   };
+}
+
+function findMatchingInputCase(
+  input: InteractionInput,
+  normalizedValue: string | number | undefined
+): InputCase | undefined {
+  if (normalizedValue === undefined) {
+    return undefined;
+  }
+
+  return (input.cases ?? []).find((inputCase) => matchesInputCase(input, inputCase, normalizedValue));
+}
+
+function matchesInputCase(input: InteractionInput, inputCase: InputCase, normalizedValue: string | number): boolean {
+  if (input.mode === "number") {
+    if (typeof normalizedValue !== "number") {
+      return false;
+    }
+
+    if (typeof inputCase.equals === "number" && normalizedValue !== inputCase.equals) {
+      return false;
+    }
+
+    if (inputCase.min !== undefined && normalizedValue < inputCase.min) {
+      return false;
+    }
+
+    if (inputCase.max !== undefined && normalizedValue > inputCase.max) {
+      return false;
+    }
+
+    return inputCase.equals !== undefined || inputCase.min !== undefined || inputCase.max !== undefined;
+  }
+
+  if (typeof normalizedValue !== "string") {
+    return false;
+  }
+
+  if (typeof inputCase.equals === "string") {
+    return normalizedValue === inputCase.equals;
+  }
+
+  return false;
 }
