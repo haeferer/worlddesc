@@ -67,6 +67,7 @@ Interpretation:
 - `loadWorldFile()` kann diese Instanzen jetzt in normale `objects` und `placement` expandieren
 - kleine Objekt-Ueberschreibungen wie Titel oder Startzustand koennen pro Asset-Objekt gesetzt werden
 - benannte Slots koennen externe Weltobjekte gezielt in interne Asset-Container einhaengen
+- Slot-Inhalte duerfen dabei aus normaler World-Platzierung kommen; diese wird beim Expandieren ueberschrieben
 - `loadWorldDocument()` bleibt dagegen bewusst dateilos und expandiert keine Asset-Dateien
 
 ### Rooms

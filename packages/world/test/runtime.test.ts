@@ -159,6 +159,8 @@ describe("WorldRuntime", () => {
       closed: true,
       locked: false
     });
+    expect(runtime.isObjectAccessible("rubin")).toBe(false);
+    expect(runtime.getContainedObjectIds("tresor1")).toEqual(["rubin", "tresor1MessingSchluessel"]);
 
     runtime.executeInteraction("tresor1", "oeffnen");
 
@@ -187,5 +189,42 @@ describe("WorldRuntime", () => {
       locked: false
     });
     expect(runtime.getContainedObjectIds("tresor1")).toEqual(["rubin", "tresor1MessingSchluessel"]);
+  });
+
+  it("keeps two expanded safe instances separate", async () => {
+    const runtime = await loadAssetRuntime("asset-host-double.world.yaml");
+
+    expect(runtime.getRoomObjectIds()).toEqual(["tresor1", "tresor2"]);
+    expect(runtime.getObjectState("tresor1")).toEqual({
+      closed: true,
+      locked: false
+    });
+    expect(runtime.getObjectState("tresor2")).toEqual({
+      closed: true,
+      locked: true
+    });
+
+    runtime.executeInteraction("tresor1", "oeffnen");
+    runtime.executeInteraction("tresor2", "codeEingeben", "4862");
+    runtime.executeInteraction("tresor2", "oeffnen");
+
+    expect(runtime.getContainedObjectIds("tresor1")).toEqual(["rubin", "tresor1MessingSchluessel"]);
+    expect(runtime.getContainedObjectIds("tresor2")).toEqual(["saphir", "tresor2MessingSchluessel"]);
+    expect(runtime.isObjectAccessible("rubin")).toBe(true);
+    expect(runtime.isObjectAccessible("saphir")).toBe(true);
+  });
+
+  it("keeps slot content inaccessible until the owning safe is open", async () => {
+    const runtime = await loadAssetRuntime("asset-host-locked.world.yaml");
+
+    expect(runtime.isObjectAccessible("rubin")).toBe(false);
+    expect(runtime.listAvailableInteractions("rubin")).toEqual([]);
+
+    runtime.executeInteraction("tresor1", "codeEingeben", "4862");
+    expect(runtime.isObjectAccessible("rubin")).toBe(false);
+
+    runtime.executeInteraction("tresor1", "oeffnen");
+
+    expect(runtime.isObjectAccessible("rubin")).toBe(true);
   });
 });

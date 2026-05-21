@@ -51,4 +51,14 @@ describe("loadObjectAssetDocument", () => {
     expect(() => loadObjectAssetDocument(source)).toThrowError(AssetValidationError);
     expect(() => loadObjectAssetDocument(source)).toThrowError(/slots\.contents\.object references unknown object/);
   });
+
+  it("loads assets with portableOnly slots", async () => {
+    const source = await readFixture("./fixtures/portable-slot.object-asset.yaml");
+    const asset = loadObjectAssetDocument(source);
+
+    expect(asset.slots?.contents).toEqual({
+      object: "truhe",
+      portableOnly: true
+    });
+  });
 });

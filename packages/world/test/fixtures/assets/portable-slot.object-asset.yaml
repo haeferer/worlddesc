@@ -1,0 +1,21 @@
+asset:
+  kind: objectAsset
+  id: portableSlotAsset
+  roots:
+    - truhe
+
+interactionTypes: {}
+
+objects:
+  truhe:
+    title: Truhe
+    desc: Eine einfache Truhe.
+
+placement:
+  truhe:
+    offstage: true
+
+slots:
+  contents:
+    object: truhe
+    portableOnly: true

@@ -305,6 +305,7 @@ Unterstuetzt:
 - strukturierte Eintraege mit `asset` und `rootPlacement`
 - kleine `objectOverrides` fuer `title`, `desc` und `state`
 - `slotContents` fuer benannte Asset-Slots
+- optionale `portableOnly`-Regel auf Asset-Slots
 - Schema-Validierung
 - formale ID-Pruefung
 
@@ -319,6 +320,7 @@ Wichtig:
 - ohne expliziten Pfadsuffix wird aktuell konventionsbasiert `assets/<assetId>.object-asset.yaml` relativ zur World-Datei gesucht
 - `loadWorldDocument()` bleibt dagegen bewusst dateilos und prueft diese Referenzen nicht
 - Runtime und Player-Sicht arbeiten danach bereits auf den expandierten Objekten, also zum Beispiel direkt auf `tresor1`
+- Slot-Inhalte duerfen anfangs normal in der World platziert sein; beim Expandieren werden sie in den Slot umplatziert
 
 ### 16. Runtime-Instanz erzeugen
 

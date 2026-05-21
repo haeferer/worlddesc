@@ -52,6 +52,7 @@ Assets koennen jetzt benannte Slots deklarieren.
 Ein Slot beschreibt aktuell:
 
 - `object`: das lokale Asset-Objekt, in das externe Weltobjekte eingehaengt werden
+- optional `portableOnly: true`, wenn der Slot nur portable Weltobjekte aufnehmen soll
 
 Beispiel:
 
@@ -66,6 +67,7 @@ Interpretation:
 - das Asset bestimmt den benannten Verbindungspunkt
 - die World kann spaeter ueber `slotContents` externe Objekte dort einhaengen
 - die interne Zielstruktur bleibt weiterhin unter Kontrolle des Assets
+- ohne `portableOnly` sind auch nicht portable Objekte als Slot-Inhalt erlaubt
 
 ## Validierung
 

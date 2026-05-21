@@ -1,0 +1,27 @@
+world:
+  title: Asset Host Invalid State Override
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  tresor1:
+    asset: safe
+    rootPlacement:
+      room: start
+    objectOverrides:
+      safe:
+        state:
+          locked: offen
+rooms:
+  start:
+    title: Start
+    desc: Ein kleiner Testraum fuer ungueltige State-Overrides.
+objects:
+  notiz:
+    title: Notiz
+    desc: Nur ein Platzhalterobjekt.
+placement:
+  notiz:
+    room: start

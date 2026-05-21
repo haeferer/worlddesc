@@ -25,4 +25,5 @@ export type AssetPlacement = OffstagePlacement | ObjectContainerPlacement;
 
 export interface ObjectAssetSlot {
   object: string;
+  portableOnly?: boolean;
 }

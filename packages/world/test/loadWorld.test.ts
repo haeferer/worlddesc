@@ -157,4 +157,26 @@ placement:
 
     await expect(loadWorldFile(fixturePath)).rejects.toThrowError(/assigns object "rubin" more than once/);
   });
+
+  it("rejects duplicate slot assignments across multiple asset instances", async () => {
+    const fixturePath = resolve(testDir, "./fixtures/asset-host-duplicate-slot-across-instances.world.yaml");
+    const { loadWorldFile } = await import("../src/index.js");
+
+    await expect(loadWorldFile(fixturePath)).rejects.toThrowError(/more than once across asset instances/);
+  });
+
+  it("rejects invalid state overrides against the asset object stateSchema", async () => {
+    const fixturePath = resolve(testDir, "./fixtures/asset-host-invalid-state-override.world.yaml");
+    const { loadWorldFile } = await import("../src/index.js");
+
+    await expect(loadWorldFile(fixturePath)).rejects.toThrowError(/objectOverrides\.safe\.state/);
+    await expect(loadWorldFile(fixturePath)).rejects.toThrowError(/locked/);
+  });
+
+  it("rejects non-portable objects in portableOnly slots", async () => {
+    const fixturePath = resolve(testDir, "./fixtures/portable-slot-host.world.yaml");
+    const { loadWorldFile } = await import("../src/index.js");
+
+    await expect(loadWorldFile(fixturePath)).rejects.toThrowError(/requires portable objects/);
+  });
 });

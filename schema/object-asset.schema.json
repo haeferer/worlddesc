@@ -186,6 +186,9 @@
         "object": {
           "type": "string",
           "minLength": 1
+        },
+        "portableOnly": {
+          "type": "boolean"
         }
       }
     },

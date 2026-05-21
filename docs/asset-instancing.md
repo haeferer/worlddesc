@@ -201,6 +201,8 @@ Die erste kleine Slot-Stufe ist jetzt vorhanden:
 - das Asset kann `slots` deklarieren
 - eine World-Instanz kann `slotContents.<slotId>: [objektIds...]` setzen
 - beim dateibasierten Laden werden diese Weltobjekte auf den internen Ziel-Container des Slots umplatziert
+- ein Slot kann optional `portableOnly: true` verlangen
+- dasselbe Weltobjekt darf nicht mehrfach ueber Slots belegt werden, auch nicht ueber mehrere Asset-Instanzen hinweg
 
 Beispiel:
 
@@ -216,6 +218,16 @@ assetInstances:
 ```
 
 Damit kann `rubin` beim Laden direkt in `tresor1` liegen, obwohl das Objekt selbst aus der World stammt und nicht aus dem Asset.
+
+## Aktuelle Slot-Regeln
+
+Aktuell gelten fuer `slotContents` diese Regeln:
+
+- ein Slot-Inhalt darf anfangs bereits normal in der World platziert sein
+- beim dateibasierten Laden wird diese Startplatzierung durch die Slot-Platzierung ueberschrieben
+- standardmaessig darf ein Slot beliebige Weltobjekte aufnehmen
+- wenn das Asset `portableOnly: true` setzt, muessen alle zugewiesenen Weltobjekte `portable: true` tragen
+- ein Weltobjekt darf nicht mehrfach ueber Slots zugewiesen werden
 
 ## Warum diese Reihenfolge
 

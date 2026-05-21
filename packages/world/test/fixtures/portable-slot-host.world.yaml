@@ -1,0 +1,26 @@
+world:
+  title: Portable Slot Host
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  truhe1:
+    asset: ./assets/portable-slot.object-asset.yaml
+    rootPlacement:
+      room: start
+    slotContents:
+      contents:
+        - statue
+rooms:
+  start:
+    title: Start
+    desc: Ein kleiner Testraum fuer portable Slots.
+objects:
+  statue:
+    title: Statue
+    desc: Eine schwere Steinstatue.
+placement:
+  statue:
+    room: start

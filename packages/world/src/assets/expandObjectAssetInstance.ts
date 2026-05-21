@@ -13,7 +13,23 @@ import type {
   WorldDocument,
   WorldObject
 } from "../types.js";
+import { validateObjectState } from "../validation/stateSchemaValidation.js";
 import { validateWorldSemantics, WorldValidationError } from "../worldValidation.js";
+import Ajv2020 from "ajv/dist/2020.js";
+import type { ErrorObject, ValidateFunction } from "ajv";
+
+type AjvLike = {
+  compile<T>(schema: object): ValidateFunction<T>;
+};
+
+type AjvCtor = new (options?: { allErrors?: boolean; strict?: boolean; useDefaults?: boolean }) => AjvLike;
+
+const Ajv2020Ctor = Ajv2020 as unknown as AjvCtor;
+const stateAjv = new Ajv2020Ctor({
+  allErrors: true,
+  strict: false,
+  useDefaults: true
+});
 
 export function expandObjectAssetInstance(
   world: WorldDocument,
@@ -145,6 +161,12 @@ function applySlotContents(
         ]);
       }
 
+      if (slot.portableOnly && world.objects[objectId].portable !== true) {
+        throw new WorldValidationError([
+          `assetInstances.${instanceId}.slotContents.${slotId} requires portable objects, but "${objectId}" is not portable`
+        ]);
+      }
+
       if (assignedObjectIds.has(objectId)) {
         throw new WorldValidationError([
           `assetInstances.${instanceId}.slotContents assigns object "${objectId}" more than once`
@@ -192,6 +214,30 @@ function validateObjectOverrides(
       throw new WorldValidationError([
         `assetInstances.${instanceId}.objectOverrides.${localObjectId} references unknown asset object "${localObjectId}"`
       ]);
+    }
+  }
+
+  for (const [localObjectId, objectOverride] of Object.entries(objectOverrides ?? {})) {
+    if (!objectOverride.state) {
+      continue;
+    }
+
+    const baseObject = asset.objects[localObjectId];
+    const mergedObject: WorldObject = {
+      ...structuredClone(baseObject),
+      state: {
+        ...(structuredClone(baseObject.state) ?? {}),
+        ...(structuredClone(objectOverride.state) as Record<string, unknown>)
+      }
+    };
+
+    const errors: string[] = [];
+    validateObjectState(`${instanceId}.${localObjectId}`, mergedObject, errors, stateAjv);
+
+    if (errors.length > 0) {
+      throw new WorldValidationError(
+        errors.map((error) => `assetInstances.${instanceId}.objectOverrides.${localObjectId}.state -> ${error}`)
+      );
     }
   }
 }

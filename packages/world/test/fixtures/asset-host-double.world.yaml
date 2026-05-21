@@ -1,0 +1,46 @@
+world:
+  title: Asset Host Double
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  tresor1:
+    asset: safe
+    rootPlacement:
+      room: start
+    objectOverrides:
+      safe:
+        title: Linker Tresor
+        state:
+          locked: false
+    slotContents:
+      contents:
+        - rubin
+  tresor2:
+    asset: safe
+    rootPlacement:
+      room: start
+    objectOverrides:
+      safe:
+        title: Rechter Tresor
+    slotContents:
+      contents:
+        - saphir
+rooms:
+  start:
+    title: Start
+    desc: Zwei Safes stehen nebeneinander.
+objects:
+  rubin:
+    title: Rubin
+    desc: Ein tiefroter Edelstein.
+  saphir:
+    title: Saphir
+    desc: Ein kuehler blauer Edelstein.
+placement:
+  rubin:
+    room: start
+  saphir:
+    room: start
