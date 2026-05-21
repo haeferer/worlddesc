@@ -1,0 +1,92 @@
+asset:
+  kind: objectAsset
+  id: safe
+  title: Einfacher Safe
+  desc: Ein in sich gekapseltes Safe-Asset fuer erste Objektmodule.
+  roots:
+    - safe
+
+interactionTypes:
+  input:
+    title: Eingabe
+  open:
+    title: Oeffnen
+  search:
+    title: Durchsuchen
+
+objects:
+  safe:
+    title: Safe
+    desc: Ein schwerer Stahlsafe mit Tastenfeld.
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+        locked:
+          type: boolean
+          default: true
+    interactions:
+      codeEingeben:
+        type: input
+        title: Code eingeben
+        desc: Du tippst einen vierstelligen Code ein.
+        input:
+          mode: text
+          minLength: 4
+          maxLength: 4
+          pattern: '^\d{4}$'
+          cases:
+            - id: unlock
+              equals: "4862"
+              effects:
+                - type: set
+                  ref: safe
+                  path: state.locked
+                  value: false
+              result:
+                text: Ein leises Klicken verriegelt das Schloss nicht mehr.
+          default:
+            result:
+              text: Nichts passiert.
+      oeffnen:
+        type: open
+        title: Oeffnen
+        availableWhen:
+          all:
+            - ref: safe
+              path: state.locked
+              equals: false
+            - ref: safe
+              path: state.closed
+              equals: true
+        effects:
+          - type: set
+            ref: safe
+            path: state.closed
+            value: false
+        result:
+          text: Die Tuer des Safes schwingt auf.
+      durchsuchen:
+        type: search
+        title: Durchsuchen
+        availableWhen:
+          all:
+            - ref: safe
+              path: state.closed
+              equals: false
+        result:
+          text: Im Safe liegt ein kleiner Messingschluessel.
+
+  messingSchluessel:
+    title: Messingschluessel
+    desc: Ein kleiner Messingschluessel mit abgenutztem Bart.
+    portable: true
+
+placement:
+  safe:
+    offstage: true
+  messingSchluessel:
+    object: safe

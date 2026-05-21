@@ -1,0 +1,21 @@
+asset:
+  kind: objectAsset
+  id: invalidSafe
+  roots:
+    - safe
+
+interactionTypes: {}
+
+objects:
+  safe:
+    title: Safe
+    desc: Ein Safe.
+  messingSchluessel:
+    title: Schluessel
+    desc: Ein Schluessel.
+
+placement:
+  safe:
+    object: messingSchluessel
+  messingSchluessel:
+    offstage: true

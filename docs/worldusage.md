@@ -277,6 +277,22 @@ Damit werden aktuell ausgefuehrt:
 - Schema-Validierung
 - Referenzpruefung
 
+### 15a. Objekt-Asset laden und pruefen
+
+Neben kompletten Worlds kann das Projekt jetzt auch isolierte Objekt-Assets validieren.
+
+Unterstuetzt:
+
+- `loadObjectAsset()` und `loadObjectAssetFile()`
+- `schema/object-asset.schema.json`
+- `npm run checkasset`
+- semantische Validierung von Root-Objekten, interner Platzierung, State-Pfaden und Zyklen
+
+Wichtig:
+
+- Assets sind aktuell ein Authoring-Format
+- sie werden noch nicht in Worlds instanziiert oder zur Laufzeit separat behandelt
+
 ### 16. Runtime-Instanz erzeugen
 
 Eine geladene World kann jetzt in eine Laufzeitinstanz ueberfuehrt werden.

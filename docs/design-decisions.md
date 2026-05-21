@@ -269,6 +269,7 @@ Wichtige Einschraenkung:
 
 - Assets sind zunaechst ein Authoring-Feature, kein eigenes Runtime-Feature
 - nach spaeterem Einmischen soll daraus wieder eine normale Weltstruktur entstehen
+- der erste konkrete Dokumentschnitt ist ein isoliertes `objectAsset` mit `asset`, `interactionTypes`, `objects` und `placement`
 
 ### Player-Sicht soll klein und fachlich aufgeteilt wachsen
 

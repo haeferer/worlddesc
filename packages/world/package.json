@@ -6,10 +6,12 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
+    "checkasset": "./dist/checkAsset.js",
     "checkworld": "./dist/checkWorld.js"
   },
   "scripts": {
     "build": "tsc -b",
+    "checkasset": "node ./dist/checkAsset.js",
     "typecheck": "tsc -b --pretty false",
     "checkworld": "node ./dist/checkWorld.js",
     "test": "vitest run"

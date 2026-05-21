@@ -1,11 +1,17 @@
 {
   "yaml.schemas": {
+    "./schema/object-asset.schema.json": [
+      "*.object-asset.yaml",
+      "*.object-asset.yml"
+    ],
     "./schema/world.schema.json": [
       "*.world.yaml",
       "*.world.yml"
     ]
   },
   "files.associations": {
+    "*.object-asset.yaml": "yaml",
+    "*.object-asset.yml": "yaml",
     "*.world.yaml": "yaml",
     "*.world.yml": "yaml"
   }

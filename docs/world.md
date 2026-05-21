@@ -307,3 +307,5 @@ Das heisst:
 Dieses Dokument beschreibt Begriffe und Modellstruktur.
 
 Technische und architektonische Festlegungen stehen in [design-decisions.md](C:/remoterep/worlddesc/docs/design-decisions.md:1).
+
+Ein erster ausgelagerter Authoring-Baustein fuer Objekte steht in [assets.md](C:/remoterep/worlddesc/docs/assets.md:1).

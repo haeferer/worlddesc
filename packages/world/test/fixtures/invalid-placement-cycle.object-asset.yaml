@@ -1,0 +1,26 @@
+asset:
+  kind: objectAsset
+  id: cycleAsset
+  roots:
+    - rootObjekt
+
+interactionTypes: {}
+
+objects:
+  rootObjekt:
+    title: Root
+    desc: Root.
+  innenA:
+    title: Innen A
+    desc: A.
+  innenB:
+    title: Innen B
+    desc: B.
+
+placement:
+  rootObjekt:
+    offstage: true
+  innenA:
+    object: innenB
+  innenB:
+    object: innenA
