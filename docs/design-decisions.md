@@ -238,6 +238,38 @@ Motivation:
 - dieselben Tests, Rueckgabetypen und Runtime-Pfade bleiben nutzbar
 - das spaetere LLM kann strukturierte Eingaben liefern, ohne selbst Weltlogik auswerten zu muessen
 
+### Asset-Idee startet mit einer kleinen Phase 0
+
+Das Thema ausgelagerter Teilwelten und wiederverwendbarer Objektbausteine wird zunaechst bewusst klein begonnen.
+
+Phase 0 bedeutet:
+
+- zuerst eigene Asset-Dokumente fuer isolierbare Objektbausteine
+- noch keine Instanziierung desselben Assets mehrfach in einer Welt
+- noch kein allgemeines Teilwelt-Merging
+- noch keine Runtime-Isolation
+
+Fokus von Phase 0:
+
+- eigenes Asset-Schema fuer fruehe strukturelle Fehler
+- eigener Asset-Loader mit semantischer interner Validierung
+- interne Referenzen, Placement, State-Pfade und Zyklen muessen schon fuer das Asset allein valide sein
+
+Leitregel:
+
+- ein Asset muss fuer sich allein sinnvoll und valide sein, bevor es spaeter in eine Welt eingebunden wird
+
+Motivation:
+
+- fruehe und bessere Fehlermeldungen
+- klare Trennung zwischen World-Dokumenten und Asset-Dokumenten
+- gute Grundlage fuer spaetere Objekt-Templates und Mehrfachinstanzen
+
+Wichtige Einschraenkung:
+
+- Assets sind zunaechst ein Authoring-Feature, kein eigenes Runtime-Feature
+- nach spaeterem Einmischen soll daraus wieder eine normale Weltstruktur entstehen
+
 ### Player-Sicht soll klein und fachlich aufgeteilt wachsen
 
 Die spaetere Spielersicht soll nicht als einzelne grosse Runtime-Datei entstehen.
