@@ -33,6 +33,12 @@
       "additionalProperties": {
         "$ref": "#/$defs/assetPlacement"
       }
+    },
+    "slots": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/objectAssetSlot"
+      }
     }
   },
   "$defs": {
@@ -158,6 +164,19 @@
       }
     },
     "objectContainerPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "object"
+      ],
+      "properties": {
+        "object": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "objectAssetSlot": {
       "type": "object",
       "additionalProperties": false,
       "required": [

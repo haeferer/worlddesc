@@ -2,6 +2,7 @@ export interface WorldDocument {
   world: WorldMeta;
   player: Player;
   interactionTypes: Record<string, InteractionType>;
+  assetInstances?: Record<string, AssetInstance>;
   rooms: Record<string, Room>;
   objects: Record<string, WorldObject>;
   placement: Record<string, ObjectPlacement>;
@@ -19,6 +20,19 @@ export interface Player {
 export interface InteractionType {
   title: string;
   desc?: string;
+}
+
+export interface AssetInstance {
+  asset: string;
+  rootPlacement: ObjectPlacement;
+  objectOverrides?: Record<string, AssetObjectOverride>;
+  slotContents?: Record<string, string[]>;
+}
+
+export interface AssetObjectOverride {
+  title?: string;
+  desc?: string;
+  state?: Record<string, unknown>;
 }
 
 export interface Room {

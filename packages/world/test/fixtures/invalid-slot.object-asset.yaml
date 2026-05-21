@@ -1,0 +1,20 @@
+asset:
+  kind: objectAsset
+  id: invalidSlotAsset
+  roots:
+    - safe
+
+interactionTypes: {}
+
+objects:
+  safe:
+    title: Safe
+    desc: Ein Safe.
+
+placement:
+  safe:
+    offstage: true
+
+slots:
+  contents:
+    object: missingObject

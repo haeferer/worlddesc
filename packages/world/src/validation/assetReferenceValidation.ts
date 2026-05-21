@@ -24,12 +24,23 @@ export function validateObjectAssetReferences(
 
   validateAssetRoots(asset, errors);
   validateAssetPlacements(asset, errors);
+  validateAssetSlots(asset, errors);
 
   for (const [objectId, object] of Object.entries(asset.objects)) {
     validateObjectReferences(objectId, object, asset, errors, validateObjectState);
   }
 
   return errors;
+}
+
+function validateAssetSlots(asset: ObjectAssetDocument, errors: string[]): void {
+  validateIdGroup("slots", Object.keys(asset.slots ?? {}), errors);
+
+  for (const [slotId, slot] of Object.entries(asset.slots ?? {})) {
+    if (!(slot.object in asset.objects)) {
+      errors.push(`slots.${slotId}.object references unknown object "${slot.object}"`);
+    }
+  }
 }
 
 function validateAssetRoots(asset: ObjectAssetDocument, errors: string[]): void {

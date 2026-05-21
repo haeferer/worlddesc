@@ -271,6 +271,13 @@ Wichtige Einschraenkung:
 - nach spaeterem Einmischen soll daraus wieder eine normale Weltstruktur entstehen
 - der erste konkrete Dokumentschnitt ist ein isoliertes `objectAsset` mit `asset`, `interactionTypes`, `objects` und `placement`
 
+Naechste bevorzugte Ausbaustufe:
+
+- zuerst `assetInstances` in Worlds
+- zuerst nur Root-Platzierung und kleine Objekt-Overrides
+- spaeter gezielte Slots fuer Weltverbindungen wie "was liegt im Safe?"
+- keine freie Innenverdrahtung oder beliebigen Cross-Referenzen in der ersten Instanzierungsphase
+
 ### Player-Sicht soll klein und fachlich aufgeteilt wachsen
 
 Die spaetere Spielersicht soll nicht als einzelne grosse Runtime-Datei entstehen.

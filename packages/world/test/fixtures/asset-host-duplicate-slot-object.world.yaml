@@ -1,0 +1,27 @@
+world:
+  title: Asset Host Duplicate Slot Object
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  tresor1:
+    asset: safe
+    rootPlacement:
+      room: start
+    slotContents:
+      contents:
+        - rubin
+        - rubin
+rooms:
+  start:
+    title: Start
+    desc: Ein kleiner Testraum fuer doppelte Slot-Belegung.
+objects:
+  rubin:
+    title: Rubin
+    desc: Ein tiefroter Edelstein.
+placement:
+  rubin:
+    room: start

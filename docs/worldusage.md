@@ -15,6 +15,7 @@ Aktuell vorhanden:
 - YAML-Parsing
 - TypeScript-Loader
 - Zugriff auf die geladene World als strukturierte Daten
+- dateibasierte Zusatzpruefung fuer referenzierte Asset-Dateien bei `loadWorldFile()`
 
 Relevante Stelle:
 
@@ -57,6 +58,7 @@ Aktuell geprueft:
 - `set.path` zeigt auf einen existierenden Objektpfad
 - `move.ref` zeigt auf ein existierendes Objekt
 - `move.to` zeigt auf gueltige Platzierungsziele
+- `assetInstances`-IDs werden bereits formal mit auf `camelCase` geprueft
 
 ### 4. IDs formal pruefen
 
@@ -65,6 +67,7 @@ IDs werden aktuell auf die vereinbarte `camelCase`-Form geprueft.
 Betroffen sind:
 
 - `interactionTypes`
+- `assetInstances`
 - `rooms`
 - `objects`
 - `ways`
@@ -290,8 +293,32 @@ Unterstuetzt:
 
 Wichtig:
 
-- Assets sind aktuell ein Authoring-Format
-- sie werden noch nicht in Worlds instanziiert oder zur Laufzeit separat behandelt
+- Assets bleiben ein Authoring-Format
+- sie werden beim dateibasierten Laden jetzt aber bereits in Worlds eingebunden und expandiert
+
+### 15b. Asset-Instanzen in Worlds vorbereiten
+
+Das World-Modell kennt jetzt zusaetzlich einen vorbereiteten Bereich `assetInstances`.
+
+Unterstuetzt:
+
+- strukturierte Eintraege mit `asset` und `rootPlacement`
+- kleine `objectOverrides` fuer `title`, `desc` und `state`
+- `slotContents` fuer benannte Asset-Slots
+- Schema-Validierung
+- formale ID-Pruefung
+
+Noch nicht unterstuetzt:
+
+- Laden von Assets direkt aus rein textbasierten World-Strings
+- freie Weltverbindungen jenseits benannter Slots
+
+Wichtig:
+
+- `loadWorldFile()` und `checkworld` pruefen jetzt nicht nur Asset-Dateien, sondern expandieren sie auch in die geladene World
+- ohne expliziten Pfadsuffix wird aktuell konventionsbasiert `assets/<assetId>.object-asset.yaml` relativ zur World-Datei gesucht
+- `loadWorldDocument()` bleibt dagegen bewusst dateilos und prueft diese Referenzen nicht
+- Runtime und Player-Sicht arbeiten danach bereits auf den expandierten Objekten, also zum Beispiel direkt auf `tresor1`
 
 ### 16. Runtime-Instanz erzeugen
 

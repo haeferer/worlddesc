@@ -21,6 +21,13 @@
         "$ref": "#/$defs/interactionType"
       }
     },
+    "assetInstances": {
+      "type": "object",
+      "description": "Vorbereitete Asset-Instanzen fuer spaeteres Authoring-Merging. Werden aktuell noch nicht expandiert.",
+      "additionalProperties": {
+        "$ref": "#/$defs/assetInstance"
+      }
+    },
     "rooms": {
       "type": "object",
       "description": "Alle Raeume der Welt.",
@@ -88,6 +95,54 @@
         "desc": {
           "type": "string",
           "description": "Beschreibung der Bedeutung dieses Typs."
+        }
+      }
+    },
+    "assetInstance": {
+      "type": "object",
+      "description": "Vorbereitete Einbindung eines Objekt-Assets in eine World.",
+      "required": ["asset", "rootPlacement"],
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "type": "string",
+          "description": "Logische Asset-ID oder spaetere Asset-Referenz."
+        },
+        "rootPlacement": {
+          "$ref": "#/$defs/objectPlacement"
+        },
+        "objectOverrides": {
+          "type": "object",
+          "description": "Kleine Ueberschreibungen pro lokalem Asset-Objekt.",
+          "additionalProperties": {
+            "$ref": "#/$defs/assetObjectOverride"
+          }
+        },
+        "slotContents": {
+          "type": "object",
+          "description": "Externe Weltobjekte, die in benannte Slots des Assets eingehaengt werden.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "assetObjectOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "state": {
+          "type": "object",
+          "additionalProperties": true
         }
       }
     },

@@ -1,0 +1,31 @@
+world:
+  title: Asset Host Locked
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  tresor1:
+    asset: safe
+    rootPlacement:
+      room: start
+    slotContents:
+      contents:
+        - rubin
+rooms:
+  start:
+    title: Start
+    desc: Ein kleiner Testraum fuer Asset-Referenzen.
+objects:
+  notiz:
+    title: Notiz
+    desc: Nur ein Platzhalterobjekt.
+  rubin:
+    title: Rubin
+    desc: Ein tiefroter Edelstein.
+placement:
+  notiz:
+    room: start
+  rubin:
+    room: start

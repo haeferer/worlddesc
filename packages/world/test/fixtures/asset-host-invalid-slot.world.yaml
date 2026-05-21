@@ -1,0 +1,31 @@
+world:
+  title: Asset Host Invalid Slot
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  tresor1:
+    asset: safe
+    rootPlacement:
+      room: start
+    slotContents:
+      missingSlot:
+        - rubin
+rooms:
+  start:
+    title: Start
+    desc: Ein kleiner Testraum fuer ungueltige Slots.
+objects:
+  notiz:
+    title: Notiz
+    desc: Nur ein Platzhalterobjekt.
+  rubin:
+    title: Rubin
+    desc: Ein tiefroter Edelstein.
+placement:
+  notiz:
+    room: start
+  rubin:
+    room: start

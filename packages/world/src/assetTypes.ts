@@ -10,6 +10,7 @@ export interface ObjectAssetDocument {
   interactionTypes: Record<string, InteractionType>;
   objects: Record<string, WorldObject>;
   placement: Record<string, AssetPlacement>;
+  slots?: Record<string, ObjectAssetSlot>;
 }
 
 export interface ObjectAssetMeta {
@@ -21,3 +22,7 @@ export interface ObjectAssetMeta {
 }
 
 export type AssetPlacement = OffstagePlacement | ObjectContainerPlacement;
+
+export interface ObjectAssetSlot {
+  object: string;
+}

@@ -3,13 +3,17 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { createWorldRuntime, loadWorldDocument } from "../src/index.js";
+import { createWorldRuntime, loadWorldDocument, loadWorldFile } from "../src/index.js";
 
 const testDir = dirname(fileURLToPath(import.meta.url));
 
 async function loadSampleRuntime() {
   const source = await readFile(resolve(testDir, "../../../sample/test.world.yaml"), "utf8");
   return createWorldRuntime(loadWorldDocument(source));
+}
+
+async function loadAssetRuntime(fixtureName: string) {
+  return createWorldRuntime(await loadWorldFile(resolve(testDir, `./fixtures/${fixtureName}`)));
 }
 
 describe("WorldRuntime", () => {
@@ -145,5 +149,43 @@ describe("WorldRuntime", () => {
 
     expect(runtime.getCurrentRoomId()).toBe("dunklerWald");
     expect(runtime.listAvailableWays().map((item) => item.wayId)).toEqual(["sued"]);
+  });
+
+  it("runs a real expanded tresor1 instance with overrides", async () => {
+    const runtime = await loadAssetRuntime("asset-host.world.yaml");
+
+    expect(runtime.getRoomObjectIds()).toEqual(["notiz", "tresor1"]);
+    expect(runtime.getObjectState("tresor1")).toEqual({
+      closed: true,
+      locked: false
+    });
+
+    runtime.executeInteraction("tresor1", "oeffnen");
+
+    expect(runtime.getObjectState("tresor1")).toEqual({
+      closed: false,
+      locked: false
+    });
+    expect(runtime.listAvailableInteractions("tresor1MessingSchluessel").map((item) => item.interactionId)).toEqual([]);
+    expect(runtime.getContainedObjectIds("tresor1")).toEqual(["rubin", "tresor1MessingSchluessel"]);
+    expect(runtime.isObjectAccessible("rubin")).toBe(true);
+  });
+
+  it("can unlock and open a real expanded tresor1 instance without overrides", async () => {
+    const runtime = await loadAssetRuntime("asset-host-locked.world.yaml");
+
+    expect(runtime.getObjectState("tresor1")).toEqual({
+      closed: true,
+      locked: true
+    });
+
+    runtime.executeInteraction("tresor1", "codeEingeben", "4862");
+    runtime.executeInteraction("tresor1", "oeffnen");
+
+    expect(runtime.getObjectState("tresor1")).toEqual({
+      closed: false,
+      locked: false
+    });
+    expect(runtime.getContainedObjectIds("tresor1")).toEqual(["rubin", "tresor1MessingSchluessel"]);
   });
 });

@@ -24,6 +24,11 @@ describe("loadObjectAssetDocument", () => {
     expect(asset.placement.messingSchluessel).toEqual({
       object: "safe"
     });
+    expect(asset.slots).toEqual({
+      contents: {
+        object: "safe"
+      }
+    });
   });
 
   it("rejects phase 0 roots that are not offstage", async () => {
@@ -38,5 +43,12 @@ describe("loadObjectAssetDocument", () => {
 
     expect(() => loadObjectAssetDocument(source)).toThrowError(AssetValidationError);
     expect(() => loadObjectAssetDocument(source)).toThrowError(/placement cycle detected/);
+  });
+
+  it("rejects slots that target missing asset objects", async () => {
+    const source = await readFixture("./fixtures/invalid-slot.object-asset.yaml");
+
+    expect(() => loadObjectAssetDocument(source)).toThrowError(AssetValidationError);
+    expect(() => loadObjectAssetDocument(source)).toThrowError(/slots\.contents\.object references unknown object/);
   });
 });

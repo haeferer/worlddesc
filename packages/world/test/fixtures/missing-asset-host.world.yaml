@@ -1,0 +1,23 @@
+world:
+  title: Missing Asset Host
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  tresor1:
+    asset: missingSafe
+    rootPlacement:
+      room: start
+rooms:
+  start:
+    title: Start
+    desc: Ein kleiner Testraum fuer fehlende Asset-Referenzen.
+objects:
+  notiz:
+    title: Notiz
+    desc: Nur ein Platzhalterobjekt.
+placement:
+  notiz:
+    room: start

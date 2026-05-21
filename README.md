@@ -18,6 +18,7 @@ Wichtige Dateien:
 - `sample/assets/safe.object-asset.yaml`
 - `docs/world.md`
 - `docs/assets.md`
+- `docs/asset-instancing.md`
 - `docs/llm-interface.md`
 - `docs/worldusage.md`
 - `docs/gameelements.md`

@@ -10,6 +10,7 @@ Es trennt sauber zwischen:
 
 - globaler Weltdefinition
 - Spielerstart
+- vorbereiteten Asset-Instanzen
 - Raeumen als Orte
 - Objekten als benennbare und interagierbare Dinge
 - Platzierung als Aufenthaltsort von Objekten
@@ -47,6 +48,26 @@ Zweck:
 - ein LLM kann Interaktionen fachlich einordnen
 - eine Engine kann gleiche Typen aehnlich behandeln
 - die Objektdefinitionen muessen diese Semantik nicht jedes Mal neu erklaeren
+
+### Asset Instances
+
+`assetInstances` ist jetzt als vorbereiteter World-Bereich vorhanden.
+
+Eine Asset-Instanz hat aktuell:
+
+- `asset`
+- `rootPlacement`
+- `objectOverrides`
+- `slotContents`
+
+Interpretation:
+
+- dieser Bereich bindet Objekt-Assets an eine World an
+- die World kann damit ausdruecken, dass ein Asset wie `safe` unter einer Instanz-ID wie `tresor1` erscheinen soll
+- `loadWorldFile()` kann diese Instanzen jetzt in normale `objects` und `placement` expandieren
+- kleine Objekt-Ueberschreibungen wie Titel oder Startzustand koennen pro Asset-Objekt gesetzt werden
+- benannte Slots koennen externe Weltobjekte gezielt in interne Asset-Container einhaengen
+- `loadWorldDocument()` bleibt dagegen bewusst dateilos und expandiert keine Asset-Dateien
 
 ### Rooms
 

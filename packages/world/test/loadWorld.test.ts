@@ -46,4 +46,115 @@ describe("loadWorldDocument", () => {
     expect(() => loadWorldDocument(source)).toThrowError(WorldValidationError);
     expect(() => loadWorldDocument(source)).toThrowError(/state\.clsoed/);
   });
+
+  it("accepts prepared assetInstances without expanding them yet", () => {
+    const source = `
+world:
+  title: Asset Preview
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  tresor1:
+    asset: safe
+    rootPlacement:
+      room: start
+rooms:
+  start:
+    title: Start
+    desc: Ein leerer Testraum.
+objects:
+  notiz:
+    title: Notiz
+    desc: Nur ein Platzhalterobjekt.
+placement:
+  notiz:
+    room: start
+`;
+
+    const world = loadWorldDocument(source);
+
+    expect(world.assetInstances?.tresor1).toEqual({
+      asset: "safe",
+      rootPlacement: {
+        room: "start"
+      }
+    });
+  });
+
+  it("loads a world file and resolves asset instance references by convention", async () => {
+    const fixturePath = resolve(testDir, "./fixtures/asset-host.world.yaml");
+
+    const { loadWorldFile } = await import("../src/index.js");
+    const world = await loadWorldFile(fixturePath);
+
+    expect(world.assetInstances?.tresor1?.asset).toBe("safe");
+    expect(world.objects.tresor1.title).toBe("Wandsafe");
+    expect(world.objects.tresor1.state).toEqual({
+      closed: true,
+      locked: false
+    });
+    expect(world.objects.tresor1MessingSchluessel.title).toBe("Messingschluessel");
+    expect(world.placement.rubin).toEqual({
+      object: "tresor1"
+    });
+    expect(world.placement.tresor1).toEqual({
+      room: "start"
+    });
+    expect(world.placement.tresor1MessingSchluessel).toEqual({
+      object: "tresor1"
+    });
+    expect(world.objects.tresor1.interactions?.codeEingeben?.input?.cases?.[0]?.effects?.[0]).toMatchObject({
+      ref: "tresor1"
+    });
+  });
+
+  it("rejects missing asset files during file-based world loading", async () => {
+    const fixturePath = resolve(testDir, "./fixtures/missing-asset-host.world.yaml");
+    const { loadWorldFile } = await import("../src/index.js");
+
+    expect(() => loadWorldDocument(`
+world:
+  title: Missing Asset Preview
+player:
+  initialRoom: start
+interactionTypes:
+  examine:
+    title: Untersuchen
+assetInstances:
+  tresor1:
+    asset: missingSafe
+    rootPlacement:
+      room: start
+rooms:
+  start:
+    title: Start
+    desc: Ein leerer Testraum.
+objects:
+  notiz:
+    title: Notiz
+    desc: Nur ein Platzhalterobjekt.
+placement:
+  notiz:
+    room: start
+`)).not.toThrow();
+
+    await expect(loadWorldFile(fixturePath)).rejects.toThrowError(/could not be loaded/);
+  });
+
+  it("rejects unknown slot ids during asset expansion", async () => {
+    const fixturePath = resolve(testDir, "./fixtures/asset-host-invalid-slot.world.yaml");
+    const { loadWorldFile } = await import("../src/index.js");
+
+    await expect(loadWorldFile(fixturePath)).rejects.toThrowError(/references unknown asset slot "missingSlot"/);
+  });
+
+  it("rejects duplicate slot assignments of the same world object", async () => {
+    const fixturePath = resolve(testDir, "./fixtures/asset-host-duplicate-slot-object.world.yaml");
+    const { loadWorldFile } = await import("../src/index.js");
+
+    await expect(loadWorldFile(fixturePath)).rejects.toThrowError(/assigns object "rubin" more than once/);
+  });
 });

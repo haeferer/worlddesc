@@ -2,7 +2,8 @@ import { access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { resolve } from "node:path";
 
-import { loadWorldFile, WorldValidationError } from "./loadWorld.js";
+import { loadWorldFile } from "./loadWorld.js";
+import { WorldValidationError } from "./worldValidation.js";
 
 async function main(): Promise<void> {
   const inputPaths = process.argv.slice(2);

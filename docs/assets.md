@@ -17,6 +17,7 @@ Ein Objekt-Asset nutzt aktuell:
 - `interactionTypes` fuer lokale Interaktionstypen
 - `objects` fuer die enthaltenen Weltobjekte
 - `placement` fuer die interne Platzierung
+- `slots` fuer benannte Einhaengepunkte externer Weltobjekte
 
 Beispiel:
 
@@ -43,6 +44,28 @@ Innerhalb eines Assets sind in Phase 0 nur zwei Platzierungsarten erlaubt:
 - `object: <objektId>`
 
 `room` und `inventory` sind noch nicht erlaubt, weil Assets aktuell vollstaendig isoliert validiert werden.
+
+## Slots
+
+Assets koennen jetzt benannte Slots deklarieren.
+
+Ein Slot beschreibt aktuell:
+
+- `object`: das lokale Asset-Objekt, in das externe Weltobjekte eingehaengt werden
+
+Beispiel:
+
+```yaml
+slots:
+  contents:
+    object: safe
+```
+
+Interpretation:
+
+- das Asset bestimmt den benannten Verbindungspunkt
+- die World kann spaeter ueber `slotContents` externe Objekte dort einhaengen
+- die interne Zielstruktur bleibt weiterhin unter Kontrolle des Assets
 
 ## Validierung
 

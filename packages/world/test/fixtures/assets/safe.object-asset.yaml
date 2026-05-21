@@ -2,7 +2,7 @@ asset:
   kind: objectAsset
   id: safe
   title: Einfacher Safe
-  desc: Ein in sich gekapseltes Safe-Asset fuer erste Objektmodule.
+  desc: Ein in sich gekapseltes Safe-Asset fuer Test-Expansion.
   roots:
     - safe
 
@@ -32,7 +32,6 @@ objects:
       codeEingeben:
         type: input
         title: Code eingeben
-        desc: Du tippst einen vierstelligen Code ein.
         input:
           mode: text
           minLength: 4
@@ -46,11 +45,6 @@ objects:
                   ref: safe
                   path: state.locked
                   value: false
-              result:
-                text: Ein leises Klicken verriegelt das Schloss nicht mehr.
-          default:
-            result:
-              text: Nichts passiert.
       oeffnen:
         type: open
         title: Oeffnen
@@ -67,18 +61,6 @@ objects:
             ref: safe
             path: state.closed
             value: false
-        result:
-          text: Die Tuer des Safes schwingt auf.
-      durchsuchen:
-        type: search
-        title: Durchsuchen
-        availableWhen:
-          all:
-            - ref: safe
-              path: state.closed
-              equals: false
-        result:
-          text: Im Safe liegt ein kleiner Messingschluessel.
 
   messingSchluessel:
     title: Messingschluessel

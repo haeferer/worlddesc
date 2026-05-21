@@ -22,6 +22,7 @@ export function validateWorldReferences(
   const errors: string[] = [];
 
   validateIdGroup("interactionTypes", Object.keys(world.interactionTypes), errors);
+  validateIdGroup("assetInstances", Object.keys(world.assetInstances ?? {}), errors);
   validateIdGroup("rooms", Object.keys(world.rooms), errors);
   validateIdGroup("objects", Object.keys(world.objects), errors);
   validateIdGroup("placement", Object.keys(world.placement), errors);
@@ -31,6 +32,18 @@ export function validateWorldReferences(
   }
 
   validateObjectPlacements(world, errors);
+
+  for (const [instanceId, assetInstance] of Object.entries(world.assetInstances ?? {})) {
+    validatePlacementTargetReference(assetInstance.rootPlacement, world, `assetInstances.${instanceId}.rootPlacement`, errors);
+
+    for (const [slotId, objectIds] of Object.entries(assetInstance.slotContents ?? {})) {
+      for (const [index, objectId] of objectIds.entries()) {
+        if (!(objectId in world.objects)) {
+          errors.push(`assetInstances.${instanceId}.slotContents.${slotId}[${index}] references unknown object "${objectId}"`);
+        }
+      }
+    }
+  }
 
   for (const [objectId, object] of Object.entries(world.objects)) {
     validateObjectReferences(objectId, object, world, errors, validateObjectState);
