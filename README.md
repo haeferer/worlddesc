@@ -14,6 +14,7 @@ Wichtige Dateien:
 - `schema/world.schema.json`
 - `sample/test.world.yaml`
 - `docs/world.md`
+- `docs/llm-interface.md`
 - `docs/worldusage.md`
 - `docs/gameelements.md`
 - `docs/design-decisions.md`

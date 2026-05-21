@@ -363,6 +363,9 @@ Diese Dinge sind fachlich vorbereitet oder angedacht, aber aktuell noch nicht al
 - generische Inventaroperationen wie `pickup` oder `drop`
 - automatische Ableitung sprachlicher Standardinteraktionen fuer Moves
 - Engine-Ausfuehrung von `trigger`
+- getrennte Player-Memory- oder Perception-Schicht
+- spielerperspektivische LLM-Fassade auf die Runtime
+- Persistenz von Runtime plus Spielerwissen
 
 ## Kurzfazit
 

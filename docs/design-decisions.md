@@ -141,6 +141,47 @@ Aktueller Stand:
 - Moves ins Inventar setzen `portable: true` voraus
 - Objekt-in-Objekt-Zyklen werden verhindert
 
+### Das LLM steht zwischen Spieler und World-Interface
+
+Das geplante LLM ist nicht Teil der kanonischen Welt und auch nicht die Welt-Engine.
+
+Seine Rolle ist:
+
+- freie menschliche Eingaben aufnehmen
+- diese in sinnvolle Weltabsichten uebersetzen
+- Antworten der Welt natuerlicher und atmosphaerischer zurueckgeben
+
+Wichtige Einschraenkung:
+
+- das LLM bekommt keinen direkten Zugriff auf rohe World-Daten
+- das LLM darf die Welt nur ueber eine kontrollierte Interface-Schicht in Spielerperspektive sehen
+
+Leitprinzip:
+
+- das LLM soll verborgenes Weltwissen nicht aktiv unterdruecken muessen
+- das Interface soll dafuer sorgen, dass es dieses Wissen gar nicht erst erhaelt
+
+Motivation:
+
+- das LLM kann sich staerker auf gute, atmosphaerische und hilfreiche Sprache konzentrieren
+- das Risiko von unbeabsichtigtem Cheaten oder Leaken sinkt
+
+### Spielerwahrnehmung wird von World und Runtime getrennt
+
+Objektive Weltwahrheit, laufender Weltzustand und Spielerwissen sollen nicht vermischt werden.
+
+Deshalb unterscheiden wir konzeptionell:
+
+- `World`: objektive Weltbeschreibung
+- `Runtime`: aktueller technischer Weltzustand
+- `PlayerMemory` oder `Perception`: bereits gezeigte und bekannte Informationen
+
+Konsequenz:
+
+- "wurde dieser Text schon gezeigt?" gehoert nicht in die World
+- "weiss der Spieler das schon?" gehoert nicht in den normalen Objektzustand
+- diese Informationen sollen spaeter in einer separaten Memory- oder Perception-Schicht liegen
+
 ### IDs folgen aktuell `camelCase`
 
 Die kanonische Schreibweise fuer IDs ist derzeit `camelCase`.
@@ -158,3 +199,16 @@ Das gilt fuer:
 
 - Ob wir zusaetzliche spezialisierte Komfortbedingungen fuer Placement brauchen
 - Ob `ref` spaeter neben Objekten auch `rooms` oder globale `world`-Werte adressieren darf
+
+## Aktueller Fokus
+
+Die LLM-Integration ist aktuell noch nicht das Primaerthema der Umsetzung.
+
+Der derzeitige Schwerpunkt liegt auf:
+
+- dem Design der Weltlogik
+- dem Ausbau der Runtime-Mechaniken
+- einer sauberen, testbaren World-Interface-Schicht
+- der Vorbereitung einer klaren Persistenzbasis
+
+Die LLM-Architektur dient im Moment vor allem als Leitplanke fuer spaetere Entscheidungen, damit World, Runtime und Spielerperspektive von Anfang an sauber getrennt bleiben.
