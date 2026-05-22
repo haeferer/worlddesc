@@ -21,6 +21,23 @@ Vor dem ersten LLM-Versuch sollte die Welt fuer das LLM so erfahrbar werden, das
 - bei Ambiguitaeten nicht raten muss
 - bei Fehlschlaegen stabile, maschinenlesbare Rueckgaben erhaelt
 
+Zusaetzlich gilt:
+
+- das LLM soll spaeter nicht "klug ueber die Welt" sein
+- es soll nur "klug in der sprachlichen Vermittlung" sein
+
+Das LLM ist damit eher:
+
+- Begleiter
+- Narrator
+- Fuehrhund auf Spielerseite
+
+aber nicht:
+
+- Co-Autor der Weltlogik
+- versteckter Spielleiter
+- Quelle neuer kanonischer Weltfakten
+
 ## 1. PlayerWorldView als eigentliche LLM-Schnittstelle
 
 Der wichtigste offene Punkt ist die Frage:
@@ -43,25 +60,75 @@ Ziel:
 
 - Das LLM soll nicht aus Rohdaten selbst herausraten muessen, was gerade relevant ist.
 
+Aktueller Fortschritt:
+
+- die Player-Szene kann jetzt sichtbare Raumobjekte, Inventarobjekte und bekannte, gerade nicht sichtbare Objekte getrennt liefern
+- zusaetzlich gibt es eine kanonische Aktionsliste pro Szene
+
 ## 2. Klare Aktionsoberflaeche
 
 Vor dem ersten LLM-Versuch sollte die Aktionsform wirklich stabil sein.
 
-Im Kern ist das schon gut angelegt:
+Die wichtige Leitfrage ist dabei nicht nur:
 
-- `interaction`
-- `way`
-- `additionalText`
+- welche Aktionen sind gerade moeglich
 
-Noch zu schaerfen ist:
+sondern auch:
 
-- wie das LLM eine Aktion eindeutig adressiert
-- ob eine Aktion immer ueber `actionId` geht oder ueber eine View-spezifische `commandId`
-- ob Objekt- und Wegaktionen in einer gemeinsamen Aktionsliste landen sollen
+- welche Aktionsform darf das LLM grundsaetzlich fuellen
+
+Die bevorzugte Richtung ist jetzt:
+
+- keine enge Whitelist nur "sinnvoller" Aktionen
+- stattdessen eine breitere, point-and-click-aehnliche Aktionsgrammatik
+- plus getrennte Hinweise aus der Szene, die dem LLM beim Fuellen helfen
+
+Die Grundidee ist also:
+
+1. `Action grammar`
+
+- beschreibt die allgemeine Form einer Aktion
+- darf auch Versuche ausdruecken, die spaeter scheitern oder lustige Fehlschlaege erzeugen
+
+2. `Affordance hints`
+
+- beschreiben, was in der aktuellen Szene sichtbar, naheliegend oder aktuell verfuegbar ist
+- helfen dem LLM beim Fuellen der Struktur
+- sind aber nicht dieselbe Sache wie die Aktionsgrammatik selbst
+
+Damit bleibt die Rollenverteilung sauber:
+
+- das LLM hilft beim Formulieren der Spielerabsicht
+- die Engine entscheidet danach deterministisch, was davon geht, was nicht geht und was nur eine Rueckmeldung wie "Das geht hier nicht" erzeugt
+
+### Empfohlene allgemeine Aktionsgrammatik
+
+Die bevorzugte Zielrichtung ist derzeit:
+
+- `verb`
+- `object1`
+- optional `object2`
+- optional `input`
+
+Das deckt Point-and-Click-artige Faelle gut ab:
+
+- `oeffnen(tresor1)`
+- `benutzen(schluessel, tuer)`
+- `legen(tuer, inventar)`
+- `codeEingeben(tresor1, "4862")`
+
+Noch offen ist, wie diese Form spaeter exakt getypt wird. Aber fachlich ist die Richtung damit klarer als beim heutigen engeren `interaction`-/`way`-Schnitt.
+
+Eine erste TypeScript-Skizze fuer dieses Zielmodell liegt jetzt in `packages/world/src/playerView/intentTypes.ts`.
 
 Ziel:
 
 - Das LLM soll nie raten muessen, wie ein Funktionsaufruf aufgebaut ist.
+
+Zusaetzlich:
+
+- das LLM soll nicht schon vorab nur "richtige" Kombinationen serviert bekommen
+- die Welt darf auch auf unpassende, lustige oder unmoegliche Versuche deterministisch reagieren
 
 ## 3. Input-Metadaten fuer Aktionen
 
@@ -104,6 +171,11 @@ Ziel:
 
 - Das LLM soll systematisch nachfragen oder umplanen koennen, statt Fehlersituationen sprachlich zu improvisieren.
 
+Aktueller Fortschritt:
+
+- die Player-Sicht liefert jetzt bereits strukturierte Fehler mit `code`, `kind` und `retryable`
+- eingabebezogene Fehler koennen zusaetzlich `followUp` und formale Input-Details liefern
+
 ## 5. Ereignis- und Wahrnehmungsmodell
 
 Fuer das spaetere LLM-Verhalten ist entscheidend, wie Weltveraenderungen rueckgemeldet werden.
@@ -123,6 +195,11 @@ Ziel:
   - was ist neu wahrnehmbar
   - was sollte dem Menschen mitgeteilt werden
 
+Aktueller Fortschritt:
+
+- erfolgreiche Player-Aktionen liefern jetzt zusaetzlich eine kompakte Turn-Zusammenfassung
+- diese enthaelt derzeit unter anderem `primaryResultText`, `newlyVisibleObjectIds`, `newlyAvailableActionIds` und `newlyKnownKnowledge`
+
 ## 6. Sichtbarkeit, Zugaenglichkeit und Bekanntheit
 
 Das sind drei verwandte, aber unterschiedliche Dinge.
@@ -138,6 +215,11 @@ Beispiel:
 - Ein Rubin im geschlossenen Tresor kann unbekannt, spaeter bekannt, aber noch unzugaenglich, und erst danach zugaenglich sein.
 
 Wenn diese Begriffe nicht sauber getrennt sind, beginnt das LLM spaeter leicht zu raten.
+
+Aktueller Fortschritt:
+
+- die Player-Sicht unterscheidet jetzt explizit zwischen `visible`, `inventory` und nur noch `known`
+- zusaetzlich wird jetzt ein `accessibilityReason` wie `visible`, `inventory`, `closed-container`, `other-room` oder `offstage` mitgeliefert
 
 ## 7. Wissens- und Memory-Modell
 
@@ -168,6 +250,12 @@ Ziel:
 
 - Das LLM kann Sprache veredeln, ohne selbst Weltwahrheit zu erzeugen.
 
+Das ist zentral fuer die Philosophie:
+
+- Die Engine liefert die logische Wahrheit.
+- Das LLM liefert die emotionale und stilistische Vermittlung.
+- Beides soll bewusst getrennt bleiben.
+
 ## 9. Kanonische Handlungsliste pro Szene
 
 Ein sehr wichtiger Punkt fuer einen ersten LLM-Versuch:
@@ -188,6 +276,24 @@ Mit Input-Metadaten dazu.
 Ziel:
 
 - Das LLM mappt Nutzerintention auf eine kleine vorhandene Aktionsmenge, statt die Welt selbst kombinatorisch zu durchsuchen.
+
+Aktueller Fortschritt:
+
+- `PlayerSceneView` kann jetzt bereits `availableActions` als vereinheitlichte Liste aus Wegen und Objektinteraktionen liefern
+- jede Aktion traegt eine stabile `commandId` und den dazugehoerigen strukturierten Befehl
+
+Naechste Schaerfung:
+
+- die heutige Aktionsliste ist ein guter Szenenhinweis
+- vor dem ersten LLM-Versuch sollte sie aber bewusst von der allgemeineren Aktionsgrammatik getrennt werden
+
+Aktueller Fortschritt:
+
+- aus der Szene laesst sich jetzt zusaetzlich eine `intent surface` ableiten
+- sie bietet Verben, Ziele und vorgeschlagene Kandidaten als Hint-Schicht
+- sie ist bewusst nicht dieselbe Sache wie die allgemeinere Aktionsgrammatik
+- die Verben werden jetzt nicht mehr nur aus aktuellen Szenenaktionen abgeleitet
+- stattdessen gibt es ein kleines festes Verb-Inventar, auf das konkrete Szenenaktionen gemappt werden
 
 ## 10. Beobachtbare Zustandsaenderungen
 
@@ -275,5 +381,11 @@ Vor dem ersten LLM-Schritt geht es nicht primaer um mehr Weltlogik, sondern um:
 - klare Aktionen
 - klare Rueckgaben
 - klare Grenzen dessen, was das LLM wissen und tun darf
+
+Und ueber allem steht:
+
+- Die World-Engine ist der strikte Handlungsstrang.
+- Das LLM ist die sprachlich-emotionale Begleitung dieses Handlungsstrangs.
+- Das LLM macht die Welt dichter erfahrbar, aber nicht weniger deterministisch.
 
 Wenn diese Dinge scharf genug sind, wird der erste LLM-Versuch deutlich aussagekraeftiger und wesentlich weniger chaotisch.

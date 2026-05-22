@@ -166,6 +166,12 @@ Motivation:
 - das LLM kann sich staerker auf gute, atmosphaerische und hilfreiche Sprache konzentrieren
 - das Risiko von unbeabsichtigtem Cheaten oder Leaken sinkt
 
+Zusaetzliche Leitregel:
+
+- die World-Engine bleibt der strikte, deterministische Handlungsstrang
+- das LLM ist nur die sprachlich-emotionale Vermittlung dieses Handlungsstrangs
+- das LLM erzeugt keine kanonische Weltwahrheit, sondern nur eine reichere Darstellung derselben Spielersicht
+
 ### Spielerwahrnehmung wird von World und Runtime getrennt
 
 Objektive Weltwahrheit, laufender Weltzustand und Spielerwissen sollen nicht vermischt werden.
@@ -199,6 +205,17 @@ Motivation:
 - die Runtime muss nicht gleichzeitig Engine- und Spieler-API sein
 - aufbereitete Texte und neue Ereignisse werden von Anfang an als eigener Teil dieser Sicht geplant
 
+Zusaetzlich wird in der Player-Sicht jetzt explizit getrennt zwischen:
+
+- `visible`: Objekt ist in der aktuellen Szene sichtbar
+- `inventory`: Objekt ist getragen und damit in einer eigenen, zugaenglichen Besitzsicht
+- `known`: Objekt ist bekannt, aber aktuell nicht sichtbar
+
+Und getrennt davon:
+
+- `accessible`: kann gerade damit interagiert werden
+- `accessibilityReason`: warum das Objekt gerade sichtbar oder blockiert ist
+
 ### Spieleraktionen sollen strukturiert in die Engine gehen
 
 Die eigentliche Player- und spaetere LLM-nahe Schnittstelle soll keine freien Texte direkt an die Weltlogik uebergeben.
@@ -220,6 +237,23 @@ Konsequenz:
 - Mehrdeutigkeiten sollen nicht heimlich erraten werden
 - stattdessen sollen sie als strukturierte Kandidaten sichtbar werden
 - Fehlschlaege sollen ebenfalls mit stabilen Fehlercodes an die aufrufende Schicht zurueckgehen
+
+Zusaetzliche Leitregel:
+
+- das LLM soll nicht nur aus einer engen Liste "richtiger" Aktionen waehlen
+- es soll eine allgemeinere, point-and-click-aehnliche Aktionsstruktur fuellen duerfen
+- die Engine bleibt danach der deterministische Richter ueber Erfolg, Fehlschlag oder "Das geht hier nicht"
+
+Das trennt:
+
+- `Action grammar`: welche Form eine Aktion grundsaetzlich haben darf
+- `Affordance hints`: welche Objekte, Wege und naheliegenden Aktionen die Szene aktuell zeigt
+
+Zusaetzlich gilt jetzt:
+
+- zwischen allgemeiner Aktionsgrammatik und konkreten Szenenaktionen liegt eine kleine kanonische Verbschicht
+- diese Verben sind ein festes Inventar fuer die spaetere LLM-Seite
+- die aktuelle Szene markiert nur, welche dieser Verben gerade durch konkrete Aktionen nahegelegt werden
 
 ### Strukturierte Eingabe bleibt Teil normaler Interaktionen
 

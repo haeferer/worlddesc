@@ -30,6 +30,11 @@ export function rememberObjectText(memory: PlayerMemory, objectId: string, text:
   }
 }
 
+export function markObjectSeen(memory: PlayerMemory, objectId: string, roomId: string): void {
+  const objectMemory = ensureKnownObjectMemory(memory, objectId);
+  objectMemory.lastSeenAt = roomId;
+}
+
 export function rememberObjectKnowledge(memory: PlayerMemory, objectId: string, knowledge: string[]): void {
   const objectMemory = ensureKnownObjectMemory(memory, objectId);
   for (const item of knowledge) {

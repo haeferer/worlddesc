@@ -20,6 +20,7 @@ Wichtige Dateien:
 - `docs/assets.md`
 - `docs/asset-instancing.md`
 - `docs/llm-interface.md`
+- `docs/action-feedback.md`
 - `docs/pre-llm-topics.md`
 - `docs/worldusage.md`
 - `docs/gameelements.md`

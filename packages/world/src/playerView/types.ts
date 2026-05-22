@@ -9,6 +9,7 @@ import type {
   WayExecution,
   WorldDocument
 } from "../types.js";
+import type { PlayerIntentSurfaceView } from "./intentTypes.js";
 
 export interface WorldRuntimePort {
   readonly world: WorldDocument;
@@ -63,14 +64,37 @@ export interface PreparedTextBlock {
   objectId?: string;
 }
 
+export type PlayerObjectPerceptionKind = "visible" | "inventory" | "known";
+export type PlayerObjectAccessibilityReason =
+  | "visible"
+  | "inventory"
+  | "closed-container"
+  | "other-room"
+  | "offstage"
+  | "unknown";
+
 export interface PlayerSceneObjectView {
   objectId: string;
   title: string;
   shortDescription?: string;
+  perception: PlayerObjectPerceptionKind;
+  visible: boolean;
   accessible: boolean;
+  accessibilityReason: PlayerObjectAccessibilityReason;
   availableInteractionIds: string[];
   availableInteractions: AvailableInteractionView[];
   preparedTexts: PreparedTextBlock[];
+}
+
+export interface KnownSceneObjectView {
+  objectId: string;
+  title: string;
+  perception: PlayerObjectPerceptionKind;
+  currentlyAccessible: boolean;
+  accessibilityReason: PlayerObjectAccessibilityReason;
+  lastSeenAt?: string;
+  knownKnowledge: string[];
+  knownTexts: string[];
 }
 
 export interface PlayerWayView {
@@ -85,14 +109,22 @@ export interface PlayerSceneView {
   description: string;
   preparedTexts: PreparedTextBlock[];
   objects: PlayerSceneObjectView[];
+  inventoryObjects: PlayerSceneObjectView[];
+  knownButNotVisibleObjects: KnownSceneObjectView[];
   ways: PlayerWayView[];
   inventoryObjectIds: string[];
   newEvents: PerceptionEvent[];
+  availableActions: PlayerActionOptionView[];
 }
 
 export interface KnownObjectView {
   objectId: string;
   title: string;
+  perception: PlayerObjectPerceptionKind;
+  currentlyVisible: boolean;
+  currentlyAccessible: boolean;
+  accessibilityReason: PlayerObjectAccessibilityReason;
+  lastSeenAt?: string;
   knownTexts: string[];
   knownKnowledge: string[];
   availableInteractionIds: string[];
@@ -104,6 +136,30 @@ export interface AvailableInteractionView {
   title: string;
   desc?: string;
   input?: InteractionInputView;
+}
+
+export type PlayerActionOptionView = PlayerInteractionOptionView | PlayerWayOptionView;
+
+export interface PlayerInteractionOptionView {
+  commandId: string;
+  kind: "interaction";
+  objectId: string;
+  objectTitle: string;
+  actionId: string;
+  interactionType?: string;
+  title: string;
+  desc?: string;
+  input?: InteractionInputView;
+  command: PlayerInteractionCommand;
+}
+
+export interface PlayerWayOptionView {
+  commandId: string;
+  kind: "way";
+  actionId: string;
+  title: string;
+  desc: string;
+  command: PlayerWayCommand;
 }
 
 export type InteractionInputView = TextInteractionInputView | SelectInteractionInputView | NumberInteractionInputView;
@@ -155,13 +211,36 @@ export type PlayerActionFailureCode =
   | "unknown-action"
   | "object-not-accessible"
   | "action-not-available"
+  | "missing-input"
+  | "invalid-input"
   | "execution-failed";
+
+export type PlayerActionFailureKind = "unknown" | "availability" | "input" | "execution";
+
+export interface PlayerActionFollowUp {
+  kind: "provide-input" | "correct-input";
+  prompt: string;
+  input?: InteractionInputView;
+}
+
+export interface PlayerActionFailureDetails {
+  expectedInput?: InteractionInputView;
+  providedValue?: string;
+  allowedValues?: string[];
+  min?: number;
+  max?: number;
+  step?: number;
+}
 
 export interface PlayerActionFailure {
   code: PlayerActionFailureCode;
+  kind: PlayerActionFailureKind;
   message: string;
+  retryable: boolean;
   objectId?: string;
   actionId?: string;
+  followUp?: PlayerActionFollowUp;
+  details?: PlayerActionFailureDetails;
 }
 
 export interface PlayerActionResultView {
@@ -170,10 +249,23 @@ export interface PlayerActionResultView {
   events: PerceptionEvent[];
   scene: PlayerSceneView;
   failure?: PlayerActionFailure;
+  turn?: PlayerTurnSummaryView;
+}
+
+export interface PlayerTurnSummaryView {
+  primaryResultText?: string;
+  newEventIds: string[];
+  newlyVisibleObjectIds: string[];
+  newlyInventoryObjectIds: string[];
+  newlyKnownObjectIds: string[];
+  newlyAccessibleObjectIds: string[];
+  newlyAvailableActionIds: string[];
+  newlyKnownKnowledge: string[];
 }
 
 export interface PlayerWorldView {
   getCurrentScene(): PlayerSceneView;
+  getIntentSurface(): PlayerIntentSurfaceView;
   getKnownObject(objectId: string): KnownObjectView | null;
   getNewEvents(): PerceptionEvent[];
   performAction(action: PlayerActionCommand): PlayerActionResultView;

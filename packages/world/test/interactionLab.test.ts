@@ -137,6 +137,10 @@ describe("interaction-lab sample", () => {
     expect(knownWhenHidden).toEqual(
       expect.objectContaining({
         objectId: "silberRing",
+        perception: "known",
+        currentlyVisible: false,
+        currentlyAccessible: false,
+        accessibilityReason: "closed-container",
         availableInteractionIds: []
       })
     );
@@ -240,6 +244,18 @@ describe("interaction-lab sample", () => {
 
     expect(result.accepted).toBe(true);
     expect(result.text).toMatch(/entriegelt/i);
+    expect(result.turn).toEqual(
+      expect.objectContaining({
+        primaryResultText: "Der richtige Code. Der Safe ist jetzt entriegelt.",
+        newlyVisibleObjectIds: [],
+        newlyInventoryObjectIds: [],
+        newlyKnownObjectIds: [],
+        newlyAccessibleObjectIds: [],
+        newlyAvailableActionIds: ["interaction:safe:oeffnen"],
+        newlyKnownKnowledge: ["safe_entriegelt"]
+      })
+    );
+    expect(result.turn?.newEventIds).toHaveLength(3);
     expect(result.events).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -254,6 +270,166 @@ describe("interaction-lab sample", () => {
         })
       ])
     );
+  });
+
+  it("reports missing structured input with a follow-up hint", async () => {
+    const view = await loadInteractionLabView();
+
+    const result = view.performAction({
+      kind: "interaction",
+      objectId: "safe",
+      actionId: "codeEingeben"
+    });
+
+    expect(result.accepted).toBe(false);
+    expect(result.failure).toEqual({
+      code: "missing-input",
+      kind: "input",
+      message: 'Action "codeEingeben" requires an input value',
+      retryable: true,
+      objectId: "safe",
+      actionId: "codeEingeben",
+      followUp: {
+        kind: "provide-input",
+        prompt: 'Please provide a text value for "codeEingeben".',
+        input: {
+          mode: "text",
+          required: true,
+          pattern: "^\\d{4}$"
+        }
+      },
+      details: {
+        expectedInput: {
+          mode: "text",
+          required: true,
+          pattern: "^\\d{4}$"
+        }
+      }
+    });
+  });
+
+  it("reports invalid structured input before runtime execution", async () => {
+    const view = await loadInteractionLabView();
+
+    const safeFailure = view.performAction({
+      kind: "interaction",
+      objectId: "safe",
+      actionId: "codeEingeben",
+      additionalText: "abc"
+    });
+    const thermostatFailure = view.performAction({
+      kind: "interaction",
+      objectId: "thermostat",
+      actionId: "temperaturSetzen",
+      additionalText: "41"
+    });
+    const schalterFailure = view.performAction({
+      kind: "interaction",
+      objectId: "modusSchalter",
+      actionId: "modusWaehlen",
+      additionalText: "party"
+    });
+
+    expect(safeFailure.accepted).toBe(false);
+    expect(safeFailure.failure).toEqual({
+      code: "invalid-input",
+      kind: "input",
+      message: 'Input for "codeEingeben" does not match the required pattern',
+      retryable: true,
+      objectId: "safe",
+      actionId: "codeEingeben",
+      followUp: {
+        kind: "correct-input",
+        prompt: 'Please provide a text value that matches the declared format for "codeEingeben".',
+        input: {
+          mode: "text",
+          required: true,
+          pattern: "^\\d{4}$"
+        }
+      },
+      details: {
+        expectedInput: {
+          mode: "text",
+          required: true,
+          pattern: "^\\d{4}$"
+        },
+        providedValue: "abc"
+      }
+    });
+
+    expect(thermostatFailure.accepted).toBe(false);
+    expect(thermostatFailure.failure).toEqual({
+      code: "invalid-input",
+      kind: "input",
+      message: 'Input for "temperaturSetzen" is above the maximum value',
+      retryable: true,
+      objectId: "thermostat",
+      actionId: "temperaturSetzen",
+      followUp: {
+        kind: "correct-input",
+        prompt: 'Please provide a valid numeric value within the declared range for "temperaturSetzen".',
+        input: {
+          mode: "number",
+          required: true,
+          min: 10,
+          max: 40,
+          step: 0.5,
+          unit: "celsius"
+        }
+      },
+      details: {
+        expectedInput: {
+          mode: "number",
+          required: true,
+          min: 10,
+          max: 40,
+          step: 0.5,
+          unit: "celsius"
+        },
+        providedValue: "41",
+        max: 40
+      }
+    });
+
+    expect(schalterFailure.accepted).toBe(false);
+    expect(schalterFailure.failure).toEqual({
+      code: "invalid-input",
+      kind: "input",
+      message: 'Input for "modusWaehlen" is not one of the allowed options',
+      retryable: true,
+      objectId: "modusSchalter",
+      actionId: "modusWaehlen",
+      followUp: {
+        kind: "correct-input",
+        prompt: 'Please choose one of the declared options for "modusWaehlen".',
+        input: {
+          mode: "select",
+          required: true,
+          options: [
+            { value: "aus", label: "Aus" },
+            { value: "an", label: "An" },
+            { value: "bereit", label: "Bereit" },
+            { value: "sonder", label: "Sonder" },
+            { value: "boom", label: "Boom" }
+          ]
+        }
+      },
+      details: {
+        expectedInput: {
+          mode: "select",
+          required: true,
+          options: [
+            { value: "aus", label: "Aus" },
+            { value: "an", label: "An" },
+            { value: "bereit", label: "Bereit" },
+            { value: "sonder", label: "Sonder" },
+            { value: "boom", label: "Boom" }
+          ]
+        },
+        providedValue: "party",
+        allowedValues: ["aus", "an", "bereit", "sonder", "boom"]
+      }
+    });
   });
 
   it("evaluates number inputs against declared range and step", async () => {

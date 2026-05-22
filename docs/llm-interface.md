@@ -25,6 +25,37 @@ Leitidee:
 - es hilft beim Verstehen, Beschreiben und Formulieren von Handlungen
 - gegenueber der Welt besitzt es exakt dieselben Informationsgrenzen wie der menschliche Spieler
 
+## Erzaehlerrolle des LLM
+
+Die spaetere Rolle des LLM ist nicht, Weltlogik zu erzeugen, sondern Weltlogik erlebbar zu machen.
+
+Das heisst:
+
+- die World-Engine ist die strikte logische Fuehrungsleine
+- sie enthaelt Abzweigungen, Bedingungen, Sackgassen, Erfolge und Fehlschlaege
+- das LLM ist nicht Teil dieser Logik
+- das LLM schmueckt diese Logik sprachlich, emotional und atmosphaerisch aus
+
+Man kann es sich so vorstellen:
+
+- die Engine ist das alte Point-and-Click-Adventure im Kern
+- das LLM ist der Begleiter, Narrator oder Fuehrhund auf Spielerseite
+- es macht dieselbe Welt dichter, menschlicher und emotionaler erfahrbar
+- aber es ist gegenueber der Welt absichtlich genauso "dumm" wie der Spieler selbst
+
+Wichtig:
+
+- das LLM weiss nicht mehr als der Mensch
+- das LLM entscheidet nicht ueber versteckte Weltwahrheit
+- das LLM erzeugt keine kanonischen Fakten
+- das LLM darf nur besser formulieren, ordnen, ankuendigen und erklaeren
+
+Konsequenz:
+
+- das emotionale Ausschmuecken ist kein Teil der World-Engine
+- die World-Engine bleibt streng, deterministisch und testbar
+- das LLM ist eine spaetere Darstellungs- und Vermittlungsschicht
+
 ## Position des LLM in der Architektur
 
 Die Schichten sollen klar getrennt bleiben:
@@ -93,6 +124,7 @@ Konsequenz:
 
 - das LLM muss nicht gleichzeitig "reich beschreiben" und "heimlich Zusatzwissen verbergen"
 - das World-Interface nimmt ihm diese Trennung ab
+- das LLM darf sich dadurch staerker auf Sprache, Ton, Spannung und emotionale Erlebbarkeit konzentrieren
 
 ## Wissen und Text trennen
 
@@ -306,6 +338,57 @@ Konsequenz:
 - die Engine bleibt deterministisch und testbar
 - Felder wie `additionalText` koennen spaeter Dinge wie Codes, freie Antworten oder kurze Eingaben transportieren
 
+## Breitere Aktionsgrammatik statt enger Moeglichkeits-Whitelist
+
+Fuer die spaetere LLM-Schicht ist eine wichtige Designentscheidung:
+
+- das LLM soll nicht nur aus einer engen Liste "sicher sinnvoller" Aktionen waehlen
+- es soll eine allgemeinere, point-and-click-aehnliche Aktionsstruktur fuellen duerfen
+
+Warum:
+
+- das LLM soll den Menschen bei der Formulierung unterstuetzen
+- es soll nicht selbst vorab die Welt auf "nur sinnvolle" Kombinationen reduzieren
+- unpassende oder unmoegliche Versuche gehoeren zum Adventure-Gefuehl dazu
+
+Beispiele:
+
+- "Ich will die Tuer ins Inventar legen."
+- "Benutze den Rubin mit dem Schloss."
+- "Lege den Safe in den Beutel."
+
+Die Engine darf darauf spaeter sauber antworten:
+
+- "Das geht hier nicht."
+- "Der Safe ist viel zu schwer."
+- "Der Rubin passt dort nicht hinein."
+
+Das bedeutet:
+
+1. Es gibt eine allgemeinere Aktionsgrammatik.
+2. Es gibt getrennte Szenenhinweise fuer sichtbare und naheliegende Aktionen.
+3. Die Engine bleibt die Instanz, die ueber Erfolg, Fehlschlag oder lustige Rueckmeldung entscheidet.
+
+Eine moegliche Zielrichtung dafuer ist:
+
+```ts
+type PlayerIntentCommand = {
+  verb: string;
+  object1?: string;
+  object2?: string;
+  input?: string | number;
+};
+```
+
+Wichtig:
+
+- das ist noch keine finale Typfestlegung
+- aber fachlich ist die Richtung klar: breitere Aktionsgrammatik, getrennt von aktuellen Affordance-Hinweisen
+
+Eine erste TypeScript-Skizze dafuer liegt jetzt in [intentTypes.ts](C:/remoterep/worlddesc/packages/world/src/playerView/intentTypes.ts:1).
+
+Ergaenzend gibt es jetzt auch eine erste `intent surface` in [intentSurface.ts](C:/remoterep/worlddesc/packages/world/src/playerView/intentSurface.ts:1), die aus einer Szene Verben, Ziele und vorgeschlagene Kandidaten ableitet.
+
 Wichtig dabei:
 
 - `additionalText` ist kein separater Freitext-Kanal in die Weltlogik
@@ -325,6 +408,7 @@ Damit UI oder spaeter ein LLM sinnvoll nachfassen koennen, sollte die Schnittste
 Aktueller Zuschnitt:
 
 - `performAction()` liefert bei Fehlschlaegen strukturierte Fehlercodes
+- diese Fehler tragen jetzt auch `kind`, `retryable` und optional `followUp`
 - die optionale Textaufloesung liefert bei Mehrdeutigkeit explizite Kandidaten
 
 Das erlaubt spaeter Rueckfragen wie:
@@ -342,8 +426,64 @@ Deshalb enthaelt das Zielmodell bereits:
 - `preparedTexts` auf Szenen- und Objektebene
 - `newEvents` auf Szenenebene
 - `knownTexts` und `knownKnowledge` auf Objektebene
+- getrennte Listen fuer sichtbare Raumobjekte, Inventarobjekte und bekannte, aktuell unsichtbare Objekte
+- eine kanonische `availableActions`-Liste pro Szene
 
 Diese Inhalte sind wichtig, damit die spaetere Assistenzschicht nicht rohe Weltdaten selbst in eine spielernahe Darstellung uebersetzen muss.
+
+Zusaetzlich liefert die Player-Sicht bei erfolgreichen Aktionen jetzt auch eine kleine Turn-Zusammenfassung:
+
+- `primaryResultText`
+- `newEventIds`
+- `newlyVisibleObjectIds`
+- `newlyInventoryObjectIds`
+- `newlyKnownObjectIds`
+- `newlyAccessibleObjectIds`
+- `newlyAvailableActionIds`
+- `newlyKnownKnowledge`
+
+Damit muss eine spaetere LLM-Schicht nicht selbst zwei Szenen vergleichen, um zu verstehen, was in diesem Zug eigentlich neu passiert ist.
+
+## Aktueller PlayerView-Schnitt
+
+Die aktuelle Richtung der Spielersicht ist damit schon klarer umrissen:
+
+- `objects`: sichtbare Raumobjekte
+- `inventoryObjects`: aktuell mitgefuehrte und damit sichtbare Inventarobjekte
+- `knownButNotVisibleObjects`: bekannte, gerade nicht sichtbare Objekte
+- `availableActions`: vereinheitlichte Liste aktuell moeglicher Wege und Interaktionen
+
+Dabei wird jetzt auch expliziter unterschieden:
+
+- `perception: visible`
+- `perception: inventory`
+- `perception: known`
+
+und getrennt davon:
+
+- ob ein Objekt aktuell zugaenglich ist
+- warum es eventuell nicht zugaenglich ist, zum Beispiel wegen `closed-container`, `other-room` oder `offstage`
+
+Das ist genau die Art von deterministischer, point-and-click-aehnlicher Sicht, auf der spaeter ein erstes LLM sinnvoll aufsetzen kann.
+
+Wichtig dabei:
+
+- `availableActions` ist aktuell eher ein Szenenhinweis
+- sie ist noch nicht automatisch die gesamte spaetere Aktionsgrammatik
+- diese beiden Ebenen sollten vor dem ersten LLM-Versuch bewusst unterschieden werden
+
+Eine erste praktische Bruecke zwischen beiden Ebenen ist jetzt vorhanden:
+
+- `availableActions` beschreibt die aktuell naheliegenden, konkreten Szenenaktionen
+- `intent surface` leitet daraus eine grobere Hinweisschicht fuer Verben, Ziele und vorgeschlagene Kandidaten ab
+- diese Verbebene ist jetzt als kleines festes Inventar modelliert und wird nicht mehr nur aus der aktuellen Szene zusammengeschoben
+- die allgemeinere Aktionsgrammatik bleibt davon weiterhin getrennt
+
+Das ist fuer den spaeteren LLM-Einsatz wichtig:
+
+- die Engine kann eine stabile, wiedererkennbare Menge kanonischer Verben anbieten
+- die Szene liefert dazu nur noch aktuelle Relevanz- und Kandidatenhinweise
+- das LLM muss dadurch nicht pro Szene neu lernen, welche Verbform gerade "existiert"
 
 ## Empfohlene Dateiaufteilung
 
@@ -395,6 +535,14 @@ Aus dieser Architektur folgen die naechsten sinnvollen Schritte:
 2. Ein internes Wahrnehmungs-/Eventmodell fuer neue Informationen definieren.
 3. Eine schmale `LLMWorldView`-Fassade auf die Runtime setzen.
 4. Sicherstellen, dass das LLM nie rohe World-Daten oder versteckte Runtime-Daten direkt erhaelt.
+
+## Praktische Leitregel fuer den ersten LLM-Versuch
+
+Der erste LLM-Versuch sollte diese Frage positiv beantworten koennen:
+
+`Kann das LLM dieselbe Welt wie der Mensch erleben, ohne irgendeine Weltlogik selbst erfinden oder verstecken zu muessen?`
+
+Wenn die Antwort ja ist, ist die Schnittstelle gut genug vorbereitet.
 
 ## Aktuelle Prioritaet
 

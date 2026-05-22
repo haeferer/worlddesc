@@ -1,13 +1,17 @@
 import {
+  markObjectSeen,
   markRoomSeen,
   rememberKnowledge,
   rememberObjectKnowledge,
   rememberObjectText
 } from "./memory.js";
+import { describeObjectPerception } from "./objectPerception.js";
 import { createPerceptionEvent } from "./events.js";
-import { buildAvailableInteractionView } from "./interactionViews.js";
+import { buildAvailableInteractionView, buildInteractionActionOption, buildWayActionOption } from "./interactionViews.js";
 import type {
+  KnownSceneObjectView,
   PerceptionEvent,
+  PlayerActionOptionView,
   PlayerMemory,
   PlayerSceneObjectView,
   PlayerSceneView,
@@ -23,6 +27,7 @@ export function buildPlayerSceneView(
   const roomId = runtime.getCurrentRoomId();
   const room = runtime.getCurrentRoom();
   const visibleObjectIds = listVisibleSceneObjectIds(runtime, roomId);
+  const inventoryObjectIds = runtime.getInventoryObjectIds();
 
   const preparedTexts: PreparedTextBlock[] = [
     {
@@ -32,29 +37,39 @@ export function buildPlayerSceneView(
     }
   ];
 
-  const objects: PlayerSceneObjectView[] = visibleObjectIds.map((objectId) => {
-    const object = runtime.world.objects[objectId];
-    const objectMemory = memory.knownObjects[objectId];
-    const isNewDescription = !(objectMemory?.knownTexts.includes(object.desc) ?? false);
-    const availableInteractions = runtime.listAvailableInteractions(objectId);
-
-    return {
-      objectId,
-      title: object.title,
-      shortDescription: object.desc,
-      accessible: runtime.isObjectAccessible(objectId),
-      availableInteractionIds: availableInteractions.map((item) => item.interactionId),
-      availableInteractions: availableInteractions.map(buildAvailableInteractionView),
-      preparedTexts: [
-        {
-          kind: "object",
-          text: object.desc,
-          isNew: isNewDescription || hasPendingEvent(pendingEvents, `object:${objectId}:desc`),
-          objectId
-        }
-      ]
-    };
-  });
+  const objects = visibleObjectIds.map((objectId) => buildSceneObjectView(runtime, memory, pendingEvents, objectId, true));
+  const inventoryObjects = inventoryObjectIds.map((objectId) =>
+    buildSceneObjectView(runtime, memory, pendingEvents, objectId, false)
+  );
+  const visibleOrInventory = new Set([...visibleObjectIds, ...inventoryObjectIds]);
+  const knownButNotVisibleObjects: KnownSceneObjectView[] = Object.entries(memory.knownObjects)
+    .filter(([objectId]) => !visibleOrInventory.has(objectId))
+    .map(([objectId, known]) => {
+      const perception = describeObjectPerception(runtime, objectId);
+      return {
+        objectId,
+        title: runtime.world.objects[objectId]?.title ?? objectId,
+        perception: perception.perception,
+        currentlyAccessible: perception.accessible,
+        accessibilityReason: perception.accessibilityReason,
+        lastSeenAt: known.lastSeenAt,
+        knownKnowledge: [...known.knownKnowledge],
+        knownTexts: [...known.knownTexts]
+      };
+    });
+  const availableActions: PlayerActionOptionView[] = [
+    ...runtime.listAvailableWays(roomId).map(buildWayActionOption),
+    ...objects.flatMap((objectView) =>
+      runtime
+        .listAvailableInteractions(objectView.objectId)
+        .map((interaction) => buildInteractionActionOption(objectView.objectId, objectView.title, interaction))
+    ),
+    ...inventoryObjects.flatMap((objectView) =>
+      runtime
+        .listAvailableInteractions(objectView.objectId)
+        .map((interaction) => buildInteractionActionOption(objectView.objectId, objectView.title, interaction))
+    )
+  ];
 
   return {
     roomId,
@@ -62,13 +77,50 @@ export function buildPlayerSceneView(
     description: room.desc,
     preparedTexts,
     objects,
+    inventoryObjects,
+    knownButNotVisibleObjects,
     ways: runtime.listAvailableWays(roomId).map((way) => ({
       wayId: way.wayId,
       title: way.definition.title,
       desc: way.definition.desc
     })),
-    inventoryObjectIds: runtime.getInventoryObjectIds(),
-    newEvents: pendingEvents.map((event) => ({ ...event }))
+    inventoryObjectIds,
+    newEvents: pendingEvents.map((event) => ({ ...event })),
+    availableActions
+  };
+}
+
+function buildSceneObjectView(
+  runtime: WorldRuntimePort,
+  memory: PlayerMemory,
+  pendingEvents: PerceptionEvent[],
+  objectId: string,
+  visible: boolean
+): PlayerSceneObjectView {
+  const object = runtime.world.objects[objectId];
+  const objectMemory = memory.knownObjects[objectId];
+  const isNewDescription = !(objectMemory?.knownTexts.includes(object.desc) ?? false);
+  const perception = describeObjectPerception(runtime, objectId);
+  const availableInteractions = runtime.listAvailableInteractions(objectId);
+
+  return {
+    objectId,
+    title: object.title,
+    shortDescription: object.desc,
+    perception: perception.perception,
+    visible,
+    accessible: perception.accessible,
+    accessibilityReason: perception.accessibilityReason,
+    availableInteractionIds: availableInteractions.map((item) => item.interactionId),
+    availableInteractions: availableInteractions.map(buildAvailableInteractionView),
+    preparedTexts: [
+      {
+        kind: "object",
+        text: object.desc,
+        isNew: isNewDescription || hasPendingEvent(pendingEvents, `object:${objectId}:desc`),
+        objectId
+      }
+    ]
   };
 }
 
@@ -105,6 +157,8 @@ export function syncSceneObservations(
       });
       rememberObjectText(memory, objectId, object.desc);
     }
+
+    markObjectSeen(memory, objectId, roomId);
   }
 }
 
@@ -153,17 +207,14 @@ export function listVisibleSceneObjectIds(runtime: WorldRuntimePort, roomId = ru
 }
 
 function collectVisibleObjectIds(runtime: WorldRuntimePort, objectId: string, visible: string[]): void {
-  visible.push(objectId);
-
-  if (!runtime.isObjectAccessible(objectId)) {
+  const perception = describeObjectPerception(runtime, objectId);
+  if (perception.perception !== "visible") {
     return;
   }
 
-  for (const containedId of runtime.getContainedObjectIds(objectId)) {
-    if (!runtime.isObjectAccessible(containedId)) {
-      continue;
-    }
+  visible.push(objectId);
 
+  for (const containedId of runtime.getContainedObjectIds(objectId)) {
     collectVisibleObjectIds(runtime, containedId, visible);
   }
 }

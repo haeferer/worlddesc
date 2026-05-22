@@ -446,12 +446,18 @@ Wichtig:
 
 - eine erste `PlayerWorldView` ist bereits vorhanden
 - sie liefert aktuelle Szene, sichtbare Objekte, Inventar, Wege, aufbereitete Texte und neue Wahrnehmungsereignisse
+- sie trennt jetzt auch sichtbare Raumobjekte, Inventarobjekte und bekannte, aktuell unsichtbare Objekte
+- sie liefert dazu jetzt explizite Wahrnehmungszustaende wie `visible`, `inventory` und `known`
+- sie liefert ausserdem Zugaenglichkeitsgruende wie `visible`, `inventory`, `closed-container`, `other-room` oder `offstage`
+- sie kann pro Szene eine vereinheitlichte `availableActions`-Liste fuer Wege und Interaktionen liefern
 - die Aktionsabwicklung arbeitet im Kern mit strukturierten Spielerkommandos
 - eine separate Hilfsschicht kann diese Kommandos deterministisch aus Text, Aliasen und Hints ableiten
 - `additionalText` wird bereits bis in normale Interaktionen durchgereicht und dort fuer deklarative Eingaberegeln ausgewertet
 - sichtbare Interaktionen koennen jetzt auch ihre erwartete Eingabeform samt Metadaten an die Player-Sicht liefern
-- Fehlschlaege werden dabei bereits strukturiert mit Fehlercodes wie `unknown-object`, `unknown-action`, `object-not-accessible` oder `action-not-available` zurueckgegeben
+- Fehlschlaege werden dabei bereits strukturiert mit Fehlercodes wie `unknown-object`, `unknown-action`, `object-not-accessible`, `action-not-available`, `missing-input` oder `invalid-input` zurueckgegeben
+- eingabebezogene Fehlschlaege koennen jetzt auch `retryable`, `followUp` und formale Input-Details liefern
 - die Textaufloesung kann neben `resolved` und `unresolved` auch bewusst `ambiguous` liefern, inklusive Kandidatenliste
+- erfolgreiche Player-Aktionen liefern jetzt zusaetzlich eine kleine Turn-Zusammenfassung mit neu sichtbaren Objekten, neuen Aktionen und neuem Wissen
 - die Schicht ist damit als Basis nutzbar, aber noch nicht die spaetere vollstaendige Spieler- oder LLM-Fassade
 
 ## Kurzfazit

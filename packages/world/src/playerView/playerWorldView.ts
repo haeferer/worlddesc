@@ -1,16 +1,19 @@
 import { resolvePlayerActionCommand } from "./actionResolution.js";
+import { createActionFailure, validateActionInput } from "./actionFeedback.js";
 import { createPerceptionEvent } from "./events.js";
+import { buildIntentSurface } from "./intentSurface.js";
 import { buildAvailableInteractionView } from "./interactionViews.js";
 import { createEmptyPlayerMemory, markEventDelivered, rememberObjectText } from "./memory.js";
+import { describeObjectPerception } from "./objectPerception.js";
 import {
   buildPlayerSceneView,
   rememberInteractionKnowledge,
   syncRuntimeKnowledge,
   syncSceneObservations
 } from "./scene.js";
+import { buildTurnSummary } from "./turnSummary.js";
 import type {
   PlayerActionCommand,
-  PlayerActionFailureCode,
   KnownObjectView,
   PerceptionEvent,
   PlayerActionResultView,
@@ -19,6 +22,7 @@ import type {
   PlayerWorldView,
   WorldRuntimePort
 } from "./types.js";
+import type { PlayerIntentSurfaceView } from "./intentTypes.js";
 
 export interface PlayerWorldViewContext {
   runtime: WorldRuntimePort;
@@ -39,6 +43,10 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
     return buildPlayerSceneView(this.context.runtime, this.memory, this.pendingEvents);
   }
 
+  getIntentSurface(): PlayerIntentSurfaceView {
+    return buildIntentSurface(this.getCurrentScene());
+  }
+
   getKnownObject(objectId: string): KnownObjectView | null {
     this.capturePassiveObservations();
 
@@ -56,9 +64,16 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
       return null;
     }
 
+    const perception = describeObjectPerception(this.context.runtime, objectId);
+
     return {
       objectId,
       title: object.title,
+      perception: perception.perception,
+      currentlyVisible: perception.visible,
+      currentlyAccessible: perception.accessible,
+      accessibilityReason: perception.accessibilityReason,
+      lastSeenAt: known.lastSeenAt,
       knownTexts: [...known.knownTexts],
       knownKnowledge: [...known.knownKnowledge],
       availableInteractionIds: this.context.runtime.isObjectAccessible(objectId)
@@ -84,52 +99,106 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
     if (resolvedAction.kind === "interaction") {
       const object = runtime.world.objects[resolvedAction.objectId];
       if (!object) {
-        return this.buildRejectedResult("unknown-object", `Unknown object "${resolvedAction.objectId}"`, resolvedAction);
+        return this.buildRejectedResult(
+          createActionFailure({
+            code: "unknown-object",
+            kind: "unknown",
+            message: `Unknown object "${resolvedAction.objectId}"`,
+            retryable: false,
+            objectId: resolvedAction.objectId,
+            actionId: resolvedAction.interactionId
+          })
+        );
       }
 
       const interaction = object.interactions?.[resolvedAction.interactionId];
       if (!interaction) {
         return this.buildRejectedResult(
-          "unknown-action",
-          `Unknown interaction "${resolvedAction.interactionId}" on object "${resolvedAction.objectId}"`,
-          resolvedAction
+          createActionFailure({
+            code: "unknown-action",
+            kind: "unknown",
+            message: `Unknown interaction "${resolvedAction.interactionId}" on object "${resolvedAction.objectId}"`,
+            retryable: false,
+            objectId: resolvedAction.objectId,
+            actionId: resolvedAction.interactionId
+          })
         );
       }
 
       if (!runtime.isObjectAccessible(resolvedAction.objectId)) {
         return this.buildRejectedResult(
-          "object-not-accessible",
-          `Object "${resolvedAction.objectId}" is not currently accessible`,
-          resolvedAction
+          createActionFailure({
+            code: "object-not-accessible",
+            kind: "availability",
+            message: `Object "${resolvedAction.objectId}" is not currently accessible`,
+            retryable: false,
+            objectId: resolvedAction.objectId,
+            actionId: resolvedAction.interactionId
+          })
         );
       }
 
       const availableInteractions = runtime.listAvailableInteractions(resolvedAction.objectId);
       if (!availableInteractions.some((item) => item.interactionId === resolvedAction.interactionId)) {
         return this.buildRejectedResult(
-          "action-not-available",
-          `Interaction "${resolvedAction.interactionId}" on object "${resolvedAction.objectId}" is currently not available`,
-          resolvedAction
+          createActionFailure({
+            code: "action-not-available",
+            kind: "availability",
+            message: `Interaction "${resolvedAction.interactionId}" on object "${resolvedAction.objectId}" is currently not available`,
+            retryable: false,
+            objectId: resolvedAction.objectId,
+            actionId: resolvedAction.interactionId
+          })
         );
+      }
+
+      const interactionInputFailure = validateActionInput(
+        resolvedAction.interactionId,
+        buildAvailableInteractionView({
+          objectId: resolvedAction.objectId,
+          interactionId: resolvedAction.interactionId,
+          definition: interaction
+        }).input,
+        action.kind === "interaction" ? action.additionalText : undefined
+      );
+      if (interactionInputFailure) {
+        return this.buildRejectedResult({
+          ...interactionInputFailure,
+          objectId: resolvedAction.objectId
+        });
       }
     } else {
       const currentRoom = runtime.getCurrentRoom();
       const knownWay = currentRoom.ways?.[resolvedAction.wayId];
       if (!knownWay) {
-        return this.buildRejectedResult("unknown-action", `Unknown way "${resolvedAction.wayId}"`, resolvedAction);
+        return this.buildRejectedResult(
+          createActionFailure({
+            code: "unknown-action",
+            kind: "unknown",
+            message: `Unknown way "${resolvedAction.wayId}"`,
+            retryable: false,
+            actionId: resolvedAction.wayId
+          })
+        );
       }
 
       const availableWays = runtime.listAvailableWays();
       if (!availableWays.some((item) => item.wayId === resolvedAction.wayId)) {
         return this.buildRejectedResult(
-          "action-not-available",
-          `Way "${resolvedAction.wayId}" is currently not available`,
-          resolvedAction
+          createActionFailure({
+            code: "action-not-available",
+            kind: "availability",
+            message: `Way "${resolvedAction.wayId}" is currently not available`,
+            retryable: false,
+            actionId: resolvedAction.wayId
+          })
         );
       }
     }
 
     try {
+      const beforeScene = this.getCurrentScene();
+      const beforeMemory = structuredClone(this.memory);
       let text: string | undefined;
       if (resolvedAction.kind === "interaction") {
         const result = runtime.executeInteraction(
@@ -186,16 +255,34 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
       this.capturePassiveObservations();
       const scene = buildPlayerSceneView(runtime, this.memory, this.pendingEvents);
       const events = scene.newEvents.map((event) => ({ ...event }));
+      const turn = buildTurnSummary(
+        beforeScene,
+        scene,
+        beforeMemory,
+        this.memory,
+        events.map((event) => event.id),
+        text
+      );
       this.clearPendingEvents();
 
       return {
         accepted: true,
         text,
         events,
-        scene
+        scene,
+        turn
       };
     } catch {
-      return this.buildRejectedResult("execution-failed", "Action failed during execution", resolvedAction);
+      return this.buildRejectedResult(
+        createActionFailure({
+          code: "execution-failed",
+          kind: "execution",
+          message: "Action failed during execution",
+          retryable: false,
+          objectId: resolvedAction.kind === "interaction" ? resolvedAction.objectId : undefined,
+          actionId: resolvedAction.kind === "interaction" ? resolvedAction.interactionId : resolvedAction.wayId
+        })
+      );
     }
   }
 
@@ -216,23 +303,14 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
     this.pendingEvents.splice(0, this.pendingEvents.length);
   }
 
-  private buildRejectedResult(
-    code: PlayerActionFailureCode,
-    message: string,
-    action: { kind: string; objectId?: string; interactionId?: string; wayId?: string }
-  ): PlayerActionResultView {
+  private buildRejectedResult(failure: PlayerActionResultView["failure"]): PlayerActionResultView {
     const scene = this.getCurrentScene();
     return {
       accepted: false,
-      text: message,
+      text: failure?.message,
       events: [],
       scene,
-      failure: {
-        code,
-        message,
-        objectId: action.objectId,
-        actionId: action.kind === "interaction" ? action.interactionId : action.wayId
-      }
+      failure
     };
   }
 }

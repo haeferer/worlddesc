@@ -1,5 +1,10 @@
-import type { InteractionInput, RuntimeInteraction } from "../types.js";
-import type { AvailableInteractionView, InteractionInputView } from "./types.js";
+import type { InteractionInput, RuntimeInteraction, RuntimeWay } from "../types.js";
+import type {
+  AvailableInteractionView,
+  InteractionInputView,
+  PlayerInteractionOptionView,
+  PlayerWayOptionView
+} from "./types.js";
 
 export function buildAvailableInteractionView(interaction: RuntimeInteraction): AvailableInteractionView {
   return {
@@ -7,6 +12,43 @@ export function buildAvailableInteractionView(interaction: RuntimeInteraction): 
     title: interaction.definition.title,
     desc: interaction.definition.desc,
     input: buildInteractionInputView(interaction.definition.input)
+  };
+}
+
+export function buildInteractionActionOption(
+  objectId: string,
+  objectTitle: string,
+  interaction: RuntimeInteraction
+): PlayerInteractionOptionView {
+  return {
+    commandId: `interaction:${objectId}:${interaction.interactionId}`,
+    kind: "interaction",
+    objectId,
+    objectTitle,
+    actionId: interaction.interactionId,
+    interactionType: interaction.definition.type,
+    title: interaction.definition.title,
+    desc: interaction.definition.desc,
+    input: buildInteractionInputView(interaction.definition.input),
+    command: {
+      kind: "interaction",
+      objectId,
+      actionId: interaction.interactionId
+    }
+  };
+}
+
+export function buildWayActionOption(way: RuntimeWay): PlayerWayOptionView {
+  return {
+    commandId: `way:${way.wayId}`,
+    kind: "way",
+    actionId: way.wayId,
+    title: way.definition.title,
+    desc: way.definition.desc,
+    command: {
+      kind: "way",
+      actionId: way.wayId
+    }
   };
 }
 
