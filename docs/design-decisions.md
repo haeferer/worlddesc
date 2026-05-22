@@ -243,6 +243,8 @@ Zusaetzliche Leitregel:
 - das LLM soll nicht nur aus einer engen Liste "richtiger" Aktionen waehlen
 - es soll eine allgemeinere, point-and-click-aehnliche Aktionsstruktur fuellen duerfen
 - die Engine bleibt danach der deterministische Richter ueber Erfolg, Fehlschlag oder "Das geht hier nicht"
+- die Engine verarbeitet dabei bewusst immer nur genau eine Aktion pro Ausfuehrung
+- eventuelle Mehrschrittabsichten sind Sache der aufrufenden LLM-Schicht, nicht der Weltlogik
 
 Das trennt:
 
@@ -374,3 +376,9 @@ Eine zusaetzliche aktuelle Umsetzungsentscheidung ist jetzt:
 - die eigentliche OpenAI- und REPL-Anbindung lebt in einem eigenen Package `@worlddesc/llm-runner`
 - diese Grenze wird als eine der wesentlichen Trennlinien des Systems behandelt
 - `@worlddesc/world` bleibt frei von direkter Modell- oder API-Anbindung
+
+Als bewusst spaetere Ausbaustufe ist vorgemerkt:
+
+- das LLM darf eventuell spaeter eng begrenzte Mikroabfolgen aus mehreren Einzelschritten steuern
+- das ist aber keine Aufgabe der Engine selbst
+- ein solcher Modus braucht harte Schrittgrenzen, Szenen-Neubewertung nach jedem Schritt und klare Abbruchregeln gegen Kreisverhalten

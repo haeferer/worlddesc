@@ -370,6 +370,12 @@ Empfohlene Einschraenkungen:
 - keine komplexen Mehrschrittplaene in einem einzigen Engine-Call
 - keine Weltbearbeitung ausserhalb aktueller Funktionsaufrufe
 
+Wichtig:
+
+- Mehrschrittabsichten dürfen spaeter als moegliche Ausbauidee zurueckkommen
+- fuer den ersten Versuch bleiben sie aber bewusst ausserhalb des direkten Engine-Pfads
+- falls spaeter eine begrenzte Mikroplanung kommt, braucht sie harte Schrittgrenzen, erneute Szenenpruefung nach jedem Schritt und klare Abbruchregeln bei Fehlschlag oder Unsicherheit
+
 Ziel:
 
 - Der erste Versuch testet die Interface-Qualitaet, nicht die maximale kreative Freiheit.

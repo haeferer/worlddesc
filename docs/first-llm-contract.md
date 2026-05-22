@@ -165,6 +165,13 @@ Noch nicht noetig fuer den ersten Versuch:
 - autonomes Weltwissen ausserhalb der aktuellen Spielersicht
 - Toolsets mit vielen Nebenfunktionen
 
+Wichtig dabei:
+
+- die Engine verarbeitet bewusst genau eine Aktion pro Ausfuehrung
+- Mehrschrittabsichten wie "nimm den Schluessel und geh nach Norden" werden nicht als Batch an die Welt uebergeben
+- falls der Spieler mehrere Schritte in einem Satz nennt, muss die aufrufende LLM-Schicht zuerst nur den naechsten konkreten Einzelschritt auswaehlen
+- nach diesem Schritt wird die Szene neu geholt und erst dann ueber den naechsten Schritt entschieden
+
 Der erste Contract soll klein genug bleiben, dass er:
 
 - testbar

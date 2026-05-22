@@ -91,6 +91,13 @@ Wichtig:
 - auch der Runner darf die Welt nicht direkt "wissen"
 - er darf nur ueber `LlmToolHost` auf `PlayerWorldView` zugreifen
 
+Zusaetzliche Grenze fuer den ersten Versuch:
+
+- die Engine verarbeitet genau eine Aktion pro Ausfuehrung
+- der Runner soll keine Mehrfachaktionen oder Batch-Kommandos an die Welt weiterreichen
+- wenn ein Spieler mehrere Schritte in einem Satz nennt, muss das LLM zuerst nur den naechsten konkreten Einzelschritt auswaehlen
+- nach dessen Ausfuehrung wird die Szene neu bewertet
+
 ## Debug-Modus
 
 Mit `--debug` protokolliert der Runner derzeit:
@@ -117,3 +124,14 @@ Danach koennen wir gezielt beurteilen:
 - ob das Prompting nachgeschaerft werden muss
 - ob der Debug-Output erweitert werden sollte
 - ob eine kleine UI danach wirklich sinnvoll waere
+
+Ein moegliches spaeteres Ziel danach ist:
+
+- eine eng begrenzte Mikroplanung durch das LLM ueber 2 bis 3 Einzelschritte
+
+Aber nur mit klaren Leitplanken:
+
+- kein unendliches autonomes Weiterlaufen
+- neue Szene nach jedem Schritt
+- sofortiger Stopp bei Fehlschlag, Mehrdeutigkeit oder fehlender neuer Evidenz
+- keine Wiederholung derselben Aktion ohne triftigen neuen Grund
