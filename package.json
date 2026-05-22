@@ -6,10 +6,11 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @worlddesc/world",
-    "typecheck": "npm run typecheck -w @worlddesc/world",
+    "build": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner",
+    "typecheck": "npm run typecheck -w @worlddesc/world && npm run typecheck -w @worlddesc/llm-runner",
     "checkasset": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkAsset.js",
     "checkworld": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkWorld.js",
-    "test": "npm run test -w @worlddesc/world"
+    "test": "npm run test -w @worlddesc/world && npm run test -w @worlddesc/llm-runner",
+    "llm:repl": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner && node ./packages/llm-runner/dist/cli.js"
   }
 }

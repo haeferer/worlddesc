@@ -1,0 +1,27 @@
+{
+  "name": "@worlddesc/llm-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "worlddesc-llm-repl": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run",
+    "repl": "node ./dist/cli.js"
+  },
+  "dependencies": {
+    "@worlddesc/world": "0.1.0",
+    "dotenv": "^16.4.5",
+    "openai": "^4.104.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.7"
+  }
+}

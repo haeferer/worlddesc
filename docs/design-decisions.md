@@ -368,3 +368,9 @@ Der derzeitige Schwerpunkt liegt auf:
 - der Vorbereitung einer klaren Persistenzbasis
 
 Die LLM-Architektur dient im Moment vor allem als Leitplanke fuer spaetere Entscheidungen, damit World, Runtime und Spielerperspektive von Anfang an sauber getrennt bleiben.
+
+Eine zusaetzliche aktuelle Umsetzungsentscheidung ist jetzt:
+
+- die eigentliche OpenAI- und REPL-Anbindung lebt in einem eigenen Package `@worlddesc/llm-runner`
+- diese Grenze wird als eine der wesentlichen Trennlinien des Systems behandelt
+- `@worlddesc/world` bleibt frei von direkter Modell- oder API-Anbindung

@@ -3,6 +3,9 @@
   "references": [
     {
       "path": "./packages/world"
+    },
+    {
+      "path": "./packages/llm-runner"
     }
   ]
 }

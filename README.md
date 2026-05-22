@@ -20,6 +20,7 @@ Wichtige Dateien:
 - `docs/assets.md`
 - `docs/asset-instancing.md`
 - `docs/llm-interface.md`
+- `docs/llm-runner.md`
 - `docs/first-llm-contract.md`
 - `docs/first-llm-tool-schemas.md`
 - `docs/action-feedback.md`
@@ -51,3 +52,4 @@ Beispielwelten:
 Geplanter Startpunkt:
 
 - `packages/world` kapselt das Domaenenmodell und das Laden/Validieren von Welten.
+- `packages/llm-runner` kapselt den ersten OpenAI-basierten REPL-Runner ueber der Player-Sicht.

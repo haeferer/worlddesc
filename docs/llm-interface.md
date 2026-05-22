@@ -580,3 +580,12 @@ Aktuell stehen davor:
 - Persistenzmodell
 
 Erst wenn diese Schichten stabil sind, sollte die eigentliche LLM-Integration darauf aufsetzen.
+
+Ein erster bewusst kleiner Integrationsschritt ist jetzt dennoch vorhanden:
+
+- `@worlddesc/llm-runner` als getrenntes Package fuer OpenAI-Anbindung und Console-REPL
+
+Die Grenze bleibt dabei bewusst scharf:
+
+- `@worlddesc/world` enthaelt die Welt- und Spielersicht
+- `@worlddesc/llm-runner` nutzt diese Sicht nur ueber den Tool-Host
