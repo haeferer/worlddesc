@@ -114,7 +114,7 @@ export interface PlayerSceneView {
   ways: PlayerWayView[];
   inventoryObjectIds: string[];
   newEvents: PerceptionEvent[];
-  availableActions: PlayerActionOptionView[];
+  sampleActions: PlayerActionOptionView[];
 }
 
 export interface KnownObjectView {

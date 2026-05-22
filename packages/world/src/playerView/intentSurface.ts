@@ -13,15 +13,15 @@ import type {
 import { inferCanonicalIntentVerb, listCanonicalIntentVerbs } from "./intentVerbs.js";
 
 export function buildIntentSurface(scene: PlayerSceneView): PlayerIntentSurfaceView {
-  const verbs = buildIntentVerbs(scene.availableActions);
+  const verbs = buildIntentVerbs(scene.sampleActions);
   const targets = buildIntentTargets(scene);
-  const suggestedCandidates = scene.availableActions.map((action) => buildIntentCandidate(action, scene));
+  const suggestedCandidates = scene.sampleActions.map((action) => buildIntentCandidate(action, scene));
 
   return {
     verbs,
     targets,
     suggestedCandidates,
-    sourceActionIds: scene.availableActions.map((action) => action.commandId)
+    sourceActionIds: scene.sampleActions.map((action) => action.commandId)
   };
 }
 

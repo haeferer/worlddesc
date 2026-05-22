@@ -50,7 +50,7 @@ describe("PlayerWorldView", () => {
     expect(scene.ways.map((item) => item.wayId)).toEqual(["nord"]);
     expect(scene.inventoryObjects).toEqual([]);
     expect(scene.knownButNotVisibleObjects).toEqual([]);
-    expect(scene.availableActions.map((item) => item.commandId)).toEqual([
+    expect(scene.sampleActions.map((item) => item.commandId)).toEqual([
       "way:nord",
       "interaction:sonne:ansehen",
       "interaction:kiste:ansehen",
@@ -274,7 +274,7 @@ describe("PlayerWorldView", () => {
       })
     );
     expect(result.turn?.newEventIds).toHaveLength(1);
-    expect(result.scene.availableActions.map((item) => item.commandId)).toContain("interaction:schluessel:ansehen");
+    expect(result.scene.sampleActions.map((item) => item.commandId)).toContain("interaction:schluessel:ansehen");
   });
 
   it("keeps known but currently invisible objects separate from the visible scene", async () => {

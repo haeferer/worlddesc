@@ -14,8 +14,8 @@ export function buildTurnSummary(
   const afterInventory = new Set(afterScene.inventoryObjects.map((item) => item.objectId));
   const beforeAccessible = new Set(listAccessibleObjectIds(beforeScene));
   const afterAccessible = new Set(listAccessibleObjectIds(afterScene));
-  const beforeActions = new Set(beforeScene.availableActions.map((item) => item.commandId));
-  const afterActions = new Set(afterScene.availableActions.map((item) => item.commandId));
+  const beforeActions = new Set(beforeScene.sampleActions.map((item) => item.commandId));
+  const afterActions = new Set(afterScene.sampleActions.map((item) => item.commandId));
   const beforeKnownObjects = new Set(Object.keys(beforeMemory.knownObjects));
   const afterKnownObjects = new Set(Object.keys(afterMemory.knownObjects));
   const beforeKnowledge = new Set(beforeMemory.knownKnowledge);

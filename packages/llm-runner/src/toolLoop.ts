@@ -3,6 +3,8 @@ import type OpenAI from "openai";
 import type { LlmToolHost, PlayerActionCommand, PlayerSceneView } from "@worlddesc/world";
 
 import { buildFirstLlmToolSchemas } from "./toolSchemas.js";
+import type { UsageTracker } from "./usageTracker.js";
+import { fromOpenAiUsage } from "./usageTracker.js";
 
 export interface ToolLoopOptions {
   client: OpenAI;
@@ -12,6 +14,8 @@ export interface ToolLoopOptions {
   userMessage: string;
   debug: boolean;
   maxToolRounds: number;
+  includeSampleActions: boolean;
+  usageTracker?: UsageTracker;
   history: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
   onDebugLog?: (line: string) => void;
 }
@@ -36,7 +40,10 @@ export async function runToolLoop(options: ToolLoopOptions): Promise<ToolLoopRes
   });
 
   for (let round = 0; round < options.maxToolRounds; round += 1) {
-    const scene = options.host.callTool("get_current_scene", {});
+    const scene = sanitizeSceneForModel(
+      options.host.callTool("get_current_scene", {}),
+      options.includeSampleActions
+    );
     if (options.debug && round === 0) {
       options.onDebugLog?.(`scene ${JSON.stringify(scene)}`);
     }
@@ -58,6 +65,15 @@ export async function runToolLoop(options: ToolLoopOptions): Promise<ToolLoopRes
       tool_choice: round === 0 ? "required" : "auto"
     });
 
+    if (completion.usage && options.usageTracker) {
+      const snapshot = await options.usageTracker.recordCompletion(fromOpenAiUsage(options.model, completion.usage));
+      if (options.debug) {
+        options.onDebugLog?.(
+          `usage total=${snapshot.totals.totalTokens} prompt=${snapshot.totals.promptTokens} completion=${snapshot.totals.completionTokens} cached=${snapshot.totals.cachedTokens} reasoning=${snapshot.totals.reasoningTokens} requests=${snapshot.totals.requests}`
+        );
+      }
+    }
+
     const message = completion.choices[0]?.message;
     if (!message) {
       throw new Error("Model returned no message");
@@ -75,7 +91,13 @@ export async function runToolLoop(options: ToolLoopOptions): Promise<ToolLoopRes
         if (options.debug) {
           options.onDebugLog?.(`tool ${toolCall.function.name} ${JSON.stringify(parsedArgs)}`);
         }
-        const result = callToolWithPolicy(options.host, toolCall.function.name, parsedArgs, toolState);
+        const result = callToolWithPolicy(
+          options.host,
+          toolCall.function.name,
+          parsedArgs,
+          toolState,
+          options.includeSampleActions
+        );
         if (options.debug) {
           options.onDebugLog?.(`result ${toolCall.function.name} ${JSON.stringify(result)}`);
         }
@@ -121,11 +143,12 @@ export function callToolWithPolicy(
   host: LlmToolHost,
   name: string,
   args: Record<string, unknown>,
-  state: ToolExecutionState
+  state: ToolExecutionState,
+  includeSampleActions = true
 ): unknown {
   switch (name) {
     case "get_current_scene":
-      return host.callTool("get_current_scene", {});
+      return sanitizeSceneForModel(host.callTool("get_current_scene", {}), includeSampleActions);
     case "get_known_object":
       return host.callTool("get_known_object", {
         objectId: String(args.objectId ?? "")
@@ -166,9 +189,12 @@ export function callToolWithPolicy(
       }
 
       state.resolvedCommandKey = undefined;
-      return host.callTool("perform_action", {
-        command
-      });
+      return sanitizeActionResultForModel(
+        host.callTool("perform_action", {
+          command
+        }),
+        includeSampleActions
+      );
     }
     case "get_new_events":
       return host.callTool("get_new_events", {});
@@ -186,4 +212,27 @@ function buildTurnContextMessage(scene: PlayerSceneView): string {
 
 function serializeCommand(command: PlayerActionCommand): string {
   return JSON.stringify(command);
+}
+
+function sanitizeSceneForModel(scene: PlayerSceneView, includeSampleActions: boolean): PlayerSceneView {
+  if (includeSampleActions) {
+    return scene;
+  }
+
+  return {
+    ...scene,
+    sampleActions: []
+  };
+}
+
+function sanitizeActionResultForModel<T>(result: T, includeSampleActions: boolean): T {
+  if (includeSampleActions || typeof result !== "object" || result === null || !("scene" in result)) {
+    return result;
+  }
+
+  const actionResult = result as T & { scene: PlayerSceneView };
+  return {
+    ...actionResult,
+    scene: sanitizeSceneForModel(actionResult.scene, false)
+  };
 }

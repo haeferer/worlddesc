@@ -32,13 +32,14 @@ Enthaelt insbesondere:
 - sichtbare Objekte
 - Inventarobjekte
 - bekannte, gerade nicht sichtbare Objekte
-- `availableActions`
+- `sampleActions`
 - `intentSurface`
 - aktuelle vorbereitete Texte
 
 Zweck:
 
 - das LLM bekommt eine kompakte, deterministische Sicht auf die aktuelle Szene
+- `sampleActions` sind dabei nur Beispiel- und Aufloesungshilfen, keine vollstaendige Whitelist aller legitimen Spielerabsichten
 
 ## 2. `get_known_object(objectId)`
 

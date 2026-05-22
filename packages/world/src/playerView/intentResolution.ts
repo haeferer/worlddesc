@@ -59,7 +59,7 @@ export function resolvePlayerIntent(scene: PlayerSceneView, intent: PlayerIntent
   }
 
   if (intent.verb === "go") {
-    const wayAction = scene.availableActions.find(
+    const wayAction = scene.sampleActions.find(
       (action) => action.kind === "way" && action.actionId === intent.object1
     );
 
@@ -78,7 +78,7 @@ export function resolvePlayerIntent(scene: PlayerSceneView, intent: PlayerIntent
     };
   }
 
-  const candidates = scene.availableActions.filter(
+  const candidates = scene.sampleActions.filter(
     (action) =>
       action.kind === "interaction" &&
       action.objectId === intent.object1 &&

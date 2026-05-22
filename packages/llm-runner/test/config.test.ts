@@ -12,13 +12,28 @@ describe("llm-runner config", () => {
       worldPath: "C:\\repo\\sample\\test.world.yaml",
       model: "gpt-test",
       debug: false,
-      maxToolRounds: 8
+      maxToolRounds: 8,
+      includeSampleActions: true,
+      usageFilePath: "C:\\repo\\tokens.usage.json",
+      character: undefined
     });
   });
 
   it("parses explicit flags", () => {
     const config = parseReplArgs(
-      ["--world", "./sample/interaction-lab.world.yaml", "--model", "gpt-x", "--debug", "--max-tool-rounds", "12"],
+      [
+        "--world",
+        "./sample/interaction-lab.world.yaml",
+        "--model",
+        "gpt-x",
+        "--debug",
+        "--max-tool-rounds",
+        "12",
+        "--usage-file",
+        "./tmp/usage.json",
+        "--character",
+        "warm-guide"
+      ],
       "C:/repo",
       {} as NodeJS.ProcessEnv
     );
@@ -27,7 +42,10 @@ describe("llm-runner config", () => {
       worldPath: "C:\\repo\\sample\\interaction-lab.world.yaml",
       model: "gpt-x",
       debug: true,
-      maxToolRounds: 12
+      maxToolRounds: 12,
+      includeSampleActions: true,
+      usageFilePath: "C:\\repo\\tmp\\usage.json",
+      character: "warm-guide"
     });
   });
 
@@ -37,7 +55,16 @@ describe("llm-runner config", () => {
     expect(config.model).toBe("gpt-5-mini");
   });
 
+  it("can hide sampleActions for the llm view", () => {
+    const config = parseReplArgs(["--hide-sample-actions"], "C:/repo", {} as NodeJS.ProcessEnv);
+
+    expect(config.includeSampleActions).toBe(false);
+  });
+
   it("mentions the gpt-5-mini default in help text", () => {
     expect(buildHelpText()).toContain("OPENAI_MODEL or gpt-5-mini");
+    expect(buildHelpText()).toContain("--hide-sample-actions");
+    expect(buildHelpText()).toContain("--usage-file");
+    expect(buildHelpText()).toContain("--character");
   });
 });

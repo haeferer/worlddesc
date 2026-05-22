@@ -433,7 +433,7 @@ Deshalb enthaelt das Zielmodell bereits:
 - `newEvents` auf Szenenebene
 - `knownTexts` und `knownKnowledge` auf Objektebene
 - getrennte Listen fuer sichtbare Raumobjekte, Inventarobjekte und bekannte, aktuell unsichtbare Objekte
-- eine kanonische `availableActions`-Liste pro Szene
+- eine kanonische `sampleActions`-Liste pro Szene
 
 Diese Inhalte sind wichtig, damit die spaetere Assistenzschicht nicht rohe Weltdaten selbst in eine spielernahe Darstellung uebersetzen muss.
 
@@ -457,7 +457,7 @@ Die aktuelle Richtung der Spielersicht ist damit schon klarer umrissen:
 - `objects`: sichtbare Raumobjekte
 - `inventoryObjects`: aktuell mitgefuehrte und damit sichtbare Inventarobjekte
 - `knownButNotVisibleObjects`: bekannte, gerade nicht sichtbare Objekte
-- `availableActions`: vereinheitlichte Liste aktuell moeglicher Wege und Interaktionen
+- `sampleActions`: vereinheitlichte Liste aktuell aufgeloester Wege und Interaktionen als Beispielschnitt
 
 Dabei wird jetzt auch expliziter unterschieden:
 
@@ -474,16 +474,22 @@ Das ist genau die Art von deterministischer, point-and-click-aehnlicher Sicht, a
 
 Wichtig dabei:
 
-- `availableActions` ist aktuell eher ein Szenenhinweis
+- `sampleActions` ist aktuell eher ein Szenenhinweis
 - sie ist noch nicht automatisch die gesamte spaetere Aktionsgrammatik
 - diese beiden Ebenen sollten vor dem ersten LLM-Versuch bewusst unterschieden werden
 
 Eine erste praktische Bruecke zwischen beiden Ebenen ist jetzt vorhanden:
 
-- `availableActions` beschreibt die aktuell naheliegenden, konkreten Szenenaktionen
+- `sampleActions` beschreibt die aktuell naheliegenden, konkreten Szenenaktionen
 - `intent surface` leitet daraus eine grobere Hinweisschicht fuer Verben, Ziele und vorgeschlagene Kandidaten ab
 - diese Verbebene ist jetzt als kleines festes Inventar modelliert und wird nicht mehr nur aus der aktuellen Szene zusammengeschoben
 - die allgemeinere Aktionsgrammatik bleibt davon weiterhin getrennt
+
+Wichtig:
+
+- `sampleActions` ist bewusst unvollstaendig
+- sie hilft bei Aufloesung, Debugging und UI
+- sie darf aber nicht als vollstaendige Liste aller "erlaubten" Spielerhandlungen missverstanden werden
 
 Das ist fuer den spaeteren LLM-Einsatz wichtig:
 

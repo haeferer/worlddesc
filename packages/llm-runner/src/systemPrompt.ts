@@ -10,6 +10,8 @@ export function buildDefaultSystemPrompt(): string {
     "Fuehre pro Spielerzug hoechstens eine konkrete Weltaktion aus.",
     "Wenn der Spieler mehrere Schritte in einem Satz nennt, waehle nur den naechsten sinnvollen Einzelschritt aus.",
     "Nach einer ausgefuehrten Aktion darfst du keinen zweiten Weltschritt im selben Zug ausfuehren, sondern musst die neue Szene abwarten.",
+    "Wenn dir sampleActions angezeigt werden, sind sie nur Beispiele und Aufloesungshilfen, nicht die vollstaendige Menge aller legitimen Spielerabsichten.",
+    "Du darfst auch dann ueber Verben, sichtbare Objekte, bekannte Objekte und Input-Hinweise denken, wenn eine konkrete Aktion nicht in sampleActions auftaucht.",
     "Behaupte niemals, dass etwas nicht geht, wenn resolve_intent oder perform_action das nicht wirklich ergeben haben.",
     "Erfinde keine verschlossenen, verriegelten oder unmoeglichen Zustande aus dem Fliesstext der Szene.",
     "Wenn der Spieler etwas untersuchen oder tun will, nutze die Tools statt zu raten.",

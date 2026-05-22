@@ -77,4 +77,48 @@ describe("llm-runner tool loop policy", () => {
     expect(result.accepted).toBe(true);
     expect(result.turn?.newlyVisibleObjectIds).toEqual(["schluessel"]);
   });
+
+  it("can hide sampleActions from get_current_scene for the llm", () => {
+    const host = loadSampleHost();
+    const state = createToolExecutionState();
+
+    const result = callToolWithPolicy(host, "get_current_scene", {}, state, false) as {
+      sampleActions: unknown[];
+    };
+
+    expect(result.sampleActions).toEqual([]);
+  });
+
+  it("can hide sampleActions from perform_action scene results for the llm", () => {
+    const host = loadSampleHost();
+    const state = createToolExecutionState();
+
+    const resolution = callToolWithPolicy(
+      host,
+      "resolve_intent",
+      {
+        intent: {
+          verb: "open",
+          object1: "kiste"
+        }
+      },
+      state,
+      false
+    ) as { status: string; command?: unknown };
+
+    expect(resolution.status).toBe("resolved");
+
+    const result = callToolWithPolicy(
+      host,
+      "perform_action",
+      {
+        command: resolution.command as Record<string, unknown>
+      },
+      state,
+      false
+    ) as { accepted: boolean; scene: { sampleActions: unknown[] } };
+
+    expect(result.accepted).toBe(true);
+    expect(result.scene.sampleActions).toEqual([]);
+  });
 });

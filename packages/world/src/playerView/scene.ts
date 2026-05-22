@@ -57,7 +57,7 @@ export function buildPlayerSceneView(
         knownTexts: [...known.knownTexts]
       };
     });
-  const availableActions: PlayerActionOptionView[] = [
+  const sampleActions: PlayerActionOptionView[] = [
     ...runtime.listAvailableWays(roomId).map(buildWayActionOption),
     ...objects.flatMap((objectView) =>
       runtime
@@ -86,7 +86,7 @@ export function buildPlayerSceneView(
     })),
     inventoryObjectIds,
     newEvents: pendingEvents.map((event) => ({ ...event })),
-    availableActions
+    sampleActions
   };
 }
 

@@ -57,12 +57,19 @@ Die REPL unterstuetzt derzeit:
 - `--model <name>`
 - `--debug`
 - `--max-tool-rounds <number>`
+- `--hide-sample-actions`
+- `--usage-file <path>`
+- `--character <name>`
 - `--system-prompt-file <path>`
 
 Zusatzlich:
 
 - `OPENAI_API_KEY` aus `.env` oder Umgebungsvariablen
 - optional `OPENAI_MODEL` als Standard fuer `--model`
+
+Standard fuer den Usage-Counter:
+
+- `tokens.usage.json` im aktuellen Projekt-Root
 
 ## Empfohlener Start
 
@@ -80,6 +87,75 @@ Empfohlene Reihenfolge:
 - danach bei Bedarf Vergleich mit `gpt-5.2`
 - optional `gpt-4.1-mini` als guenstige Kontrollgruppe
 
+Fuer A/B-Tests der Tool-Disziplin ist zusaetzlich sinnvoll:
+
+- ein Lauf mit sichtbaren `sampleActions`
+- ein zweiter Lauf mit `--hide-sample-actions`
+
+So laesst sich pruefen, ob das Modell nur an Beispielaktionen klebt oder auch ueber Verben, Objekte und Inputs robust arbeitet.
+
+## Charakter und Ausschweifigkeit
+
+Fuer Persoenlichkeit, Ton und Ausschweifigkeit ist `--character <name>` jetzt der bequemste Ort.
+
+Intern mappt der Runner dabei auf:
+
+- `prompts/<name>.character.txt`
+
+Fuer freie Experimente oder projektlokale Spezialfaelle bleibt zusaetzlich:
+
+- `--system-prompt-file <path>`
+
+Warum:
+
+- der Basisprompt des Runners haelt die harten Regeln fuer Tool-Disziplin und Weltgrenzen fest
+- die Charakterdatei kann den Begleiter stilistisch formen, ohne die Welt-Engine selbst zu veraendern
+- unterschiedliche Begleiter lassen sich so leicht gegeneinander testen
+
+Geeignet fuer diese Zusatzdatei:
+
+- Persoenlichkeit
+- Erzaehlton
+- Ausschweifigkeit oder Knappheit
+- Umgang mit Fehlschlaegen
+- Grad an Fuehrung oder Zurueckhaltung
+- Art von Rueckfragen
+
+Nicht der richtige Ort fuer:
+
+- neue Weltregeln
+- Ausnahmen von der Tool-Disziplin
+- Mehrschritt-Autonomie
+- verstecktes Zusatzwissen ueber die Welt
+
+Beispiel-Dateien im Repo:
+
+- `prompts/warm-guide.character.txt`
+- `prompts/dry-curator.character.txt`
+- `prompts/playful-poet.character.txt`
+- `prompts/minimal-operator.character.txt`
+
+Beispielaufruf:
+
+```bash
+npm run llm:repl -- --debug --character warm-guide
+```
+
+Additiv mit einem freien Extra-Prompt:
+
+```bash
+npm run llm:repl -- --debug --character warm-guide --system-prompt-file ./my-extra-guidance.txt
+```
+
+Was man spaeter darueber noch gut steuern kann:
+
+- wie aktiv der Begleiter Vorschlaege macht
+- wie stark er Szene-Details ausmalt
+- ob er eher emotional, poetisch, sachlich oder spielmechanisch klingt
+- wie oft er Optionen explizit zusammenfasst
+- wie er mit Unsicherheit oder Ablehnung umgeht
+- wie stark er den Spieler fuehrt oder nur spiegelt
+
 ## Aktuelle REPL-Kommandos
 
 Zur Laufzeit gibt es zunaechst nur wenige lokale Kommandos:
@@ -87,9 +163,80 @@ Zur Laufzeit gibt es zunaechst nur wenige lokale Kommandos:
 - `/scene`
 - `/events`
 - `/tools`
+- `/usage`
 - `/quit`
 
 Das ist absichtlich klein gehalten.
+
+## Persistenter Token-Counter
+
+Der Runner schreibt den OpenAI-Tokenverbrauch jetzt persistent in eine JSON-Datei.
+
+Standard:
+
+- `tokens.usage.json` im Repo-Root
+
+Inhalt:
+
+- Gesamtsummen ueber alle bisherigen REPL-Laeufe
+- Summen pro Modell
+- letzter einzelner Completion-Eintrag
+- zusaetzlich auch `cachedTokens` und `reasoningTokens`, sofern die API diese Felder liefert
+
+Wichtig:
+
+- gezaehlt werden echte OpenAI-Completion-Aufrufe des Runners
+- Tool-Aufrufe innerhalb der Welt zaehlen nicht separat, weil sie lokal ausgefuehrt werden
+- bei jedem Completion-Call wird der Counter direkt fortgeschrieben
+
+Fuer Aenderungen am Speicherort:
+
+- `--usage-file <path>`
+
+Zur direkten Kontrolle waehrend eines REPL-Laufs:
+
+- `/usage`
+
+## API-Schnitt und History
+
+Aktuell nutzt der Runner die Chat-Completions-API.
+
+Das bedeutet:
+
+- pro Modellaufruf wird die bisherige Nachrichtenhistorie wieder mitgeschickt
+- dazu kommt pro Runde erneut der aktuelle deterministische Szenen-Snapshot
+- formal ist das Chat
+- praktisch ist es aber weiterhin ein jedes Mal neu aufgebauter Vollkontext
+
+Fuer den aktuellen ersten Versuch ist das in Ordnung, aber noch nicht optimal.
+
+Warum:
+
+- die World-Engine und `PlayerWorldView` liefern bereits sehr viel frischen, strukturierten Kontext
+- dadurch braucht der Runner vermutlich deutlich weniger freie Text-History als ein normaler Chatbot
+- jede zusaetzliche alte Nachricht drueckt nur weiter auf Kosten und Kontext
+
+Naheliegende Optimierungsrichtung:
+
+- spaeter auf die Responses API wechseln
+- dort `previous_response_id` nutzen, statt jedes Mal die gesamte History manuell wieder aufzubauen
+
+Warum das spannend ist:
+
+- einfachere Zustandsfuehrung auf API-Seite
+- offizielle Usage-Felder fuer `input_tokens_details.cached_tokens`
+- bessere Sicht darauf, wie stark Prompt-Caching wirklich greift
+
+Wichtig trotzdem:
+
+- auch mit besserer API bleibt gute lokale Kontextdisziplin wichtig
+- der groesste Hebel ist wahrscheinlich nicht "mehr History", sondern "weniger unnoetige History"
+
+Fuer dieses Projekt ist die wahrscheinlich beste Richtung:
+
+1. den jetzigen Chat-Runner erst mit echten Usage-Zahlen beobachten
+2. die freie Nachrichtenhistory klein halten
+3. danach einen gezielten Responses-API-Vergleich bauen
 
 ## Grenzen des ersten Runners
 
@@ -127,6 +274,12 @@ Das ist fuer den ersten LLM-Versuch wichtig, weil wir so sehen koennen:
 - ob das Modell die richtigen Tools waehlt
 - ob die Intent-Aufloesung sauber ist
 - ob die Turn-Zusammenfassung wirklich genutzt werden kann
+
+Wichtig fuer `sampleActions`:
+
+- wenn sie sichtbar sind, sind sie im Prompt ausdruecklich nur Vorschlaege und Aufloesungshilfen
+- sie sind keine vollstaendige Liste legitimer Spielerhandlungen
+- mit `--hide-sample-actions` werden sie fuer das LLM ganz aus Szenen und Aktionsrueckgaben entfernt
 
 ## Nächster sinnvoller Schritt
 

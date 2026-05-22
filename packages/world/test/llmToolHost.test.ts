@@ -44,7 +44,7 @@ describe("LlmToolHost", () => {
 
     expect(scene.roomId).toBe("wiese");
     expect(scene.objects.map((item) => item.objectId)).toEqual(["sonne", "kiste", "beutel"]);
-    expect(scene.availableActions.map((item) => item.commandId)).toContain("interaction:kiste:oeffnen");
+    expect(scene.sampleActions.map((item) => item.commandId)).toContain("interaction:kiste:oeffnen");
   });
 
   it("can resolve and execute a simple open flow through tools", async () => {

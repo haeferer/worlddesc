@@ -33,6 +33,12 @@ Rueckgabe:
 
 - `PlayerSceneView`
 
+Wichtig:
+
+- `sampleActions` sind absichtlich nur ein Beispielschnitt der aktuell direkt aufloesbaren Szenenaktionen
+- sie begrenzen nicht die breitere Intent-Grammatik des LLM
+- der Runner kann sie fuer A/B-Tests optional ganz aus der LLM-Sicht entfernen
+
 Beispiel:
 
 ```json
@@ -49,7 +55,7 @@ Beispiel:
   ],
   "inventoryObjects": [],
   "knownButNotVisibleObjects": [],
-  "availableActions": [
+  "sampleActions": [
     {
       "commandId": "interaction:kiste:oeffnen",
       "kind": "interaction",
@@ -260,3 +266,5 @@ Eine erste duenne Laufzeit-Fassade fuer genau diese Tools liegt jetzt in:
 - [llmToolHost.ts](C:/remoterep/worlddesc/packages/world/src/playerView/llmToolHost.ts:1)
 
 Damit ist der Contract nicht mehr nur dokumentiert, sondern bereits als testbarer Adapter auf `PlayerWorldView` vorhanden.
+
+Auf Runner-Ebene gibt es zusaetzlich einen persistenten Usage-Counter in `tokens.usage.json`, damit reale OpenAI-Tokenkosten ueber REPL-Sessions hinweg beobachtbar bleiben.

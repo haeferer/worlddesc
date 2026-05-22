@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-22T13:43:33.402Z",
+  "totals": {
+    "requests": 29,
+    "promptTokens": 150717,
+    "completionTokens": 1361,
+    "totalTokens": 152078
+  },
+  "models": {
+    "gpt-4.1-mini": {
+      "requests": 29,
+      "promptTokens": 150717,
+      "completionTokens": 1361,
+      "totalTokens": 152078
+    }
+  },
+  "last": {
+    "model": "gpt-4.1-mini",
+    "recordedAt": "2026-05-22T13:43:33.402Z",
+    "promptTokens": 4510,
+    "completionTokens": 63,
+    "totalTokens": 4573
+  }
+}

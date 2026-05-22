@@ -449,7 +449,7 @@ Wichtig:
 - sie trennt jetzt auch sichtbare Raumobjekte, Inventarobjekte und bekannte, aktuell unsichtbare Objekte
 - sie liefert dazu jetzt explizite Wahrnehmungszustaende wie `visible`, `inventory` und `known`
 - sie liefert ausserdem Zugaenglichkeitsgruende wie `visible`, `inventory`, `closed-container`, `other-room` oder `offstage`
-- sie kann pro Szene eine vereinheitlichte `availableActions`-Liste fuer Wege und Interaktionen liefern
+- sie kann pro Szene eine vereinheitlichte `sampleActions`-Liste fuer Wege und Interaktionen liefern
 - die Aktionsabwicklung arbeitet im Kern mit strukturierten Spielerkommandos
 - eine separate Hilfsschicht kann diese Kommandos deterministisch aus Text, Aliasen und Hints ableiten
 - `additionalText` wird bereits bis in normale Interaktionen durchgereicht und dort fuer deklarative Eingaberegeln ausgewertet

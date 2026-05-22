@@ -286,7 +286,7 @@ Ziel:
 
 Aktueller Fortschritt:
 
-- `PlayerSceneView` kann jetzt bereits `availableActions` als vereinheitlichte Liste aus Wegen und Objektinteraktionen liefern
+- `PlayerSceneView` kann jetzt bereits `sampleActions` als vereinheitlichte Liste aus Wegen und Objektinteraktionen liefern
 - jede Aktion traegt eine stabile `commandId` und den dazugehoerigen strukturierten Befehl
 
 Naechste Schaerfung:
