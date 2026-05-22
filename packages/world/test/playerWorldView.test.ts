@@ -382,6 +382,92 @@ describe("PlayerWorldView", () => {
     });
   });
 
+  it("resolves a simple intent command into a structured action", async () => {
+    const view = await loadSamplePlayerView();
+
+    const result = view.resolveIntent({
+      verb: "open",
+      object1: "kiste"
+    });
+
+    expect(result).toEqual({
+      status: "resolved",
+      command: {
+        kind: "interaction",
+        objectId: "kiste",
+        actionId: "oeffnen"
+      },
+      verb: "open",
+      object1: "kiste",
+      object2: undefined,
+      usedObject2AsHint: false,
+      sourceActionId: "interaction:kiste:oeffnen"
+    });
+  });
+
+  it("supports object2 as a validated hint on unlock intents", async () => {
+    const view = await loadSamplePlayerView();
+
+    view.getNewEvents();
+    view.performAction({
+      kind: "interaction",
+      objectId: "kiste",
+      actionId: "oeffnen"
+    });
+    view.performAction({
+      kind: "interaction",
+      objectId: "schluessel",
+      actionId: "nehmen"
+    });
+    view.performAction({
+      kind: "way",
+      actionId: "nord"
+    });
+
+    const resolution = view.resolveIntent({
+      verb: "unlock",
+      object1: "huettenTuer",
+      object2: "schluessel"
+    });
+
+    expect(resolution).toEqual({
+      status: "resolved",
+      command: {
+        kind: "interaction",
+        objectId: "huettenTuer",
+        actionId: "entriegeln"
+      },
+      verb: "unlock",
+      object1: "huettenTuer",
+      object2: "schluessel",
+      usedObject2AsHint: true,
+      sourceActionId: "interaction:huettenTuer:entriegeln"
+    });
+  });
+
+  it("rejects object2 on verbs that do not support a second target yet", async () => {
+    const view = await loadInteractionLabPlayerView();
+
+    const resolution = view.resolveIntent({
+      verb: "open",
+      object1: "roteKiste",
+      object2: "blaueKiste"
+    });
+
+    expect(resolution).toEqual({
+      status: "rejected",
+      issue: {
+        code: "object2-not-supported",
+        message: 'Intent verb "open" does not currently support object2',
+        retryable: true,
+        verb: "open",
+        object1: "roteKiste",
+        object2: "blaueKiste",
+        candidateActionIds: undefined
+      }
+    });
+  });
+
   it("executes structured way commands", async () => {
     const view = await loadSamplePlayerView();
 

@@ -389,6 +389,12 @@ Eine erste TypeScript-Skizze dafuer liegt jetzt in [intentTypes.ts](C:/remoterep
 
 Ergaenzend gibt es jetzt auch eine erste `intent surface` in [intentSurface.ts](C:/remoterep/worlddesc/packages/world/src/playerView/intentSurface.ts:1), die aus einer Szene Verben, Ziele und vorgeschlagene Kandidaten ableitet.
 
+Zusaetzlich gibt es jetzt einen ersten kleinen Resolver in [intentResolution.ts](C:/remoterep/worlddesc/packages/world/src/playerView/intentResolution.ts:1):
+
+- er mappt einfache Intents deterministisch auf konkrete Player-Aktionen
+- er bleibt dabei absichtlich klein und ehrlich
+- `object2` wird vorerst nur als validierter Zweitbezug und Hint behandelt, nicht als eigene Weltlogik
+
 Wichtig dabei:
 
 - `additionalText` ist kein separater Freitext-Kanal in die Weltlogik
@@ -535,6 +541,24 @@ Aus dieser Architektur folgen die naechsten sinnvollen Schritte:
 2. Ein internes Wahrnehmungs-/Eventmodell fuer neue Informationen definieren.
 3. Eine schmale `LLMWorldView`-Fassade auf die Runtime setzen.
 4. Sicherstellen, dass das LLM nie rohe World-Daten oder versteckte Runtime-Daten direkt erhaelt.
+
+## Erster Function-Contract
+
+Fuer einen ersten echten LLM-Versuch ist jetzt ein kleiner Funktionsvertrag vorgeschlagen:
+
+- `get_current_scene()`
+- `get_known_object(objectId)`
+- `resolve_intent(intent)`
+- `perform_action(command)`
+- `get_new_events()`
+
+Wichtig dabei:
+
+- `resolve_intent` und `perform_action` bleiben bewusst getrennt
+- der erste Versuch soll dadurch ein sauberer Interface-Test sein und kein undurchsichtiger Gesamtzauber
+
+Der konkrete Zuschnitt ist in [first-llm-contract.md](C:/remoterep/worlddesc/docs/first-llm-contract.md:1) beschrieben.
+Eine erste testbare Host-Fassade dafuer existiert jetzt in [llmToolHost.ts](C:/remoterep/worlddesc/packages/world/src/playerView/llmToolHost.ts:1).
 
 ## Praktische Leitregel fuer den ersten LLM-Versuch
 

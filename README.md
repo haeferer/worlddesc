@@ -20,6 +20,8 @@ Wichtige Dateien:
 - `docs/assets.md`
 - `docs/asset-instancing.md`
 - `docs/llm-interface.md`
+- `docs/first-llm-contract.md`
+- `docs/first-llm-tool-schemas.md`
 - `docs/action-feedback.md`
 - `docs/pre-llm-topics.md`
 - `docs/worldusage.md`

@@ -272,6 +272,26 @@ describe("interaction-lab sample", () => {
     );
   });
 
+  it("can execute an input intent through the intent bridge", async () => {
+    const view = await loadInteractionLabView();
+
+    view.getNewEvents();
+    const result = view.performIntent({
+      verb: "input",
+      object1: "safe",
+      inputText: "4862"
+    });
+
+    expect(result.accepted).toBe(true);
+    expect(result.text).toMatch(/entriegelt/i);
+    expect(result.turn).toEqual(
+      expect.objectContaining({
+        newlyAvailableActionIds: ["interaction:safe:oeffnen"],
+        newlyKnownKnowledge: ["safe_entriegelt"]
+      })
+    );
+  });
+
   it("reports missing structured input with a follow-up hint", async () => {
     const view = await loadInteractionLabView();
 

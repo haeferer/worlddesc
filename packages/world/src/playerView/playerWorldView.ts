@@ -2,6 +2,7 @@ import { resolvePlayerActionCommand } from "./actionResolution.js";
 import { createActionFailure, validateActionInput } from "./actionFeedback.js";
 import { createPerceptionEvent } from "./events.js";
 import { buildIntentSurface } from "./intentSurface.js";
+import { resolvePlayerIntent } from "./intentResolution.js";
 import { buildAvailableInteractionView } from "./interactionViews.js";
 import { createEmptyPlayerMemory, markEventDelivered, rememberObjectText } from "./memory.js";
 import { describeObjectPerception } from "./objectPerception.js";
@@ -22,7 +23,7 @@ import type {
   PlayerWorldView,
   WorldRuntimePort
 } from "./types.js";
-import type { PlayerIntentSurfaceView } from "./intentTypes.js";
+import type { PlayerIntentCommand, PlayerIntentResolution, PlayerIntentSurfaceView } from "./intentTypes.js";
 
 export interface PlayerWorldViewContext {
   runtime: WorldRuntimePort;
@@ -45,6 +46,10 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
 
   getIntentSurface(): PlayerIntentSurfaceView {
     return buildIntentSurface(this.getCurrentScene());
+  }
+
+  resolveIntent(intent: PlayerIntentCommand): PlayerIntentResolution {
+    return resolvePlayerIntent(this.getCurrentScene(), intent);
   }
 
   getKnownObject(objectId: string): KnownObjectView | null {
@@ -90,6 +95,41 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
     const events = this.pendingEvents.map((event) => ({ ...event }));
     this.clearPendingEvents();
     return events;
+  }
+
+  performIntent(intent: PlayerIntentCommand): PlayerActionResultView {
+    const resolution = this.resolveIntent(intent);
+    if (resolution.status === "resolved") {
+      return this.performAction(resolution.command);
+    }
+
+    return this.buildRejectedResult(
+      createActionFailure({
+        code:
+          resolution.issue.code === "unknown-object1"
+            ? "unknown-object"
+            : resolution.issue.code === "missing-object1"
+              ? "unknown-action"
+              : resolution.issue.code === "ambiguous-intent"
+                ? "action-not-available"
+                : resolution.issue.code === "object2-not-supported" || resolution.issue.code === "intent-not-available"
+                  ? "action-not-available"
+                  : "unknown-action",
+        kind:
+          resolution.issue.code === "unknown-object1" || resolution.issue.code === "unknown-object2"
+            ? "unknown"
+            : "availability",
+        message: resolution.issue.message,
+        retryable: resolution.issue.retryable,
+        objectId: resolution.issue.object1,
+        actionId: resolution.issue.verb,
+        details: resolution.issue.candidateActionIds
+          ? {
+              allowedValues: resolution.issue.candidateActionIds
+            }
+          : undefined
+      })
+    );
   }
 
   performAction(action: PlayerActionCommand): PlayerActionResultView {

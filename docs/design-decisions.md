@@ -248,12 +248,21 @@ Das trennt:
 
 - `Action grammar`: welche Form eine Aktion grundsaetzlich haben darf
 - `Affordance hints`: welche Objekte, Wege und naheliegenden Aktionen die Szene aktuell zeigt
+- `Intent resolution`: wie eine breitere Spielerabsicht deterministisch auf eine konkrete Engine-Aktion zurueckgefuehrt wird
 
 Zusaetzlich gilt jetzt:
 
 - zwischen allgemeiner Aktionsgrammatik und konkreten Szenenaktionen liegt eine kleine kanonische Verbschicht
 - diese Verben sind ein festes Inventar fuer die spaetere LLM-Seite
 - die aktuelle Szene markiert nur, welche dieser Verben gerade durch konkrete Aktionen nahegelegt werden
+
+Fuer `object2` gilt im aktuellen ersten Schnitt:
+
+- `object2` ist noch keine allgemeine Runtime-Semantik
+- es ist zunaechst ein strukturierter Zweitbezug auf Intent-Ebene
+- der Resolver darf `object2` validieren und als Hint verwenden
+- fuer `unlock` kann dieser Hint bereits sauber mitlaufen
+- fuer andere Verben wird ein nicht unterstuetzter Zweitbezug aktuell explizit und strukturiert abgelehnt
 
 ### Strukturierte Eingabe bleibt Teil normaler Interaktionen
 

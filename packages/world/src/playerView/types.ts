@@ -9,7 +9,7 @@ import type {
   WayExecution,
   WorldDocument
 } from "../types.js";
-import type { PlayerIntentSurfaceView } from "./intentTypes.js";
+import type { PlayerIntentCommand, PlayerIntentResolution, PlayerIntentSurfaceView } from "./intentTypes.js";
 
 export interface WorldRuntimePort {
   readonly world: WorldDocument;
@@ -268,5 +268,7 @@ export interface PlayerWorldView {
   getIntentSurface(): PlayerIntentSurfaceView;
   getKnownObject(objectId: string): KnownObjectView | null;
   getNewEvents(): PerceptionEvent[];
+  resolveIntent(intent: PlayerIntentCommand): PlayerIntentResolution;
+  performIntent(intent: PlayerIntentCommand): PlayerActionResultView;
   performAction(action: PlayerActionCommand): PlayerActionResultView;
 }

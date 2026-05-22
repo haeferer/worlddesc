@@ -121,6 +121,13 @@ Noch offen ist, wie diese Form spaeter exakt getypt wird. Aber fachlich ist die 
 
 Eine erste TypeScript-Skizze fuer dieses Zielmodell liegt jetzt in `packages/world/src/playerView/intentTypes.ts`.
 
+Aktueller Fortschritt:
+
+- es gibt jetzt einen ersten deterministischen Resolver von `PlayerIntentCommand` nach `PlayerActionCommand`
+- `object2` wird dabei vorerst bewusst klein behandelt: als validierter Zweitbezug und Hint, nicht als eigene Runtime-Logik
+- fuer `unlock` kann `object2` bereits als sauberer Begleithinweis mitlaufen
+- fuer andere Verben wie `open` fuehrt `object2` aktuell bewusst zu einer strukturierten Ablehnung statt zu stiller Magie
+
 Ziel:
 
 - Das LLM soll nie raten muessen, wie ein Funktionsaufruf aufgebaut ist.
@@ -341,6 +348,12 @@ Naheliegende Kandidaten:
 - `get_known_object(objectId)`
 - `perform_action(command)`
 - `poll_new_events()`
+
+Aktueller Vorschlag:
+
+- der erste Contract wird jetzt bewusst als kleines 2-Stufen-Modell gedacht
+- `resolve_intent(intent)` und `perform_action(command)` bleiben getrennt
+- die vorgeschlagene erste Fassung ist in `docs/first-llm-contract.md` festgehalten
 
 Ziel:
 
