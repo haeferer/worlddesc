@@ -11,7 +11,7 @@ export interface ReplConfig {
 export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process.env): ReplConfig {
   const defaults: ReplConfig = {
     worldPath: resolve(cwd, "sample/test.world.yaml"),
-    model: env.OPENAI_MODEL ?? "gpt-4.1-mini",
+    model: env.OPENAI_MODEL ?? "gpt-5-mini",
     debug: false,
     maxToolRounds: 8
   };
@@ -60,7 +60,7 @@ export function buildHelpText(): string {
     "",
     "Options:",
     "  --world <path>               Path to the world file. Default: sample/test.world.yaml",
-    "  --model <name>               OpenAI model name. Default: OPENAI_MODEL or gpt-4.1-mini",
+    "  --model <name>               OpenAI model name. Default: OPENAI_MODEL or gpt-5-mini",
     "  --debug                      Print tool calls and internal summaries",
     "  --max-tool-rounds <number>   Maximum tool-call loops per user turn. Default: 8",
     "  --system-prompt-file <path>  Optional file whose contents are appended to the default system prompt",

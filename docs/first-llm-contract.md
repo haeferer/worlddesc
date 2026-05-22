@@ -114,6 +114,15 @@ Der erste LLM-Versuch sollte idealerweise diesem Muster folgen:
 5. wenn `rejected`: Rueckfrage, Umformulierung oder Alternativvorschlag
 6. das LLM nutzt `turn` und `scene` fuer seine Antwort an den Spieler
 
+## Empfohlenes Startmodell
+
+Fuer den ersten manuellen Test dieses Contracts ist aktuell `gpt-5-mini` die empfohlene Startwahl im Runner.
+
+Die Idee dabei:
+
+- zuerst ein schnelles, klar tool-orientiertes Modell pruefen
+- danach bei Bedarf mit `gpt-5.2` auf mehr Qualitaet vergleichen
+
 ## Warum nicht direkt `perform_intent()` als Hauptweg
 
 Obwohl das Projekt bereits einen zusammengesetzten Weg `performIntent()` kennt, sollte der erste LLM-Versuch ihn nicht als Hauptschnitt verwenden.

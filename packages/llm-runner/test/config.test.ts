@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseReplArgs } from "../src/config.js";
+import { buildHelpText, parseReplArgs } from "../src/config.js";
 
 describe("llm-runner config", () => {
   it("parses defaults", () => {
@@ -29,5 +29,15 @@ describe("llm-runner config", () => {
       debug: true,
       maxToolRounds: 12
     });
+  });
+
+  it("falls back to gpt-5-mini without OPENAI_MODEL", () => {
+    const config = parseReplArgs([], "C:/repo", {} as NodeJS.ProcessEnv);
+
+    expect(config.model).toBe("gpt-5-mini");
+  });
+
+  it("mentions the gpt-5-mini default in help text", () => {
+    expect(buildHelpText()).toContain("OPENAI_MODEL or gpt-5-mini");
   });
 });

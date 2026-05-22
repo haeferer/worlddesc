@@ -64,6 +64,22 @@ Zusatzlich:
 - `OPENAI_API_KEY` aus `.env` oder Umgebungsvariablen
 - optional `OPENAI_MODEL` als Standard fuer `--model`
 
+## Empfohlener Start
+
+Fuer den ersten echten REPL-Versuch ist aktuell `gpt-5-mini` das empfohlene Startmodell.
+
+Gruende:
+
+- schnelle Turn-Zyklen in der Console-REPL
+- guter Fit fuer klar definierte Tool-Aufrufe
+- guenstiger und unkomplizierter als ein groesseres Modell fuer die erste Debugging-Runde
+
+Empfohlene Reihenfolge:
+
+- zuerst `gpt-5-mini`
+- danach bei Bedarf Vergleich mit `gpt-5.2`
+- optional `gpt-4.1-mini` als guenstige Kontrollgruppe
+
 ## Aktuelle REPL-Kommandos
 
 Zur Laufzeit gibt es zunaechst nur wenige lokale Kommandos:
