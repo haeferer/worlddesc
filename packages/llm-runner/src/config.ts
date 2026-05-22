@@ -5,6 +5,7 @@ export interface ReplConfig {
   model: string;
   debug: boolean;
   maxToolRounds: number;
+  maxHistoryMessages: number;
   includeSampleActions: boolean;
   usageFilePath: string;
   character?: string;
@@ -14,9 +15,10 @@ export interface ReplConfig {
 export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process.env): ReplConfig {
   const defaults: ReplConfig = {
     worldPath: resolve(cwd, "sample/test.world.yaml"),
-    model: env.OPENAI_MODEL ?? "gpt-5-mini",
+    model: env.OPENAI_MODEL ?? "gpt-5.4-mini",
     debug: false,
     maxToolRounds: 8,
+    maxHistoryMessages: 4,
     includeSampleActions: true,
     usageFilePath: resolve(cwd, "tokens.usage.json")
   };
@@ -42,6 +44,13 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
         continue;
       case "--max-tool-rounds":
         defaults.maxToolRounds = parsePositiveInteger(requireValue(args, index, "--max-tool-rounds"), "--max-tool-rounds");
+        index += 2;
+        continue;
+      case "--max-history-messages":
+        defaults.maxHistoryMessages = parsePositiveInteger(
+          requireValue(args, index, "--max-history-messages"),
+          "--max-history-messages"
+        );
         index += 2;
         continue;
       case "--hide-sample-actions":
@@ -77,9 +86,10 @@ export function buildHelpText(): string {
     "",
     "Options:",
     "  --world <path>               Path to the world file. Default: sample/test.world.yaml",
-    "  --model <name>               OpenAI model name. Default: OPENAI_MODEL or gpt-5-mini",
+    "  --model <name>               OpenAI model name. Default: OPENAI_MODEL or gpt-5.4-mini",
     "  --debug                      Print tool calls and internal summaries",
     "  --max-tool-rounds <number>   Maximum tool-call loops per user turn. Default: 8",
+    "  --max-history-messages <n>   Maximum persisted chat history messages between turns. Default: 4",
     "  --hide-sample-actions        Hide sampleActions from the LLM-facing scene and action results",
     "  --usage-file <path>          Path to the persistent token usage file. Default: tokens.usage.json",
     "  --character <name>           Load prompts/<name>.character.txt and append it to the base system prompt",

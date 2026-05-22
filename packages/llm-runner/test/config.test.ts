@@ -13,6 +13,7 @@ describe("llm-runner config", () => {
       model: "gpt-test",
       debug: false,
       maxToolRounds: 8,
+      maxHistoryMessages: 4,
       includeSampleActions: true,
       usageFilePath: "C:\\repo\\tokens.usage.json",
       character: undefined
@@ -29,6 +30,8 @@ describe("llm-runner config", () => {
         "--debug",
         "--max-tool-rounds",
         "12",
+        "--max-history-messages",
+        "6",
         "--usage-file",
         "./tmp/usage.json",
         "--character",
@@ -43,16 +46,17 @@ describe("llm-runner config", () => {
       model: "gpt-x",
       debug: true,
       maxToolRounds: 12,
+      maxHistoryMessages: 6,
       includeSampleActions: true,
       usageFilePath: "C:\\repo\\tmp\\usage.json",
       character: "warm-guide"
     });
   });
 
-  it("falls back to gpt-5-mini without OPENAI_MODEL", () => {
+  it("falls back to gpt-5.4-mini without OPENAI_MODEL", () => {
     const config = parseReplArgs([], "C:/repo", {} as NodeJS.ProcessEnv);
 
-    expect(config.model).toBe("gpt-5-mini");
+    expect(config.model).toBe("gpt-5.4-mini");
   });
 
   it("can hide sampleActions for the llm view", () => {
@@ -61,10 +65,11 @@ describe("llm-runner config", () => {
     expect(config.includeSampleActions).toBe(false);
   });
 
-  it("mentions the gpt-5-mini default in help text", () => {
-    expect(buildHelpText()).toContain("OPENAI_MODEL or gpt-5-mini");
+  it("mentions the gpt-5.4-mini default in help text", () => {
+    expect(buildHelpText()).toContain("OPENAI_MODEL or gpt-5.4-mini");
     expect(buildHelpText()).toContain("--hide-sample-actions");
     expect(buildHelpText()).toContain("--usage-file");
     expect(buildHelpText()).toContain("--character");
+    expect(buildHelpText()).toContain("--max-history-messages");
   });
 });

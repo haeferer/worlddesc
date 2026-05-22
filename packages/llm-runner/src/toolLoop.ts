@@ -14,6 +14,7 @@ export interface ToolLoopOptions {
   userMessage: string;
   debug: boolean;
   maxToolRounds: number;
+  maxHistoryMessages: number;
   includeSampleActions: boolean;
   usageTracker?: UsageTracker;
   history: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
@@ -100,6 +101,11 @@ export async function runToolLoop(options: ToolLoopOptions): Promise<ToolLoopRes
         );
         if (options.debug) {
           options.onDebugLog?.(`result ${toolCall.function.name} ${JSON.stringify(result)}`);
+          if (toolCall.function.name === "perform_action" && isActionResultWithScene(result)) {
+            options.onDebugLog?.(
+              `focus room=${result.scene.roomId} actionFocus=${JSON.stringify(result.scene.currentActionFocus ?? null)}`
+            );
+          }
         }
 
         history.push({
@@ -120,7 +126,7 @@ export async function runToolLoop(options: ToolLoopOptions): Promise<ToolLoopRes
 
     return {
       assistantText,
-      history
+      history: buildPersistedConversationHistory(history, options.maxHistoryMessages)
     };
   }
 
@@ -235,4 +241,45 @@ function sanitizeActionResultForModel<T>(result: T, includeSampleActions: boolea
     ...actionResult,
     scene: sanitizeSceneForModel(actionResult.scene, false)
   };
+}
+
+export function trimConversationHistory(
+  history: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+  maxHistoryMessages: number
+): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
+  if (history.length <= maxHistoryMessages) {
+    return [...history];
+  }
+
+  return history.slice(-maxHistoryMessages);
+}
+
+export function buildPersistedConversationHistory(
+  history: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+  maxHistoryMessages: number
+): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
+  const persisted = history.filter(isPersistableConversationMessage);
+  return trimConversationHistory(persisted, maxHistoryMessages);
+}
+
+function isPersistableConversationMessage(
+  message: OpenAI.Chat.Completions.ChatCompletionMessageParam
+): boolean {
+  if (message.role === "user") {
+    return typeof message.content === "string" && message.content.trim().length > 0;
+  }
+
+  if (message.role === "assistant") {
+    const assistantMessage = message as OpenAI.Chat.Completions.ChatCompletionAssistantMessageParam & {
+      tool_calls?: unknown;
+    };
+
+    return !assistantMessage.tool_calls && typeof assistantMessage.content === "string" && assistantMessage.content.trim().length > 0;
+  }
+
+  return false;
+}
+
+function isActionResultWithScene(value: unknown): value is { scene: PlayerSceneView } {
+  return typeof value === "object" && value !== null && "scene" in value;
 }

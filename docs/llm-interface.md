@@ -450,6 +450,23 @@ Zusaetzlich liefert die Player-Sicht bei erfolgreichen Aktionen jetzt auch eine 
 
 Damit muss eine spaetere LLM-Schicht nicht selbst zwei Szenen vergleichen, um zu verstehen, was in diesem Zug eigentlich neu passiert ist.
 
+Ergaenzend gibt es jetzt auch einen kleinen sprachneutralen Verlaufskontext:
+
+- `currentActionFocus`
+
+Dieser enthaelt nur:
+
+- das zuletzt bearbeitete Objekt, falls vorhanden
+- die zuletzt ausgefuehrte oder gescheiterte Aktion
+- ob sie erfolgreich war
+- den Primaertext des Ergebnisses
+
+Wichtig:
+
+- das ist kein Pronomen-Resolver
+- es ist nur strukturierter Verlaufskontext fuer das LLM
+- die sprachliche Aufloesung von "sie", "ihn" oder "das" bleibt weiterhin Aufgabe des LLM
+
 ## Aktueller PlayerView-Schnitt
 
 Die aktuelle Richtung der Spielersicht ist damit schon klarer umrissen:

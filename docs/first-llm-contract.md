@@ -34,12 +34,14 @@ Enthaelt insbesondere:
 - bekannte, gerade nicht sichtbare Objekte
 - `sampleActions`
 - `intentSurface`
+- optional `currentActionFocus`
 - aktuelle vorbereitete Texte
 
 Zweck:
 
 - das LLM bekommt eine kompakte, deterministische Sicht auf die aktuelle Szene
 - `sampleActions` sind dabei nur Beispiel- und Aufloesungshilfen, keine vollstaendige Whitelist aller legitimen Spielerabsichten
+- `currentActionFocus` kann zusaetzlich das zuletzt bearbeitete Objekt und das Primaerergebnis der letzten Aktion sichtbar machen, ohne selbst Sprachlogik zu enthalten
 
 ## 2. `get_known_object(objectId)`
 
@@ -117,12 +119,12 @@ Der erste LLM-Versuch sollte idealerweise diesem Muster folgen:
 
 ## Empfohlenes Startmodell
 
-Fuer den ersten manuellen Test dieses Contracts ist aktuell `gpt-5-mini` die empfohlene Startwahl im Runner.
+Fuer den ersten manuellen Test dieses Contracts ist aktuell `gpt-5.4-mini` die empfohlene Startwahl im Runner.
 
 Die Idee dabei:
 
-- zuerst ein schnelles, klar tool-orientiertes Modell pruefen
-- danach bei Bedarf mit `gpt-5.2` auf mehr Qualitaet vergleichen
+- zuerst ein kleines, aber deutlich stabileres Tool-Use-Modell pruefen
+- danach bei Bedarf mit `gpt-5.1` auf noch mehr Zuverlaessigkeit vergleichen
 
 ## Warum nicht direkt `perform_intent()` als Hauptweg
 

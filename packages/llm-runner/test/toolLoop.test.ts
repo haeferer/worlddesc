@@ -6,7 +6,12 @@ import {
   createWorldRuntime,
   loadWorldDocument
 } from "@worlddesc/world";
-import { callToolWithPolicy, createToolExecutionState } from "../src/index.js";
+import {
+  buildPersistedConversationHistory,
+  callToolWithPolicy,
+  createToolExecutionState,
+  trimConversationHistory
+} from "../src/index.js";
 
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -120,5 +125,61 @@ describe("llm-runner tool loop policy", () => {
 
     expect(result.accepted).toBe(true);
     expect(result.scene.sampleActions).toEqual([]);
+  });
+
+  it("trims persisted chat history to the configured maximum", () => {
+    const trimmed = trimConversationHistory(
+      [
+        { role: "user", content: "eins" },
+        { role: "assistant", content: "zwei" },
+        { role: "user", content: "drei" },
+        { role: "assistant", content: "vier" },
+        { role: "user", content: "fuenf" }
+      ],
+      4
+    );
+
+    expect(trimmed).toEqual([
+      { role: "assistant", content: "zwei" },
+      { role: "user", content: "drei" },
+      { role: "assistant", content: "vier" },
+      { role: "user", content: "fuenf" }
+    ]);
+  });
+
+  it("persists only plain user and assistant text messages between turns", () => {
+    const persisted = buildPersistedConversationHistory(
+      [
+        { role: "user", content: "oeffne die kiste" },
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call_1",
+              type: "function",
+              function: {
+                name: "resolve_intent",
+                arguments: "{\"intent\":{\"verb\":\"open\",\"object1\":\"kiste\"}}"
+              }
+            }
+          ]
+        },
+        {
+          role: "tool",
+          tool_call_id: "call_1",
+          content: "{\"status\":\"resolved\"}"
+        },
+        { role: "assistant", content: "Du hebst den Deckel." },
+        { role: "user", content: "nimm den schluessel" }
+      ],
+      4
+    );
+
+    expect(persisted).toEqual([
+      { role: "user", content: "oeffne die kiste" },
+      { role: "assistant", content: "Du hebst den Deckel." },
+      { role: "user", content: "nimm den schluessel" }
+    ]);
   });
 });

@@ -5,8 +5,13 @@ export function createEmptyPlayerMemory(): PlayerMemory {
     knownKnowledge: [],
     seenRooms: [],
     knownObjects: {},
-    deliveredEventIds: []
+    deliveredEventIds: [],
+    currentActionFocus: undefined
   };
+}
+
+export function setCurrentActionFocus(memory: PlayerMemory, focus: PlayerMemory["currentActionFocus"]): void {
+  memory.currentActionFocus = focus ? { ...focus } : undefined;
 }
 
 export function markRoomSeen(memory: PlayerMemory, roomId: string): void {

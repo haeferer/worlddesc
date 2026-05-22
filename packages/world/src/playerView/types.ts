@@ -39,6 +39,7 @@ export interface PlayerMemory {
   seenRooms: string[];
   knownObjects: Record<string, KnownObjectMemory>;
   deliveredEventIds: string[];
+  currentActionFocus?: PlayerActionFocusView;
 }
 
 export interface KnownObjectMemory {
@@ -115,6 +116,7 @@ export interface PlayerSceneView {
   inventoryObjectIds: string[];
   newEvents: PerceptionEvent[];
   sampleActions: PlayerActionOptionView[];
+  currentActionFocus?: PlayerActionFocusView;
 }
 
 export interface KnownObjectView {
@@ -250,6 +252,13 @@ export interface PlayerActionResultView {
   scene: PlayerSceneView;
   failure?: PlayerActionFailure;
   turn?: PlayerTurnSummaryView;
+}
+
+export interface PlayerActionFocusView {
+  objectId?: string;
+  actionId: string;
+  accepted: boolean;
+  primaryResultText?: string;
 }
 
 export interface PlayerTurnSummaryView {

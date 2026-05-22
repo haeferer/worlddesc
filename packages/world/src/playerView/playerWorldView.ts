@@ -4,7 +4,7 @@ import { createPerceptionEvent } from "./events.js";
 import { buildIntentSurface } from "./intentSurface.js";
 import { resolvePlayerIntent } from "./intentResolution.js";
 import { buildAvailableInteractionView } from "./interactionViews.js";
-import { createEmptyPlayerMemory, markEventDelivered, rememberObjectText } from "./memory.js";
+import { createEmptyPlayerMemory, markEventDelivered, rememberObjectText, setCurrentActionFocus } from "./memory.js";
 import { describeObjectPerception } from "./objectPerception.js";
 import {
   buildPlayerSceneView,
@@ -303,13 +303,20 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
         events.map((event) => event.id),
         text
       );
+      setCurrentActionFocus(this.memory, {
+        objectId: resolvedAction.kind === "interaction" ? resolvedAction.objectId : undefined,
+        actionId: resolvedAction.kind === "interaction" ? resolvedAction.interactionId : resolvedAction.wayId,
+        accepted: true,
+        primaryResultText: turn.primaryResultText ?? text
+      });
+      const sceneWithFocus = buildPlayerSceneView(runtime, this.memory, this.pendingEvents);
       this.clearPendingEvents();
 
       return {
         accepted: true,
         text,
         events,
-        scene,
+        scene: sceneWithFocus,
         turn
       };
     } catch {
@@ -344,6 +351,12 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
   }
 
   private buildRejectedResult(failure: PlayerActionResultView["failure"]): PlayerActionResultView {
+    setCurrentActionFocus(this.memory, {
+      objectId: failure?.objectId,
+      actionId: failure?.actionId ?? "unknown",
+      accepted: false,
+      primaryResultText: failure?.message
+    });
     const scene = this.getCurrentScene();
     return {
       accepted: false,

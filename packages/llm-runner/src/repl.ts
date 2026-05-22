@@ -74,6 +74,7 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
         userMessage: line,
         debug: config.debug,
         maxToolRounds: config.maxToolRounds,
+        maxHistoryMessages: config.maxHistoryMessages,
         includeSampleActions: config.includeSampleActions,
         usageTracker,
         history,
@@ -92,6 +93,7 @@ function printBanner(config: ReplConfig): void {
   output.write(`World: ${config.worldPath}\n`);
   output.write(`Model: ${config.model}\n`);
   output.write(`Debug: ${config.debug ? "on" : "off"}\n`);
+  output.write(`Max history messages: ${config.maxHistoryMessages}\n`);
   output.write(`Sample actions for LLM: ${config.includeSampleActions ? "visible" : "hidden"}\n`);
   output.write(`Character: ${config.character ?? "none"}\n`);
   output.write(`Usage file: ${config.usageFilePath}\n`);

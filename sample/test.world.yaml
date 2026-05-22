@@ -24,6 +24,9 @@ interactionTypes:
   unlock:
     title: Entriegeln
     desc: Ein verschlossenes Objekt mit einem passenden Mittel entriegeln.
+  toggle:
+    title: Betaetigen
+    desc: Etwas ein-, aus- oder umschalten.
 
 objects:
   sonne:
@@ -287,10 +290,10 @@ objects:
         result:
           text: Du nimmst die Laterne mit. Ohne Licht willst du hier nicht wieder hinaus.
       einschalten:
-        type: open
+        type: toggle
         title: Laterne einschalten
         desc: Die Laterne auf kleiner Flamme anzuenden.
-        aliases: [laterne einschalten, lampe anmachen, licht an]
+        aliases: [laterne einschalten, laterne anzuenden, laterne anmachen, lampe anmachen, licht an]
         availableWhen:
           all:
             - ref: laterne

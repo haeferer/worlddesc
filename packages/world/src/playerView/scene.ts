@@ -12,6 +12,7 @@ import type {
   KnownSceneObjectView,
   PerceptionEvent,
   PlayerActionOptionView,
+  PlayerActionFocusView,
   PlayerMemory,
   PlayerSceneObjectView,
   PlayerSceneView,
@@ -86,7 +87,8 @@ export function buildPlayerSceneView(
     })),
     inventoryObjectIds,
     newEvents: pendingEvents.map((event) => ({ ...event })),
-    sampleActions
+    sampleActions,
+    currentActionFocus: memory.currentActionFocus ? { ...memory.currentActionFocus } : undefined
   };
 }
 

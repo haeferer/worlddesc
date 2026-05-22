@@ -45,6 +45,7 @@ describe("LlmToolHost", () => {
     expect(scene.roomId).toBe("wiese");
     expect(scene.objects.map((item) => item.objectId)).toEqual(["sonne", "kiste", "beutel"]);
     expect(scene.sampleActions.map((item) => item.commandId)).toContain("interaction:kiste:oeffnen");
+    expect(scene.currentActionFocus).toBeUndefined();
   });
 
   it("can resolve and execute a simple open flow through tools", async () => {
@@ -81,6 +82,12 @@ describe("LlmToolHost", () => {
     });
 
     expect(result.accepted).toBe(true);
+    expect(result.scene.currentActionFocus).toEqual({
+      objectId: "kiste",
+      actionId: "oeffnen",
+      accepted: true,
+      primaryResultText: "Du hebst den Deckel. In der Kiste liegt ein kleiner Eisenschluessel."
+    });
     expect(result.turn).toEqual(
       expect.objectContaining({
         newlyVisibleObjectIds: ["schluessel"],

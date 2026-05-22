@@ -57,6 +57,7 @@ Die REPL unterstuetzt derzeit:
 - `--model <name>`
 - `--debug`
 - `--max-tool-rounds <number>`
+- `--max-history-messages <n>`
 - `--hide-sample-actions`
 - `--usage-file <path>`
 - `--character <name>`
@@ -73,19 +74,19 @@ Standard fuer den Usage-Counter:
 
 ## Empfohlener Start
 
-Fuer den ersten echten REPL-Versuch ist aktuell `gpt-5-mini` das empfohlene Startmodell.
+Fuer den ersten echten REPL-Versuch ist aktuell `gpt-5.4-mini` das empfohlene Startmodell.
 
 Gruende:
 
-- schnelle Turn-Zyklen in der Console-REPL
-- guter Fit fuer klar definierte Tool-Aufrufe
-- guenstiger und unkomplizierter als ein groesseres Modell fuer die erste Debugging-Runde
+- deutlich bessere Tool-Disziplin im bisherigen Runner-Test
+- weiterhin ein kleines Modell mit gutem Kosten-/Qualitaetsverhaeltnis
+- sauberer im Umgang mit Einzelschrittlogik, Raumzustaenden und Toolgrenzen als `gpt-4o-mini`
 
 Empfohlene Reihenfolge:
 
-- zuerst `gpt-5-mini`
-- danach bei Bedarf Vergleich mit `gpt-5.2`
-- optional `gpt-4.1-mini` als guenstige Kontrollgruppe
+- zuerst `gpt-5.4-mini`
+- danach bei Bedarf Vergleich mit `gpt-5.1`
+- `gpt-4o-mini` oder `gpt-4.1-mini` eher als guenstige Kontrollgruppe
 
 Fuer A/B-Tests der Tool-Disziplin ist zusaetzlich sinnvoll:
 
@@ -215,6 +216,16 @@ Warum:
 - die World-Engine und `PlayerWorldView` liefern bereits sehr viel frischen, strukturierten Kontext
 - dadurch braucht der Runner vermutlich deutlich weniger freie Text-History als ein normaler Chatbot
 - jede zusaetzliche alte Nachricht drueckt nur weiter auf Kosten und Kontext
+
+Aktueller Default:
+
+- `--max-history-messages 4`
+
+Das ist absichtlich klein gehalten:
+
+- lieber strukturierter Weltkontext
+- weniger freie Chat-History
+- bessere Kostenkontrolle
 
 Naheliegende Optimierungsrichtung:
 

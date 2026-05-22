@@ -50,6 +50,7 @@ describe("PlayerWorldView", () => {
     expect(scene.ways.map((item) => item.wayId)).toEqual(["nord"]);
     expect(scene.inventoryObjects).toEqual([]);
     expect(scene.knownButNotVisibleObjects).toEqual([]);
+    expect(scene.currentActionFocus).toBeUndefined();
     expect(scene.sampleActions.map((item) => item.commandId)).toEqual([
       "way:nord",
       "interaction:sonne:ansehen",
@@ -203,6 +204,12 @@ describe("PlayerWorldView", () => {
     );
     expect(result.turn?.newEventIds).toHaveLength(2);
     expect(result.turn?.newEventIds).toContain("object:schluessel:desc");
+    expect(result.scene.currentActionFocus).toEqual({
+      objectId: "kiste",
+      actionId: "oeffnen",
+      accepted: true,
+      primaryResultText: "Du hebst den Deckel. In der Kiste liegt ein kleiner Eisenschluessel."
+    });
     expect(result.events).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -274,6 +281,12 @@ describe("PlayerWorldView", () => {
       })
     );
     expect(result.turn?.newEventIds).toHaveLength(1);
+    expect(result.scene.currentActionFocus).toEqual({
+      objectId: "schluessel",
+      actionId: "nehmen",
+      accepted: true,
+      primaryResultText: "Du nimmst den kleinen Eisenschluessel an dich."
+    });
     expect(result.scene.sampleActions.map((item) => item.commandId)).toContain("interaction:schluessel:ansehen");
   });
 
@@ -445,6 +458,59 @@ describe("PlayerWorldView", () => {
     });
   });
 
+  it("resolves lantern ignition as a toggle intent once the lantern is reachable", async () => {
+    const view = await loadSamplePlayerView();
+
+    view.getNewEvents();
+    view.performAction({
+      kind: "interaction",
+      objectId: "kiste",
+      actionId: "oeffnen"
+    });
+    view.performAction({
+      kind: "interaction",
+      objectId: "schluessel",
+      actionId: "nehmen"
+    });
+    view.performAction({
+      kind: "way",
+      actionId: "nord"
+    });
+    view.performAction({
+      kind: "interaction",
+      objectId: "huettenTuer",
+      actionId: "entriegeln"
+    });
+    view.performAction({
+      kind: "interaction",
+      objectId: "huettenTuer",
+      actionId: "oeffnen"
+    });
+    view.performAction({
+      kind: "way",
+      actionId: "huette"
+    });
+
+    const resolution = view.resolveIntent({
+      verb: "toggle",
+      object1: "laterne"
+    });
+
+    expect(resolution).toEqual({
+      status: "resolved",
+      command: {
+        kind: "interaction",
+        objectId: "laterne",
+        actionId: "einschalten"
+      },
+      verb: "toggle",
+      object1: "laterne",
+      object2: undefined,
+      usedObject2AsHint: false,
+      sourceActionId: "interaction:laterne:einschalten"
+    });
+  });
+
   it("rejects object2 on verbs that do not support a second target yet", async () => {
     const view = await loadInteractionLabPlayerView();
 
@@ -501,6 +567,12 @@ describe("PlayerWorldView", () => {
       retryable: false,
       objectId: "huettenTuer",
       actionId: "oeffnen"
+    });
+    expect(result.scene.currentActionFocus).toEqual({
+      objectId: "huettenTuer",
+      actionId: "oeffnen",
+      accepted: false,
+      primaryResultText: 'Object "huettenTuer" is not currently accessible'
     });
   });
 

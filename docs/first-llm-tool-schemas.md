@@ -55,6 +55,12 @@ Beispiel:
   ],
   "inventoryObjects": [],
   "knownButNotVisibleObjects": [],
+  "currentActionFocus": {
+    "objectId": "kiste",
+    "actionId": "oeffnen",
+    "accepted": true,
+    "primaryResultText": "Du hebst den Deckel. In der Kiste liegt ein kleiner Eisenschluessel."
+  },
   "sampleActions": [
     {
       "commandId": "interaction:kiste:oeffnen",
