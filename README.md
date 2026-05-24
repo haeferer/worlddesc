@@ -27,6 +27,7 @@ Wichtige Dateien:
 - `docs/narrative-guide.md`
 - `docs/narrative-guide-mixing.md`
 - `docs/writing-narrative-guides.md`
+- `docs/project-scaffold.md`
 - `docs/llm-interface.md`
 - `docs/llm-runner.md`
 - `docs/first-llm-contract.md`
@@ -80,6 +81,7 @@ Geplanter Startpunkt:
 - `packages/llm-runner` kapselt den ersten OpenAI-basierten REPL-Runner ueber der Player-Sicht.
 - der REPL-Runner kann optional ueber `--narrative-guide-mix` einen gemischten `narrativeContext` aus Guide-Dateien laden
 - der REPL-Runner kann aktuell zwischen `--api-mode chat` und `--api-mode responses` umgeschaltet werden
+- `worlddesc create <dir>` scaffoldet jetzt ein neues Authoring-Projekt mit World, Guide, Prompt, Docs und npm-Skripten
 
 Release-Ablauf:
 
@@ -98,6 +100,7 @@ Dabei gilt:
 
 Gedachte NPX-Einstiege nach dem Publish:
 
+- `npx @worlddesc/world@latest create ./my-world`
 - `npx @worlddesc/world@latest checkworld ./sample/test.world.yaml`
 - `npx @worlddesc/world@latest checkasset ./sample/assets/safe.object-asset.yaml`
 - `npx @worlddesc/llm-runner@latest --debug`

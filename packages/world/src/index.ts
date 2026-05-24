@@ -1,4 +1,5 @@
 export * from "./assetTypes.js";
+export * from "./createProject.js";
 export * from "./assets/expandWorldAssetInstances.js";
 export * from "./assets/resolveObjectAssetReference.js";
 export * from "./loadObjectAsset.js";

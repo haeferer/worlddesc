@@ -12,8 +12,17 @@ It contains:
 
 CLI entry points:
 
+- `npx @worlddesc/world@latest create ./my-world`
 - `npx @worlddesc/world@latest checkworld ./sample/test.world.yaml`
 - `npx @worlddesc/world@latest checkasset ./sample/assets/safe.object-asset.yaml`
+
+The `create` command scaffolds:
+
+- a starter `world/main.world.yaml`
+- a minimal narrative guide and guide mix
+- a project character prompt
+- `AGENTS.md` and authoring docs
+- npm scripts for validation and REPL usage
 
 Published bin:
 
