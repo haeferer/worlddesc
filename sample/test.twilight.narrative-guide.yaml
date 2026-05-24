@@ -1,0 +1,25 @@
+guide:
+  kind: narrativeGuide
+  id: waldpfadTwilightGuide
+  title: Abendliche Nachschaerfung fuer den Waldpfad
+  desc: Ein kleiner Overlay-Guide fuer daemmerige, vorsichtigere Erzaehlung.
+  forWorld: Der Waldpfad
+
+world:
+  tone: [quiet, twilight, watchful]
+  narrativeHints: [ruhe-vor-vertiefung, helligkeit-verliert-boden]
+
+rooms:
+  wieseVorDemWald:
+    tone: [threshold, watchful, dimming]
+    sensoryHints: [cooler-air, longer-shadows]
+  huetteInnen:
+    tone: [musty, enclosed, uneasy]
+    narrativeHints: [nicht-gemutlich-sondern-zurueckgehalten]
+
+objects:
+  huettenTuer:
+    tone: [stubborn, old, reluctant]
+  laterne:
+    tone: [fragile, hopeful, needed]
+    narrativeHints: [licht-ist-entscheidung, klein-aber-wichtig]

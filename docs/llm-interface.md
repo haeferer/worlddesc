@@ -467,6 +467,17 @@ Wichtig:
 - es ist nur strukturierter Verlaufskontext fuer das LLM
 - die sprachliche Aufloesung von "sie", "ihn" oder "das" bleibt weiterhin Aufgabe des LLM
 
+Zusaetzlich ist jetzt eine erste Andockstelle fuer spaetere semantische Fuehrung vorgesehen:
+
+- optionaler `narrativeContext` an der Szene
+- optionale narrative Fragmente direkt an sichtbaren oder bekannten Objektansichten
+
+Wichtig:
+
+- diese Ebene ueberschreibt keine physischen Beschreibungen
+- sie liefert nur einen kleinen, bereits gemischten Regieausschnitt
+- die physische World bleibt dadurch bewusst frei von Theme- oder Stilverdrahtung
+
 ## Aktueller PlayerView-Schnitt
 
 Die aktuelle Richtung der Spielersicht ist damit schon klarer umrissen:

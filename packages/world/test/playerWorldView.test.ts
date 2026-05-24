@@ -24,6 +24,45 @@ async function loadInteractionLabPlayerView() {
   return createPlayerWorldView({ runtime });
 }
 
+async function loadSamplePlayerViewWithNarrative() {
+  const source = await readFile(resolve(testDir, "../../../sample/test.world.yaml"), "utf8");
+  const runtime = createWorldRuntime(loadWorldDocument(source));
+  return createPlayerWorldView({
+    runtime,
+    narrativeContextProvider: {
+      getSceneNarrativeContext(request) {
+        return {
+          mixId: "testMix",
+          world: {
+            tone: ["quiet", "rustic"]
+          },
+          room: request.roomId === "wiese" ? { tone: ["warm", "open"] } : undefined,
+          objects: {
+            kiste: {
+              narrativeHints: ["first-discovery"]
+            }
+          }
+        };
+      },
+      getObjectNarrativeContext(request) {
+        if (request.objectId === "kiste") {
+          return {
+            tone: ["humble", "promising"]
+          };
+        }
+
+        if (request.objectId === "schluessel") {
+          return {
+            associations: ["next-step"]
+          };
+        }
+
+        return undefined;
+      }
+    }
+  });
+}
+
 describe("PlayerWorldView", () => {
   it("builds a player-facing scene with texts, objects and ways", async () => {
     const view = await loadSamplePlayerView();
@@ -127,6 +166,31 @@ describe("PlayerWorldView", () => {
         })
       ])
     );
+  });
+
+  it("can expose a small mixed narrative context without changing physical world facts", async () => {
+    const view = await loadSamplePlayerViewWithNarrative();
+
+    const scene = view.getCurrentScene();
+
+    expect(scene.roomId).toBe("wiese");
+    expect(scene.narrativeContext).toEqual({
+      mixId: "testMix",
+      world: {
+        tone: ["quiet", "rustic"]
+      },
+      room: {
+        tone: ["warm", "open"]
+      },
+      objects: {
+        kiste: {
+          narrativeHints: ["first-discovery"]
+        }
+      }
+    });
+    expect(scene.objects.find((item) => item.objectId === "kiste")?.narrative).toEqual({
+      tone: ["humble", "promising"]
+    });
   });
 
   it("maps richer scene actions onto the fixed intent verb inventory", async () => {
@@ -243,6 +307,17 @@ describe("PlayerWorldView", () => {
       })
     );
     expect(known?.knownTexts[0]).toMatch(/truhe|kiste/i);
+  });
+
+  it("can attach narrative context to known object views through the provider hook", async () => {
+    const view = await loadSamplePlayerViewWithNarrative();
+
+    view.getCurrentScene();
+    const known = view.getKnownObject("kiste");
+
+    expect(known?.narrative).toEqual({
+      tone: ["humble", "promising"]
+    });
   });
 
   it("surfaces inventory objects in the scene after taking them", async () => {

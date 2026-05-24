@@ -85,6 +85,7 @@ export interface PlayerSceneObjectView {
   availableInteractionIds: string[];
   availableInteractions: AvailableInteractionView[];
   preparedTexts: PreparedTextBlock[];
+  narrative?: PlayerNarrativeNodeView;
 }
 
 export interface KnownSceneObjectView {
@@ -96,6 +97,7 @@ export interface KnownSceneObjectView {
   lastSeenAt?: string;
   knownKnowledge: string[];
   knownTexts: string[];
+  narrative?: PlayerNarrativeNodeView;
 }
 
 export interface PlayerWayView {
@@ -117,6 +119,7 @@ export interface PlayerSceneView {
   newEvents: PerceptionEvent[];
   sampleActions: PlayerActionOptionView[];
   currentActionFocus?: PlayerActionFocusView;
+  narrativeContext?: PlayerSceneNarrativeContextView;
 }
 
 export interface KnownObjectView {
@@ -131,6 +134,47 @@ export interface KnownObjectView {
   knownKnowledge: string[];
   availableInteractionIds: string[];
   availableInteractions: AvailableInteractionView[];
+  narrative?: PlayerNarrativeNodeView;
+}
+
+export interface PlayerNarrativeNodeView {
+  tone?: string[];
+  associations?: string[];
+  narrativeHints?: string[];
+  sensoryHints?: string[];
+  taboos?: string[];
+  desc?: string;
+}
+
+export interface PlayerSceneNarrativeContextView {
+  mixId?: string;
+  world?: PlayerNarrativeNodeView;
+  room?: PlayerNarrativeNodeView;
+  objects: Record<string, PlayerNarrativeNodeView>;
+  currentActionFocusObject?: PlayerNarrativeNodeView;
+}
+
+export interface PlayerSceneNarrativeContextRequest {
+  roomId: string;
+  visibleObjectIds: string[];
+  inventoryObjectIds: string[];
+  knownButNotVisibleObjectIds: string[];
+  currentActionFocusObjectId?: string;
+}
+
+export interface PlayerObjectNarrativeContextRequest {
+  objectId: string;
+  roomId: string;
+  perception: PlayerObjectPerceptionKind;
+  visible: boolean;
+  accessible: boolean;
+  accessibilityReason: PlayerObjectAccessibilityReason;
+  currentActionFocus: boolean;
+}
+
+export interface PlayerNarrativeContextProvider {
+  getSceneNarrativeContext(request: PlayerSceneNarrativeContextRequest): PlayerSceneNarrativeContextView | undefined;
+  getObjectNarrativeContext?(request: PlayerObjectNarrativeContextRequest): PlayerNarrativeNodeView | undefined;
 }
 
 export interface AvailableInteractionView {

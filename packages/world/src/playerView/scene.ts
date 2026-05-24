@@ -14,6 +14,8 @@ import type {
   PlayerActionOptionView,
   PlayerActionFocusView,
   PlayerMemory,
+  PlayerNarrativeContextProvider,
+  PlayerNarrativeNodeView,
   PlayerSceneObjectView,
   PlayerSceneView,
   PreparedTextBlock,
@@ -23,7 +25,8 @@ import type {
 export function buildPlayerSceneView(
   runtime: WorldRuntimePort,
   memory: PlayerMemory,
-  pendingEvents: PerceptionEvent[]
+  pendingEvents: PerceptionEvent[],
+  narrativeProvider?: PlayerNarrativeContextProvider
 ): PlayerSceneView {
   const roomId = runtime.getCurrentRoomId();
   const room = runtime.getCurrentRoom();
@@ -38,9 +41,11 @@ export function buildPlayerSceneView(
     }
   ];
 
-  const objects = visibleObjectIds.map((objectId) => buildSceneObjectView(runtime, memory, pendingEvents, objectId, true));
+  const objects = visibleObjectIds.map((objectId) =>
+    buildSceneObjectView(runtime, memory, pendingEvents, objectId, true, memory, narrativeProvider)
+  );
   const inventoryObjects = inventoryObjectIds.map((objectId) =>
-    buildSceneObjectView(runtime, memory, pendingEvents, objectId, false)
+    buildSceneObjectView(runtime, memory, pendingEvents, objectId, false, memory, narrativeProvider)
   );
   const visibleOrInventory = new Set([...visibleObjectIds, ...inventoryObjectIds]);
   const knownButNotVisibleObjects: KnownSceneObjectView[] = Object.entries(memory.knownObjects)
@@ -55,7 +60,18 @@ export function buildPlayerSceneView(
         accessibilityReason: perception.accessibilityReason,
         lastSeenAt: known.lastSeenAt,
         knownKnowledge: [...known.knownKnowledge],
-        knownTexts: [...known.knownTexts]
+        knownTexts: [...known.knownTexts],
+        narrative: cloneNarrativeNode(
+          narrativeProvider?.getObjectNarrativeContext?.({
+            objectId,
+            roomId,
+            perception: perception.perception,
+            visible: false,
+            accessible: perception.accessible,
+            accessibilityReason: perception.accessibilityReason,
+            currentActionFocus: memory.currentActionFocus?.objectId === objectId
+          })
+        )
       };
     });
   const sampleActions: PlayerActionOptionView[] = [
@@ -88,7 +104,16 @@ export function buildPlayerSceneView(
     inventoryObjectIds,
     newEvents: pendingEvents.map((event) => ({ ...event })),
     sampleActions,
-    currentActionFocus: memory.currentActionFocus ? { ...memory.currentActionFocus } : undefined
+    currentActionFocus: memory.currentActionFocus ? { ...memory.currentActionFocus } : undefined,
+    narrativeContext: cloneSceneNarrativeContext(
+      narrativeProvider?.getSceneNarrativeContext({
+        roomId,
+        visibleObjectIds,
+        inventoryObjectIds,
+        knownButNotVisibleObjectIds: knownButNotVisibleObjects.map((item) => item.objectId),
+        currentActionFocusObjectId: memory.currentActionFocus?.objectId
+      })
+    )
   };
 }
 
@@ -97,7 +122,9 @@ function buildSceneObjectView(
   memory: PlayerMemory,
   pendingEvents: PerceptionEvent[],
   objectId: string,
-  visible: boolean
+  visible: boolean,
+  actionMemory: PlayerMemory,
+  narrativeProvider?: PlayerNarrativeContextProvider
 ): PlayerSceneObjectView {
   const object = runtime.world.objects[objectId];
   const objectMemory = memory.knownObjects[objectId];
@@ -115,6 +142,17 @@ function buildSceneObjectView(
     accessibilityReason: perception.accessibilityReason,
     availableInteractionIds: availableInteractions.map((item) => item.interactionId),
     availableInteractions: availableInteractions.map(buildAvailableInteractionView),
+    narrative: cloneNarrativeNode(
+      narrativeProvider?.getObjectNarrativeContext?.({
+        objectId,
+        roomId: runtime.getCurrentRoomId(),
+        perception: perception.perception,
+        visible,
+        accessible: perception.accessible,
+        accessibilityReason: perception.accessibilityReason,
+        currentActionFocus: actionMemory.currentActionFocus?.objectId === objectId
+      })
+    ),
     preparedTexts: [
       {
         kind: "object",
@@ -241,4 +279,14 @@ function enqueueStableEvent(
 
 function hasPendingEvent(pendingEvents: PerceptionEvent[], eventId: string): boolean {
   return pendingEvents.some((event) => event.id === eventId && event.isNew);
+}
+
+function cloneNarrativeNode(node: PlayerNarrativeNodeView | undefined): PlayerNarrativeNodeView | undefined {
+  return node ? structuredClone(node) : undefined;
+}
+
+function cloneSceneNarrativeContext(
+  context: PlayerSceneView["narrativeContext"] | undefined
+): PlayerSceneView["narrativeContext"] {
+  return context ? structuredClone(context) : undefined;
 }

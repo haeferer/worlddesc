@@ -38,6 +38,7 @@ Wichtig:
 - `sampleActions` sind absichtlich nur ein Beispielschnitt der aktuell direkt aufloesbaren Szenenaktionen
 - sie begrenzen nicht die breitere Intent-Grammatik des LLM
 - der Runner kann sie fuer A/B-Tests optional ganz aus der LLM-Sicht entfernen
+- `narrativeContext` ist optional und liefert nur den aktuell relevanten semantischen Ausschnitt
 
 Beispiel:
 
@@ -60,6 +61,20 @@ Beispiel:
     "actionId": "oeffnen",
     "accepted": true,
     "primaryResultText": "Du hebst den Deckel. In der Kiste liegt ein kleiner Eisenschluessel."
+  },
+  "narrativeContext": {
+    "mixId": "waldpfadDefaultMix",
+    "world": {
+      "tone": ["quiet", "rustic", "fairy-tale-edge"]
+    },
+    "room": {
+      "tone": ["warm", "open", "safe"]
+    },
+    "objects": {
+      "kiste": {
+        "narrativeHints": ["einfaches-abenteuerobjekt", "fruehe-belohnung"]
+      }
+    }
   },
   "sampleActions": [
     {

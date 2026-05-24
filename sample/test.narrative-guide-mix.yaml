@@ -1,0 +1,14 @@
+mix:
+  kind: narrativeGuideMix
+  id: waldpfadDefaultMix
+  title: Standard-Mix fuer die Adventure-Referenzwelt
+  desc: Mischt einen Basis-Guide mit einer spaeteren atmosphaerischen Nachschaerfung.
+  forWorld: Der Waldpfad
+
+layers:
+  - id: base
+    guide: ./test.narrative-guide.yaml
+    desc: Grundton und erste semantische Verankerung der Referenzwelt.
+  - id: twilight
+    guide: ./test.twilight.narrative-guide.yaml
+    desc: Spaeterer Overlay-Layer, der einzelne Toene gezielt nachschaerft.

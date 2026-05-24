@@ -4,12 +4,24 @@
       "*.object-asset.yaml",
       "*.object-asset.yml"
     ],
+    "./schema/narrative-guide.schema.json": [
+      "*.narrative-guide.yaml",
+      "*.narrative-guide.yml"
+    ],
+    "./schema/narrative-guide-mix.schema.json": [
+      "*.narrative-guide-mix.yaml",
+      "*.narrative-guide-mix.yml"
+    ],
     "./schema/world.schema.json": [
       "*.world.yaml",
       "*.world.yml"
     ]
   },
   "files.associations": {
+    "*.narrative-guide-mix.yaml": "yaml",
+    "*.narrative-guide-mix.yml": "yaml",
+    "*.narrative-guide.yaml": "yaml",
+    "*.narrative-guide.yml": "yaml",
     "*.object-asset.yaml": "yaml",
     "*.object-asset.yml": "yaml",
     "*.world.yaml": "yaml",

@@ -48,7 +48,8 @@ export type FirstLlmToolResult<TName extends FirstLlmToolName> =
 export const FIRST_LLM_TOOL_CONTRACT: FirstLlmToolSpec[] = [
   {
     name: "get_current_scene",
-    description: "Return the current player-facing scene, including visible objects, inventory, known hidden objects, actions and intent hints.",
+    description:
+      "Return the current player-facing scene, including visible objects, inventory, known hidden objects, actions, intent hints and an optional narrative context slice.",
     argsExample: {}
   },
   {

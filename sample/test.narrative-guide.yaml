@@ -1,0 +1,49 @@
+guide:
+  kind: narrativeGuide
+  id: waldpfadGuide
+  title: Narrative Guide fuer den Waldpfad
+  desc: Ein kleiner semantischer Bedeutungsrahmen fuer die Beispielwelt.
+  forWorld: Der Waldpfad
+
+world:
+  tone: [quiet, rustic, fairy-tale-edge]
+  associations: [threshold, curiosity, old-places, small-discoveries]
+  narrativeHints: [von-hell-nach-dunkel, neugier-vor-gefahr]
+
+rooms:
+  wiese:
+    tone: [warm, open, safe]
+    associations: [summer, breath, daylight]
+    sensoryHints: [sun-on-skin, soft-grass, bright-air]
+  wieseVorDemWald:
+    tone: [threshold, watchful, uncertain]
+    associations: [border, hesitation, decision]
+    narrativeHints: [letzter-heller-ort, uebergang-zur-gefahr]
+  huetteInnen:
+    tone: [musty, enclosed, forgotten]
+    associations: [stale-air, paused-time, old-wood]
+    sensoryHints: [damp-wood, muffled-air, dust]
+  dunklerWald:
+    tone: [eerie, close, listening]
+    associations: [disorientation, wet-ground, hidden-paths]
+    sensoryHints: [cold-shadow, damp-earth, swallowed-sound]
+
+objects:
+  kiste:
+    tone: [humble, promising]
+    associations: [small-secret, first-discovery]
+    narrativeHints: [einfaches-abenteuerobjekt, fruehe-belohnung]
+  beutel:
+    tone: [plain, empty, careful]
+    associations: [false-lead, craftsmanship]
+  schluessel:
+    tone: [useful, tactile, transitional]
+    associations: [permission, access, next-step]
+  huettenTuer:
+    tone: [stubborn, old, significant]
+    associations: [threshold, resistance, permission]
+    narrativeHints: [nicht-nur-holz-sondern-grenze]
+  laterne:
+    tone: [fragile, hopeful]
+    associations: [guidance, courage, borrowed-light]
+    narrativeHints: [licht-gegen-dunkelheit, tragbare-orientierung]

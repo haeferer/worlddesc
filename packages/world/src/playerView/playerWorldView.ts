@@ -19,6 +19,7 @@ import type {
   PerceptionEvent,
   PlayerActionResultView,
   PlayerMemory,
+  PlayerNarrativeContextProvider,
   PlayerSceneView,
   PlayerWorldView,
   WorldRuntimePort
@@ -28,6 +29,7 @@ import type { PlayerIntentCommand, PlayerIntentResolution, PlayerIntentSurfaceVi
 export interface PlayerWorldViewContext {
   runtime: WorldRuntimePort;
   memory?: PlayerMemory;
+  narrativeContextProvider?: PlayerNarrativeContextProvider;
 }
 
 export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
@@ -41,7 +43,12 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
 
   getCurrentScene(): PlayerSceneView {
     this.capturePassiveObservations();
-    return buildPlayerSceneView(this.context.runtime, this.memory, this.pendingEvents);
+    return buildPlayerSceneView(
+      this.context.runtime,
+      this.memory,
+      this.pendingEvents,
+      this.context.narrativeContextProvider
+    );
   }
 
   getIntentSurface(): PlayerIntentSurfaceView {
@@ -86,7 +93,16 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
         : [],
       availableInteractions: this.context.runtime.isObjectAccessible(objectId)
         ? this.context.runtime.listAvailableInteractions(objectId).map(buildAvailableInteractionView)
-        : []
+        : [],
+      narrative: this.context.narrativeContextProvider?.getObjectNarrativeContext?.({
+        objectId,
+        roomId: this.context.runtime.getCurrentRoomId(),
+        perception: perception.perception,
+        visible: perception.visible,
+        accessible: perception.accessible,
+        accessibilityReason: perception.accessibilityReason,
+        currentActionFocus: this.memory.currentActionFocus?.objectId === objectId
+      })
     };
   }
 
@@ -293,7 +309,12 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
       }
 
       this.capturePassiveObservations();
-      const scene = buildPlayerSceneView(runtime, this.memory, this.pendingEvents);
+      const scene = buildPlayerSceneView(
+        runtime,
+        this.memory,
+        this.pendingEvents,
+        this.context.narrativeContextProvider
+      );
       const events = scene.newEvents.map((event) => ({ ...event }));
       const turn = buildTurnSummary(
         beforeScene,
@@ -309,7 +330,12 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
         accepted: true,
         primaryResultText: turn.primaryResultText ?? text
       });
-      const sceneWithFocus = buildPlayerSceneView(runtime, this.memory, this.pendingEvents);
+      const sceneWithFocus = buildPlayerSceneView(
+        runtime,
+        this.memory,
+        this.pendingEvents,
+        this.context.narrativeContextProvider
+      );
       this.clearPendingEvents();
 
       return {

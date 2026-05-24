@@ -323,6 +323,36 @@ Naechste bevorzugte Ausbaustufe:
 - spaeter gezielte Slots fuer Weltverbindungen wie "was liegt im Safe?"
 - keine freie Innenverdrahtung oder beliebigen Cross-Referenzen in der ersten Instanzierungsphase
 
+### Semantischer Deutungsrahmen soll als zweite Ebene kommen
+
+Neben der physischen World ist jetzt als weitere Richtung ein eigener `narrative guide` vorgemerkt.
+
+Leitidee:
+
+- die physische World bleibt die harte, pruefbare Wahrheit
+- ein `narrative guide` beschreibt keinen Physikzustand
+- er liefert stattdessen einen stabilen semantischen und erzählerischen Deutungsrahmen
+
+Aktueller bevorzugter Schnitt:
+
+- eigene YAML-Datei mit eigenem Schema
+- Anker zunaechst nur ueber bestehende `roomId` und `objectId`
+- kleine lokale Felder wie `tone`, `associations`, `narrativeHints` und `sensoryHints`
+- mehrere Guides sollen spaeter ueber ein eigenes Mix-Dokument in expliziter Reihenfolge kombiniert werden
+
+Wichtige Grenze:
+
+- diese Ebene soll zunaechst nicht direkt in die physische Runtime eingemischt werden
+- sie ist eher eine zweite Mixing-Ebene fuer spaetere LLM-nahe Sichtmodelle
+- der Guide darf keine harte Weltwahrheit ueberschreiben
+
+Bevorzugte Mischregeln fuer die naechste Phase:
+
+- spaetere Layer gewinnen gegenueber frueheren Layern
+- Listenfelder werden zunaechst ersetzt, nicht intelligent vereinigt
+- wenn ein Layer gegen die physische World auf nicht existierende `roomId` oder `objectId` zielt, ist das ein Fehler
+- wenn ein Layer nach der Mischung keine effektive Veraenderung bewirkt, soll das als Warnung sichtbar werden
+
 ### Player-Sicht soll klein und fachlich aufgeteilt wachsen
 
 Die spaetere Spielersicht soll nicht als einzelne grosse Runtime-Datei entstehen.

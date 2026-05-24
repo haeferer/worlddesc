@@ -35,6 +35,7 @@ Enthaelt insbesondere:
 - `sampleActions`
 - `intentSurface`
 - optional `currentActionFocus`
+- optional `narrativeContext`
 - aktuelle vorbereitete Texte
 
 Zweck:
@@ -42,6 +43,7 @@ Zweck:
 - das LLM bekommt eine kompakte, deterministische Sicht auf die aktuelle Szene
 - `sampleActions` sind dabei nur Beispiel- und Aufloesungshilfen, keine vollstaendige Whitelist aller legitimen Spielerabsichten
 - `currentActionFocus` kann zusaetzlich das zuletzt bearbeitete Objekt und das Primaerergebnis der letzten Aktion sichtbar machen, ohne selbst Sprachlogik zu enthalten
+- `narrativeContext` ist ein kleiner, bereits gemischter Regieausschnitt fuer Weltton, Raumton und relevante Objektdeutung, nicht die ganze Lore
 
 ## 2. `get_known_object(objectId)`
 

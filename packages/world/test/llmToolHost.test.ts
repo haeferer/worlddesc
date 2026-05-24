@@ -24,6 +24,30 @@ async function loadInteractionLabToolHost() {
   return createLlmToolHost(createPlayerWorldView({ runtime }));
 }
 
+async function loadNarrativeToolHost() {
+  const source = await readFile(resolve(testDir, "../../../sample/test.world.yaml"), "utf8");
+  const runtime = createWorldRuntime(loadWorldDocument(source));
+  return createLlmToolHost(
+    createPlayerWorldView({
+      runtime,
+      narrativeContextProvider: {
+        getSceneNarrativeContext() {
+          return {
+            mixId: "testMix",
+            world: {
+              tone: ["quiet"]
+            },
+            room: {
+              tone: ["warm"]
+            },
+            objects: {}
+          };
+        }
+      }
+    })
+  );
+}
+
 describe("LlmToolHost", () => {
   it("lists the first tool contract in a stable order", async () => {
     const host = await loadSampleToolHost();
@@ -46,6 +70,23 @@ describe("LlmToolHost", () => {
     expect(scene.objects.map((item) => item.objectId)).toEqual(["sonne", "kiste", "beutel"]);
     expect(scene.sampleActions.map((item) => item.commandId)).toContain("interaction:kiste:oeffnen");
     expect(scene.currentActionFocus).toBeUndefined();
+  });
+
+  it("passes through the optional narrative context slice in the current scene", async () => {
+    const host = await loadNarrativeToolHost();
+
+    const scene = host.callTool("get_current_scene", {});
+
+    expect(scene.narrativeContext).toEqual({
+      mixId: "testMix",
+      world: {
+        tone: ["quiet"]
+      },
+      room: {
+        tone: ["warm"]
+      },
+      objects: {}
+    });
   });
 
   it("can resolve and execute a simple open flow through tools", async () => {
