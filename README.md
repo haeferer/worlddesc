@@ -71,3 +71,17 @@ Geplanter Startpunkt:
 - `packages/llm-runner` kapselt den ersten OpenAI-basierten REPL-Runner ueber der Player-Sicht.
 - der REPL-Runner kann optional ueber `--narrative-guide-mix` einen gemischten `narrativeContext` aus Guide-Dateien laden
 - der REPL-Runner kann aktuell zwischen `--api-mode chat` und `--api-mode responses` umgeschaltet werden
+
+Release-Ablauf:
+
+- `npm run release:version -- patch`
+- `npm run release:version -- minor`
+- `npm run release:version -- major`
+- `npm run release:build`
+- `npm run release:publish`
+
+Gedachte NPX-Einstiege nach dem Publish:
+
+- `npx @worlddesc/world checkworld ./sample/test.world.yaml`
+- `npx @worlddesc/world checkasset ./sample/assets/safe.object-asset.yaml`
+- `npx @worlddesc/llm-runner --debug`

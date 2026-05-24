@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { resolve } from "node:path";

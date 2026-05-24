@@ -11,6 +11,9 @@
     "checkasset": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkAsset.js",
     "checkworld": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkWorld.js",
     "test": "npm run test -w @worlddesc/world && npm run test -w @worlddesc/llm-runner",
-    "llm:repl": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner && node ./packages/llm-runner/dist/cli.js"
+    "llm:repl": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner && node ./packages/llm-runner/dist/cli.js",
+    "release:version": "node ./scripts/release-version.mjs",
+    "release:build": "node ./scripts/release-build.mjs",
+    "release:publish": "node ./scripts/release-publish.mjs"
   }
 }

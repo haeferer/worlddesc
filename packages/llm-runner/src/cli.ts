@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import "dotenv/config";
 
 import { buildHelpText, parseReplArgs } from "./config.js";

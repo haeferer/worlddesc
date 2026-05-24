@@ -1,19 +1,24 @@
 {
   "name": "@worlddesc/world",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "checkasset": "./dist/checkAsset.js",
-    "checkworld": "./dist/checkWorld.js"
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "bin": "./dist/cli.js",
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -b",
     "checkasset": "node ./dist/checkAsset.js",
     "typecheck": "tsc -b --pretty false",
     "checkworld": "node ./dist/checkWorld.js",
+    "cli": "node ./dist/cli.js",
     "test": "vitest run"
   },
   "dependencies": {
