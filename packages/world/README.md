@@ -12,5 +12,15 @@ It contains:
 
 CLI entry points:
 
-- `npx @worlddesc/world checkworld ./sample/test.world.yaml`
-- `npx @worlddesc/world checkasset ./sample/assets/safe.object-asset.yaml`
+- `npx @worlddesc/world@latest checkworld ./sample/test.world.yaml`
+- `npx @worlddesc/world@latest checkasset ./sample/assets/safe.object-asset.yaml`
+
+Published bin:
+
+- `worlddesc`
+
+Schema packaging:
+
+- `schema/` in the repo root is the single source of truth
+- `packages/world/schema/` is only the synchronized package copy
+- `npm run prepare:schemas` refreshes the package copy before build and pack

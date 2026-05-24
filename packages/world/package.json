@@ -1,26 +1,29 @@
 {
   "name": "@worlddesc/world",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
+    "schema",
     "README.md"
   ],
   "bin": {
-    "world": "dist/cli.js"
+    "worlddesc": "dist/cli.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsc -b",
+    "prepare:schemas": "node ../../scripts/sync-package-schemas.mjs",
+    "build": "npm run prepare:schemas && tsc -b",
     "checkasset": "node ./dist/checkAsset.js",
     "typecheck": "tsc -b --pretty false",
     "checkworld": "node ./dist/checkWorld.js",
     "cli": "node ./dist/cli.js",
+    "prepack": "npm run prepare:schemas",
     "test": "vitest run"
   },
   "dependencies": {

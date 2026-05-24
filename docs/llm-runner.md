@@ -64,6 +64,7 @@ Die REPL unterstuetzt derzeit:
 - `--usage-file <path>`
 - `--character <name>`
 - `--system-prompt-file <path>`
+- `--print-system-prompt`
 
 Zusatzlich:
 
@@ -156,10 +157,22 @@ Beispielaufruf:
 npm run llm:repl -- --debug --character warm-guide
 ```
 
+Direkt aus dem npm-Paket:
+
+```bash
+npx @worlddesc/llm-runner@latest --debug --character warm-guide
+```
+
 Mit Narrative-Guide-Mix:
 
 ```bash
 npm run llm:repl -- --debug --character warm-guide --narrative-guide-mix ./sample/test.narrative-guide-mix.yaml
+```
+
+Direkt aus dem npm-Paket:
+
+```bash
+npx @worlddesc/llm-runner@latest --debug --character warm-guide --narrative-guide-mix ./sample/test.narrative-guide-mix.yaml
 ```
 
 Additiv mit einem freien Extra-Prompt:
@@ -217,6 +230,23 @@ Fuer Aenderungen am Speicherort:
 Zur direkten Kontrolle waehrend eines REPL-Laufs:
 
 - `/usage`
+
+## Verteilungs- und Publish-Grenze
+
+Fuer den Publish ist wichtig:
+
+- `@worlddesc/world` und `@worlddesc/llm-runner` werden als getrennte npm-Pakete veroeffentlicht
+- `@worlddesc/world` enthaelt zusaetzlich die synchronisierte Package-Kopie der JSON-Schemas
+- diese Package-Schemas werden nicht manuell gepflegt, sondern aus `schema/` im Repo-Root erzeugt
+- `release:build` prueft vor dem Build mit `check:schemas`, dass Root- und Package-Schemas nicht auseinanderlaufen
+
+Der praktische Smoke-Test nach einem Release ist damit:
+
+```bash
+npx @worlddesc/world@latest checkworld ./sample/test.world.yaml
+npx @worlddesc/world@latest checkasset ./sample/assets/safe.object-asset.yaml
+npx @worlddesc/llm-runner@latest --debug
+```
 
 ## API-Schnitt und History
 

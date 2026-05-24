@@ -56,6 +56,15 @@ Validierung:
 - `npm run checkasset -- <pfad-zum-asset>` prueft ein konkretes Objekt-Asset
 - dabei werden auch Startplatzierung, Inventar-Referenzen und Offstage-Objekte geprueft
 
+Schema-Quelle und Packaging:
+
+- `schema/` im Repo-Root ist die einzige kanonische Quelle fuer JSON-Schemas
+- `packages/world/schema/` ist nur ein synchronisierter Publish-Abdruck fuer das npm-Paket
+- `npm run sync:schemas` uebertraegt die Root-Schemas in das Paket
+- `npm run check:schemas` prueft, dass Package- und Root-Schemas nicht auseinanderlaufen
+- `npm run build` synchronisiert die Package-Schemas automatisch vor dem TypeScript-Build
+- `prepack` von `@worlddesc/world` synchronisiert die Schemas zusaetzlich direkt vor dem Paketbau
+
 Beispielwelten:
 
 - `sample/test.world.yaml` ist die kleine Adventure-Referenzwelt
@@ -80,8 +89,21 @@ Release-Ablauf:
 - `npm run release:build`
 - `npm run release:publish`
 
+Dabei gilt:
+
+- `release:version` hebt Root und beide Workspace-Pakete gemeinsam auf dieselbe Version
+- `release:build` fuehrt `typecheck`, Tests, `check:schemas` und den Workspace-Build aus
+- `release:publish` veroeffentlicht danach die beiden npm-Pakete
+- direkte manuelle Aenderungen unter `packages/world/schema/` sollten vermieden werden
+
 Gedachte NPX-Einstiege nach dem Publish:
 
-- `npx @worlddesc/world checkworld ./sample/test.world.yaml`
-- `npx @worlddesc/world checkasset ./sample/assets/safe.object-asset.yaml`
-- `npx @worlddesc/llm-runner --debug`
+- `npx @worlddesc/world@latest checkworld ./sample/test.world.yaml`
+- `npx @worlddesc/world@latest checkasset ./sample/assets/safe.object-asset.yaml`
+- `npx @worlddesc/llm-runner@latest --debug`
+
+Der veroeffentlichte Bin-Name von `@worlddesc/world` ist:
+
+- `worlddesc`
+
+Der direkte Paketaufruf ueber `npx @worlddesc/world@latest ...` ist fuer den normalen Smoke-Test aber der bequemste Weg.

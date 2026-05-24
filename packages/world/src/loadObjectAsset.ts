@@ -5,13 +5,13 @@ import type { ErrorObject, ValidateFunction } from "ajv";
 import Ajv2020 from "ajv/dist/2020.js";
 import { parse } from "yaml";
 
-import schema from "../../../schema/object-asset.schema.json" with { type: "json" };
+import schema from "../schema/object-asset.schema.json" with { type: "json" };
 import type { ObjectAssetDocument } from "./assetTypes.js";
 import { validateObjectAssetReferences as validateReferences } from "./validation/assetReferenceValidation.js";
 import { validateObjectState } from "./validation/stateSchemaValidation.js";
 
 const moduleDir = dirname(fileURLToPath(import.meta.url));
-const defaultSchemaPath = resolve(moduleDir, "../../../schema/object-asset.schema.json");
+const defaultSchemaPath = resolve(moduleDir, "../schema/object-asset.schema.json");
 
 type AjvLike = {
   compile<T>(schema: object): ValidateFunction<T>;

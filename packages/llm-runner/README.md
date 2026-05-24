@@ -13,5 +13,9 @@ It provides:
 Example:
 
 ```bash
-npx @worlddesc/llm-runner --debug --character warm-guide --narrative-guide-mix ./sample/test.narrative-guide-mix.yaml
+npx @worlddesc/llm-runner@latest --debug --character warm-guide --narrative-guide-mix ./sample/test.narrative-guide-mix.yaml
 ```
+
+Published bin:
+
+- `worlddesc-llm-repl`

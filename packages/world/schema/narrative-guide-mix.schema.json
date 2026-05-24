@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/narrative-guide-mix.schema.json",
+  "title": "NarrativeGuideMixDocument",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mix",
+    "layers"
+  ],
+  "properties": {
+    "mix": {
+      "$ref": "#/$defs/mixMeta"
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/layerRef"
+      }
+    }
+  },
+  "$defs": {
+    "mixMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "const": "narrativeGuideMix"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "desc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forWorld": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "layerRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "guide"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "guide": {
+          "type": "string",
+          "minLength": 1
+        },
+        "optional": {
+          "type": "boolean"
+        },
+        "desc": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

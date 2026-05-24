@@ -5,14 +5,14 @@ import type { ValidateFunction } from "ajv";
 import Ajv2020 from "ajv/dist/2020.js";
 import { parse } from "yaml";
 
-import schema from "../../../schema/world.schema.json" with { type: "json" };
+import schema from "../schema/world.schema.json" with { type: "json" };
 import { expandWorldAssetInstances } from "./assets/expandWorldAssetInstances.js";
 import type { WorldDocument } from "./types.js";
 import { validateWorldAssetReferences as validateFileAssetReferences } from "./assets/validateWorldAssetReferences.js";
 import { formatAjvErrors, validateWorldSemantics, WorldValidationError } from "./worldValidation.js";
 
 const moduleDir = dirname(fileURLToPath(import.meta.url));
-const defaultSchemaPath = resolve(moduleDir, "../../../schema/world.schema.json");
+const defaultSchemaPath = resolve(moduleDir, "../schema/world.schema.json");
 
 type AjvLike = {
   compile<T>(schema: object): ValidateFunction<T>;

@@ -1,0 +1,735 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/adventure-world.schema.json",
+  "title": "Adventure World Schema",
+  "description": "Schema fuer eine zustandsbasierte Adventure-/Audio-Spielwelt mit Raeumen, Objekten, Platzierung, Interaktionen, Bedingungen und Effekten.",
+  "type": "object",
+  "required": ["world", "player", "interactionTypes", "rooms", "objects", "placement"],
+  "additionalProperties": false,
+  "properties": {
+    "world": {
+      "$ref": "#/$defs/world"
+    },
+    "player": {
+      "$ref": "#/$defs/player"
+    },
+    "interactionTypes": {
+      "type": "object",
+      "description": "Globale semantische Interaktionstypen fuer Engine und LLM.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/interactionType"
+      }
+    },
+    "assetInstances": {
+      "type": "object",
+      "description": "Vorbereitete Asset-Instanzen fuer spaeteres Authoring-Merging. Werden aktuell noch nicht expandiert.",
+      "additionalProperties": {
+        "$ref": "#/$defs/assetInstance"
+      }
+    },
+    "rooms": {
+      "type": "object",
+      "description": "Alle Raeume der Welt.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/room"
+      }
+    },
+    "objects": {
+      "type": "object",
+      "description": "Globale Objektinstanzen der Welt.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/object"
+      }
+    },
+    "placement": {
+      "type": "object",
+      "description": "Initiale Aufenthaltsorte aller Objekte.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/objectPlacement"
+      }
+    }
+  },
+  "$defs": {
+    "world": {
+      "type": "object",
+      "description": "Globale Informationen ueber die Spielwelt.",
+      "required": ["title"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Titel der Spielwelt."
+        },
+        "desc": {
+          "type": "string",
+          "description": "Optionale Beschreibung der Spielwelt."
+        }
+      }
+    },
+    "player": {
+      "type": "object",
+      "description": "Startkontext des Spielers.",
+      "required": ["initialRoom"],
+      "additionalProperties": false,
+      "properties": {
+        "initialRoom": {
+          "type": "string",
+          "description": "ID des Raums, in dem der Spieler startet."
+        }
+      }
+    },
+    "interactionType": {
+      "type": "object",
+      "description": "Semantischer Grundtyp einer Interaktion.",
+      "required": ["title"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Kurzname des Interaktionstyps."
+        },
+        "desc": {
+          "type": "string",
+          "description": "Beschreibung der Bedeutung dieses Typs."
+        }
+      }
+    },
+    "assetInstance": {
+      "type": "object",
+      "description": "Vorbereitete Einbindung eines Objekt-Assets in eine World.",
+      "required": ["asset", "rootPlacement"],
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "type": "string",
+          "description": "Logische Asset-ID oder spaetere Asset-Referenz."
+        },
+        "rootPlacement": {
+          "$ref": "#/$defs/objectPlacement"
+        },
+        "objectOverrides": {
+          "type": "object",
+          "description": "Kleine Ueberschreibungen pro lokalem Asset-Objekt.",
+          "additionalProperties": {
+            "$ref": "#/$defs/assetObjectOverride"
+          }
+        },
+        "slotContents": {
+          "type": "object",
+          "description": "Externe Weltobjekte, die in benannte Slots des Assets eingehaengt werden.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "assetObjectOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "state": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "room": {
+      "type": "object",
+      "description": "Ein Raum oder Ort der Welt.",
+      "required": ["title", "desc"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Kurzname des Raums."
+        },
+        "desc": {
+          "type": "string",
+          "description": "Beschreibung des Raums."
+        },
+        "tags": {
+          "type": "array",
+          "description": "Optionale semantische Marker fuer Stimmung, Bedeutung, Themen oder Kategorien.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ways": {
+          "type": "object",
+          "description": "Moegliche Wege oder Uebergaenge in andere Raeume.",
+          "additionalProperties": {
+            "$ref": "#/$defs/way"
+          }
+        },
+        "onEnter": {
+          "type": "array",
+          "description": "Optionale Effekte beim Betreten des Raums.",
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        }
+      }
+    },
+    "way": {
+      "type": "object",
+      "description": "Ein Weg oder Ausgang aus einem Raum.",
+      "required": ["title", "desc", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Kurzname des Weges."
+        },
+        "desc": {
+          "type": "string",
+          "description": "Beschreibung des Weges."
+        },
+        "aliases": {
+          "type": "array",
+          "description": "Alternative Sprachformulierungen fuer Navigation.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target": {
+          "$ref": "#/$defs/roomTarget"
+        },
+        "availableWhen": {
+          "$ref": "#/$defs/conditionGroup"
+        }
+      }
+    },
+    "roomTarget": {
+      "type": "object",
+      "description": "Referenz auf einen Zielraum.",
+      "required": ["room"],
+      "additionalProperties": false,
+      "properties": {
+        "room": {
+          "type": "string",
+          "description": "ID des Zielraums."
+        }
+      }
+    },
+    "object": {
+      "type": "object",
+      "description": "Ein globales Weltobjekt.",
+      "required": ["title", "desc"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Kurzname des Objekts."
+        },
+        "desc": {
+          "type": "string",
+          "description": "Beschreibung des Objekts."
+        },
+        "aliases": {
+          "type": "array",
+          "description": "Alternative Begriffe fuer Sprachsteuerung.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Optionale semantische Eigenschaften des Objekts.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "portable": {
+          "type": "boolean",
+          "description": "Ob das Objekt grundsaetzlich ins Inventar bewegt werden darf."
+        },
+        "stateSchema": {
+          "$ref": "#/$defs/stateSchema"
+        },
+        "state": {
+          "type": "object",
+          "description": "Optionale explizite Startwerte fuer den Objektzustand. Die erlaubte Struktur kommt aus stateSchema.",
+          "additionalProperties": true
+        },
+        "interactions": {
+          "type": "object",
+          "description": "Interaktionen, die der Spieler mit diesem Objekt ausfuehren kann.",
+          "additionalProperties": {
+            "$ref": "#/$defs/interaction"
+          }
+        }
+      }
+    },
+    "objectPlacement": {
+      "type": "object",
+      "description": "Genau ein initialer Aufenthaltsort fuer ein Objekt.",
+      "additionalProperties": false,
+      "properties": {
+        "room": {
+          "type": "string",
+          "description": "Objekt liegt in einem Raum."
+        },
+        "inventory": {
+          "type": "string",
+          "description": "Objekt ist im Inventar eines Besitzers. Aktuell nur `player`."
+        },
+        "offstage": {
+          "type": "boolean",
+          "description": "Objekt ist ausserhalb der aktiven Szene.",
+          "const": true
+        },
+        "object": {
+          "type": "string",
+          "description": "Objekt liegt in einem anderen Objekt."
+        }
+      },
+      "oneOf": [
+        { "required": ["room"] },
+        { "required": ["inventory"] },
+        { "required": ["offstage"] },
+        { "required": ["object"] }
+      ]
+    },
+    "stateSchema": {
+      "type": "object",
+      "description": "JSON-Schema-artige Beschreibung des Objektzustands. Defaults werden beim Laden materialisiert.",
+      "required": ["type", "properties"],
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "const": "object"
+        },
+        "description": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/stateSchemaNode"
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": {
+          "type": "boolean"
+        }
+      }
+    },
+    "stateSchemaNode": {
+      "type": "object",
+      "description": "Teil eines zustandsbezogenen JSON Schemas.",
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "default": {},
+        "enum": {
+          "type": "array",
+          "items": {}
+        },
+        "const": {},
+        "minimum": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "items": {
+          "$ref": "#/$defs/stateSchemaNode"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/stateSchemaNode"
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": {
+          "type": "boolean"
+        }
+      }
+    },
+    "interaction": {
+      "type": "object",
+      "description": "Eine Interaktion mit einem Objekt.",
+      "required": ["title"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Optionaler globaler semantischer Interaktionstyp."
+        },
+        "title": {
+          "type": "string",
+          "description": "Kurzname der Interaktion."
+        },
+        "desc": {
+          "type": "string",
+          "description": "Beschreibung der Interaktion."
+        },
+        "intent": {
+          "type": "string",
+          "description": "Natuerliche Beschreibung der Spielerabsicht fuer LLMs."
+        },
+        "aliases": {
+          "type": "array",
+          "description": "Alternative Sprachformulierungen.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "availableWhen": {
+          "$ref": "#/$defs/conditionGroup"
+        },
+        "input": {
+          "$ref": "#/$defs/interactionInput"
+        },
+        "effects": {
+          "type": "array",
+          "description": "Effekte oder Weltveraenderungen dieser Interaktion.",
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        }
+      }
+    },
+    "interactionInput": {
+      "description": "Deklarative Eingaberegel fuer parameterisierte Interaktionen.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["mode"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "text"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "minLength": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maxLength": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pattern": {
+              "type": "string"
+            },
+            "applyInputTo": {
+              "$ref": "#/$defs/inputTarget"
+            },
+            "cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/inputCase"
+              }
+            },
+            "default": {
+              "$ref": "#/$defs/interactionOutcome"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["mode", "options"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "select"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "options": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/selectOption"
+              }
+            },
+            "applyInputTo": {
+              "$ref": "#/$defs/inputTarget"
+            },
+            "cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/inputCase"
+              }
+            },
+            "default": {
+              "$ref": "#/$defs/interactionOutcome"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["mode"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "number"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "step": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unit": {
+              "type": "string"
+            },
+            "applyInputTo": {
+              "$ref": "#/$defs/inputTarget"
+            },
+            "cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/inputCase"
+              }
+            },
+            "default": {
+              "$ref": "#/$defs/interactionOutcome"
+            }
+          }
+        }
+      ]
+    },
+    "inputCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "equals": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" }
+          ]
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        }
+      }
+    },
+    "inputTarget": {
+      "type": "object",
+      "required": ["ref", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "selectOption": {
+      "type": "object",
+      "required": ["value", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      }
+    },
+    "interactionOutcome": {
+      "type": "object",
+      "description": "Ausgang eines parameterisierten Interaktionszweigs.",
+      "additionalProperties": false,
+      "properties": {
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "description": "Rueckgabe oder Antwort einer Interaktion.",
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Antworttext fuer den Spieler."
+        },
+        "knowledge": {
+          "type": "array",
+          "description": "Wissensmarker, die der Spieler danach kennt.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "description": "Weltveraenderung oder Nebeneffekt.",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Art des Effekts.",
+          "enum": ["set", "say", "trigger", "move"]
+        },
+        "ref": {
+          "type": "string",
+          "description": "Referenz auf ein Zielobjekt."
+        },
+        "path": {
+          "type": "string",
+          "description": "Pfad innerhalb des Zielobjekts."
+        },
+        "value": {
+          "description": "Neuer Wert."
+        },
+        "text": {
+          "type": "string",
+          "description": "Text fuer say-Effekte."
+        },
+        "event": {
+          "type": "string",
+          "description": "Name eines Trigger-Events."
+        },
+        "to": {
+          "$ref": "#/$defs/objectPlacement"
+        }
+      }
+    },
+    "conditionGroup": {
+      "type": "object",
+      "description": "Logische Gruppierung von Bedingungen.",
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "type": "array",
+          "description": "Alle Bedingungen muessen wahr sein.",
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "any": {
+          "type": "array",
+          "description": "Mindestens eine Bedingung muss wahr sein.",
+          "items": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "not": {
+          "$ref": "#/$defs/condition"
+        }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "description": "Eine einzelne Bedingung.",
+      "required": ["ref"],
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "description": "Referenz auf ein Objekt."
+        },
+        "path": {
+          "type": "string",
+          "description": "Pfad innerhalb des Objekts."
+        },
+        "equals": {
+          "description": "Exakter Vergleichswert."
+        },
+        "contains": {
+          "description": "Prueft, ob ein Array den Wert enthaelt."
+        },
+        "placement": {
+          "$ref": "#/$defs/objectPlacement"
+        }
+      },
+      "anyOf": [
+        { "required": ["path"] },
+        { "required": ["placement"] }
+      ]
+    }
+  }
+}

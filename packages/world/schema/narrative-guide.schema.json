@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/narrative-guide.schema.json",
+  "title": "NarrativeGuideDocument",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "guide"
+  ],
+  "properties": {
+    "guide": {
+      "$ref": "#/$defs/guideMeta"
+    },
+    "world": {
+      "$ref": "#/$defs/narrativeNode"
+    },
+    "rooms": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/narrativeNode"
+      }
+    },
+    "objects": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/narrativeNode"
+      }
+    }
+  },
+  "$defs": {
+    "guideMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "const": "narrativeGuide"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "desc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forWorld": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "narrativeNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tone": {
+          "$ref": "#/$defs/stringList"
+        },
+        "associations": {
+          "$ref": "#/$defs/stringList"
+        },
+        "narrativeHints": {
+          "$ref": "#/$defs/stringList"
+        },
+        "sensoryHints": {
+          "$ref": "#/$defs/stringList"
+        },
+        "taboos": {
+          "$ref": "#/$defs/stringList"
+        },
+        "desc": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  }
+}
