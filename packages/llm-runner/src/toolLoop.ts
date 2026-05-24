@@ -2,13 +2,14 @@ import type OpenAI from "openai";
 
 import type { LlmToolHost, PlayerActionCommand, PlayerNarrativeNodeView, PlayerSceneView } from "@worlddesc/world";
 
-import { buildFirstLlmToolSchemas } from "./toolSchemas.js";
+import { buildFirstLlmResponseToolSchemas, buildFirstLlmToolSchemas } from "./toolSchemas.js";
 import type { UsageTracker } from "./usageTracker.js";
 import { fromOpenAiUsage } from "./usageTracker.js";
 
 export interface ToolLoopOptions {
   client: OpenAI;
   host: LlmToolHost;
+  apiMode: "chat" | "responses";
   model: string;
   systemPrompt: string;
   userMessage: string;
@@ -31,6 +32,14 @@ export interface ToolExecutionState {
 }
 
 export async function runToolLoop(options: ToolLoopOptions): Promise<ToolLoopResult> {
+  if (options.apiMode === "responses") {
+    return runResponsesToolLoop(options);
+  }
+
+  return runChatToolLoop(options);
+}
+
+async function runChatToolLoop(options: ToolLoopOptions): Promise<ToolLoopResult> {
   const tools = buildFirstLlmToolSchemas() as unknown as OpenAI.Chat.Completions.ChatCompletionTool[];
   const history = [...options.history];
   const toolState = createToolExecutionState();
@@ -133,6 +142,102 @@ export async function runToolLoop(options: ToolLoopOptions): Promise<ToolLoopRes
   throw new Error(`Model exceeded max tool rounds (${options.maxToolRounds})`);
 }
 
+async function runResponsesToolLoop(options: ToolLoopOptions): Promise<ToolLoopResult> {
+  const tools = buildFirstLlmResponseToolSchemas();
+  const history = [...options.history];
+  const toolState = createToolExecutionState();
+
+  history.push({
+    role: "user",
+    content: options.userMessage
+  });
+
+  let previousResponseId: string | undefined;
+  let pendingInput: unknown = buildResponsesInputFromHistory(history);
+
+  for (let round = 0; round < options.maxToolRounds; round += 1) {
+    const scene = sanitizeSceneForModel(
+      options.host.callTool("get_current_scene", {}),
+      options.includeSampleActions
+    );
+    if (options.debug && round === 0) {
+      options.onDebugLog?.(`scene ${JSON.stringify(scene)}`);
+    }
+
+    const response = (await (options.client.responses.create as unknown as (input: unknown) => Promise<unknown>)({
+      model: options.model,
+      instructions: buildResponsesInstructions(options.systemPrompt, scene),
+      input: pendingInput,
+      previous_response_id: previousResponseId,
+      tools: tools as unknown as never[]
+    })) as {
+      id: string;
+      usage?: Parameters<typeof fromOpenAiUsage>[1];
+      output_text?: string;
+      output?: unknown[];
+    };
+
+    if (response.usage && options.usageTracker) {
+      const snapshot = await options.usageTracker.recordCompletion(fromOpenAiUsage(options.model, response.usage));
+      if (options.debug) {
+        options.onDebugLog?.(
+          `usage total=${snapshot.totals.totalTokens} prompt=${snapshot.totals.promptTokens} completion=${snapshot.totals.completionTokens} cached=${snapshot.totals.cachedTokens} reasoning=${snapshot.totals.reasoningTokens} requests=${snapshot.totals.requests}`
+        );
+      }
+    }
+
+    previousResponseId = response.id;
+    const functionCalls = extractResponseFunctionCalls(response);
+
+    if (functionCalls.length > 0) {
+      const toolOutputs: Array<{ type: "function_call_output"; call_id: string; output: string }> = [];
+
+      for (const functionCall of functionCalls) {
+        const parsedArgs = parseToolArguments(functionCall.arguments ?? "");
+        if (options.debug) {
+          options.onDebugLog?.(`tool ${functionCall.name} ${JSON.stringify(parsedArgs)}`);
+        }
+        const result = callToolWithPolicy(
+          options.host,
+          functionCall.name,
+          parsedArgs,
+          toolState,
+          options.includeSampleActions
+        );
+        if (options.debug) {
+          options.onDebugLog?.(`result ${functionCall.name} ${JSON.stringify(result)}`);
+          if (functionCall.name === "perform_action" && isActionResultWithScene(result)) {
+            options.onDebugLog?.(
+              `focus room=${result.scene.roomId} actionFocus=${JSON.stringify(result.scene.currentActionFocus ?? null)}`
+            );
+          }
+        }
+        toolOutputs.push({
+          type: "function_call_output",
+          call_id: functionCall.call_id,
+          output: JSON.stringify(result)
+        });
+      }
+
+      pendingInput = toolOutputs;
+      continue;
+    }
+
+    const assistantText = extractResponseOutputText(response);
+    history.push({
+      role: "assistant",
+      content: assistantText
+    });
+
+    return {
+      assistantText,
+      history: buildPersistedConversationHistory(history, options.maxHistoryMessages)
+    };
+  }
+
+  throw new Error(`Model exceeded max tool rounds (${options.maxToolRounds})`);
+}
+
 function parseToolArguments(input: string): Record<string, unknown> {
   if (!input.trim()) {
     return {};
@@ -216,6 +321,10 @@ function buildTurnContextMessage(scene: PlayerSceneView): string {
   ].join("\n");
 }
 
+function buildResponsesInstructions(systemPrompt: string, scene: PlayerSceneView): string {
+  return [systemPrompt, buildTurnContextMessage(scene)].join("\n\n");
+}
+
 function serializeCommand(command: PlayerActionCommand): string {
   return JSON.stringify(command);
 }
@@ -288,6 +397,75 @@ function isPersistableConversationMessage(
 
 function isActionResultWithScene(value: unknown): value is { scene: PlayerSceneView } {
   return typeof value === "object" && value !== null && "scene" in value;
+}
+
+function buildResponsesInputFromHistory(history: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): unknown[] {
+  return history
+    .filter(isPersistableConversationMessage)
+    .map((message) => ({
+      type: "message",
+      role: message.role,
+      content: [
+        {
+          type: "input_text",
+          text: typeof message.content === "string" ? message.content : ""
+        }
+      ]
+    }));
+}
+
+function extractResponseFunctionCalls(response: {
+  output?: unknown[];
+}): Array<{ name: string; arguments?: string; call_id: string }> {
+  return (response.output ?? [])
+    .filter(
+      (item): item is { type: "function_call"; name?: unknown; arguments?: unknown; call_id?: unknown } =>
+        typeof item === "object" && item !== null && "type" in item && (item as { type?: unknown }).type === "function_call"
+    )
+    .map((item) => ({
+      name: String(item.name ?? ""),
+      arguments: typeof item.arguments === "string" ? item.arguments : "",
+      call_id: String(item.call_id ?? "")
+    }))
+    .filter((item) => item.name.length > 0 && item.call_id.length > 0);
+}
+
+function extractResponseOutputText(response: {
+  output_text?: string;
+  output?: unknown[];
+}): string {
+  if (typeof response.output_text === "string" && response.output_text.length > 0) {
+    return response.output_text;
+  }
+
+  for (const item of response.output ?? []) {
+    if (
+      typeof item !== "object" ||
+      item === null ||
+      !("type" in item) ||
+      (item as { type?: unknown }).type !== "message" ||
+      !("content" in item) ||
+      !Array.isArray((item as { content?: unknown }).content)
+    ) {
+      continue;
+    }
+
+    const parts = (item as { content: unknown[] }).content
+      .filter(
+        (contentItem): contentItem is { type: "output_text"; text: string } =>
+          typeof contentItem === "object" &&
+          contentItem !== null &&
+          (contentItem as { type?: unknown }).type === "output_text" &&
+          typeof (contentItem as { text?: unknown }).text === "string"
+      )
+      .map((contentItem) => contentItem.text);
+
+    if (parts.length > 0) {
+      return parts.join("\n");
+    }
+  }
+
+  return "";
 }
 
 function sanitizeNarrativeContextForModel(scene: PlayerSceneView): PlayerSceneView["narrativeContext"] {

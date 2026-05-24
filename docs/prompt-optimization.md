@@ -67,15 +67,19 @@ sondern eher:
 - "Wo koennte das Modell trotz dieser Instruktionen noch halluzinieren?"
 - "Wie wuerdest du den Prompt kuerzen, ohne Tool-Disziplin oder Weltkonsistenz zu verlieren?"
 
-## Naechster technischer Schritt
+## Aktueller technischer Stand
 
-Der aktuelle Runner nutzt noch die Chat-Completions-API.
+Der Runner hat jetzt:
+
+- einen stabilen Chat-Completions-Pfad
+- einen experimentellen Responses-Pfad ueber `--api-mode responses`
+- einen Prompt-Export ueber `--print-system-prompt`
 
 OpenAI weist fuer Reasoning- und Tool-Workflows darauf hin, dass die Responses API in solchen Faellen oft besser ist, besonders wenn mehrere Tool-Runden und reasoning items relevant werden.
 
-Darum ist eine spaetere Vergleichsstufe sinnvoll:
+Darum ist jetzt ein direkter Vergleich sinnvoll:
 
 - aktueller Runner mit Chat Completions
-- spaeterer Prototyp mit Responses API
+- derselbe Runner mit Responses API
 
-Aber zuerst lohnt sich der inhaltliche Prompt-Review des jetzigen Systems.
+Der Prompt-Review bleibt trotzdem wichtig, weil ein API-Wechsel allein keine unklaren Regeln oder zu weiche Instruktionen repariert.

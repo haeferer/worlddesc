@@ -11,6 +11,7 @@ describe("llm-runner config", () => {
     expect(config).toEqual({
       worldPath: "C:\\repo\\sample\\test.world.yaml",
       narrativeGuideMixPath: undefined,
+      apiMode: "chat",
       model: "gpt-test",
       printSystemPrompt: false,
       debug: false,
@@ -29,6 +30,8 @@ describe("llm-runner config", () => {
         "./sample/interaction-lab.world.yaml",
         "--narrative-guide-mix",
         "./sample/test.narrative-guide-mix.yaml",
+        "--api-mode",
+        "responses",
         "--model",
         "gpt-x",
         "--print-system-prompt",
@@ -49,6 +52,7 @@ describe("llm-runner config", () => {
     expect(config).toEqual({
       worldPath: "C:\\repo\\sample\\interaction-lab.world.yaml",
       narrativeGuideMixPath: "C:\\repo\\sample\\test.narrative-guide-mix.yaml",
+      apiMode: "responses",
       model: "gpt-x",
       printSystemPrompt: true,
       debug: true,
@@ -77,6 +81,7 @@ describe("llm-runner config", () => {
     expect(buildHelpText()).toContain("--print-system-prompt");
     expect(buildHelpText()).toContain("--hide-sample-actions");
     expect(buildHelpText()).toContain("--narrative-guide-mix");
+    expect(buildHelpText()).toContain("--api-mode");
     expect(buildHelpText()).toContain("--usage-file");
     expect(buildHelpText()).toContain("--character");
     expect(buildHelpText()).toContain("--max-history-messages");

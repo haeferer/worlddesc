@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildFirstLlmToolSchemas } from "../src/toolSchemas.js";
+import { buildFirstLlmResponseToolSchemas, buildFirstLlmToolSchemas } from "../src/toolSchemas.js";
 
 describe("llm-runner tool schemas", () => {
   it("exposes the first tool set in a stable order", () => {
@@ -22,5 +22,15 @@ describe("llm-runner tool schemas", () => {
         required: ["intent"]
       })
     );
+  });
+
+  it("can expose the same first tool set in Responses API shape", () => {
+    expect(buildFirstLlmResponseToolSchemas().map((tool) => tool.name)).toEqual([
+      "get_current_scene",
+      "get_known_object",
+      "resolve_intent",
+      "perform_action",
+      "get_new_events"
+    ]);
   });
 });

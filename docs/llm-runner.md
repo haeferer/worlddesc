@@ -55,6 +55,7 @@ Die REPL unterstuetzt derzeit:
 
 - `--world <path>`
 - `--narrative-guide-mix <path>`
+- `--api-mode <chat|responses>`
 - `--model <name>`
 - `--debug`
 - `--max-tool-rounds <number>`
@@ -68,6 +69,7 @@ Zusatzlich:
 
 - `OPENAI_API_KEY` aus `.env` oder Umgebungsvariablen
 - optional `OPENAI_MODEL` als Standard fuer `--model`
+- optional `OPENAI_API_MODE` als Standard fuer `--api-mode`
 
 Standard fuer den Usage-Counter:
 
@@ -218,7 +220,16 @@ Zur direkten Kontrolle waehrend eines REPL-Laufs:
 
 ## API-Schnitt und History
 
-Aktuell nutzt der Runner die Chat-Completions-API.
+Aktuell unterstuetzt der Runner zwei API-Pfade:
+
+- `--api-mode chat`
+- `--api-mode responses`
+
+Default:
+
+- `chat`
+
+### Chat-Modus
 
 Das bedeutet:
 
@@ -265,7 +276,44 @@ Fuer dieses Projekt ist die wahrscheinlich beste Richtung:
 
 1. den jetzigen Chat-Runner erst mit echten Usage-Zahlen beobachten
 2. die freie Nachrichtenhistory klein halten
-3. danach einen gezielten Responses-API-Vergleich bauen
+3. den vorhandenen Responses-Pfad gezielt dagegen testen
+
+### Responses-Modus
+
+Der Responses-Pfad ist jetzt als experimenteller Parallelmodus vorhanden.
+
+Er nutzt:
+
+- die Responses API
+- Funktionstools in Responses-Form
+- denselben lokalen Tool-Host
+- mehrere Tool-Runden innerhalb desselben Runner-Turns
+
+Warum das sinnvoll ist:
+
+- OpenAI empfiehlt Responses fuer neue agentische Setups
+- Reasoning-Modelle und Tool-Nutzung sind dort der natuerlichere Zielpfad
+- spaetere Nutzung von `previous_response_id` wird dadurch einfacher anschlussfaehig
+
+Wichtige Einschraenkung aktuell:
+
+- der Responses-Pfad ist bewusst noch ein Vergleichs- und Testmodus
+- er ersetzt den Chat-Pfad noch nicht als Default
+- die eigentliche Welt- und Tool-Disziplin ist in beiden Modi gleich
+
+Empfohlener A/B-Vergleich:
+
+```bash
+npm run llm:repl -- --debug --api-mode chat
+npm run llm:repl -- --debug --api-mode responses
+```
+
+Oder mit Guide-Mix:
+
+```bash
+npm run llm:repl -- --debug --api-mode chat --narrative-guide-mix ./sample/test.narrative-guide-mix.yaml
+npm run llm:repl -- --debug --api-mode responses --narrative-guide-mix ./sample/test.narrative-guide-mix.yaml
+```
 
 ## Grenzen des ersten Runners
 

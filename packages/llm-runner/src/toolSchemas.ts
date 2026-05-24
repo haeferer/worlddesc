@@ -17,6 +17,13 @@ export interface ChatToolSchema {
   };
 }
 
+export interface ResponsesToolSchema {
+  type: "function";
+  name: string;
+  description: string;
+  parameters: JsonSchema;
+}
+
 export function buildFirstLlmToolSchemas(): ChatToolSchema[] {
   return [
     {
@@ -133,4 +140,13 @@ export function buildFirstLlmToolSchemas(): ChatToolSchema[] {
       }
     }
   ];
+}
+
+export function buildFirstLlmResponseToolSchemas(): ResponsesToolSchema[] {
+  return buildFirstLlmToolSchemas().map((tool) => ({
+    type: "function",
+    name: tool.function.name,
+    description: tool.function.description,
+    parameters: tool.function.parameters
+  }));
 }

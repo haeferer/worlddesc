@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 export interface ReplConfig {
   worldPath: string;
   narrativeGuideMixPath?: string;
+  apiMode: "chat" | "responses";
   model: string;
   printSystemPrompt: boolean;
   debug: boolean;
@@ -18,6 +19,7 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
   const defaults: ReplConfig = {
     worldPath: resolve(cwd, "sample/test.world.yaml"),
     model: env.OPENAI_MODEL ?? "gpt-5.4-mini",
+    apiMode: env.OPENAI_API_MODE === "responses" ? "responses" : "chat",
     printSystemPrompt: false,
     debug: false,
     maxToolRounds: 8,
@@ -43,6 +45,10 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
         continue;
       case "--model":
         defaults.model = requireValue(args, index, "--model");
+        index += 2;
+        continue;
+      case "--api-mode":
+        defaults.apiMode = parseApiMode(requireValue(args, index, "--api-mode"));
         index += 2;
         continue;
       case "--print-system-prompt":
@@ -98,6 +104,7 @@ export function buildHelpText(): string {
     "Options:",
     "  --world <path>               Path to the world file. Default: sample/test.world.yaml",
     "  --narrative-guide-mix <path> Optional narrative guide mix file to build the LLM-facing narrativeContext",
+    "  --api-mode <chat|responses>  OpenAI API mode. Default: OPENAI_API_MODE or chat",
     "  --model <name>               OpenAI model name. Default: OPENAI_MODEL or gpt-5.4-mini",
     "  --print-system-prompt        Print the fully assembled runner system prompt and exit",
     "  --debug                      Print tool calls and internal summaries",
@@ -127,4 +134,12 @@ function parsePositiveInteger(value: string, flag: string): number {
   }
 
   return parsed;
+}
+
+function parseApiMode(value: string): "chat" | "responses" {
+  if (value === "chat" || value === "responses") {
+    return value;
+  }
+
+  throw new Error(`--api-mode must be either "chat" or "responses"`);
 }

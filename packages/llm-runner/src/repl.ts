@@ -81,6 +81,7 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
       const result = await runToolLoop({
         client,
         host,
+        apiMode: config.apiMode,
         model: config.model,
         systemPrompt,
         userMessage: line,
@@ -104,6 +105,7 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
 function printBanner(config: ReplConfig): void {
   output.write(`World: ${config.worldPath}\n`);
   output.write(`Narrative mix: ${config.narrativeGuideMixPath ?? "none"}\n`);
+  output.write(`API mode: ${config.apiMode}\n`);
   output.write(`Model: ${config.model}\n`);
   output.write(`Debug: ${config.debug ? "on" : "off"}\n`);
   output.write(`Max history messages: ${config.maxHistoryMessages}\n`);
