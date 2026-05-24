@@ -2,7 +2,9 @@ import { resolve } from "node:path";
 
 export interface ReplConfig {
   worldPath: string;
+  narrativeGuideMixPath?: string;
   model: string;
+  printSystemPrompt: boolean;
   debug: boolean;
   maxToolRounds: number;
   maxHistoryMessages: number;
@@ -16,6 +18,7 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
   const defaults: ReplConfig = {
     worldPath: resolve(cwd, "sample/test.world.yaml"),
     model: env.OPENAI_MODEL ?? "gpt-5.4-mini",
+    printSystemPrompt: false,
     debug: false,
     maxToolRounds: 8,
     maxHistoryMessages: 4,
@@ -34,9 +37,17 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
         defaults.worldPath = resolve(cwd, requireValue(args, index, "--world"));
         index += 2;
         continue;
+      case "--narrative-guide-mix":
+        defaults.narrativeGuideMixPath = resolve(cwd, requireValue(args, index, "--narrative-guide-mix"));
+        index += 2;
+        continue;
       case "--model":
         defaults.model = requireValue(args, index, "--model");
         index += 2;
+        continue;
+      case "--print-system-prompt":
+        defaults.printSystemPrompt = true;
+        index += 1;
         continue;
       case "--debug":
         defaults.debug = true;
@@ -86,7 +97,9 @@ export function buildHelpText(): string {
     "",
     "Options:",
     "  --world <path>               Path to the world file. Default: sample/test.world.yaml",
+    "  --narrative-guide-mix <path> Optional narrative guide mix file to build the LLM-facing narrativeContext",
     "  --model <name>               OpenAI model name. Default: OPENAI_MODEL or gpt-5.4-mini",
+    "  --print-system-prompt        Print the fully assembled runner system prompt and exit",
     "  --debug                      Print tool calls and internal summaries",
     "  --max-tool-rounds <number>   Maximum tool-call loops per user turn. Default: 8",
     "  --max-history-messages <n>   Maximum persisted chat history messages between turns. Default: 4",

@@ -6,13 +6,14 @@ import { resolve } from "node:path";
 import OpenAI from "openai";
 import {
   createLlmToolHost,
+  loadNarrativeGuideProviderFromMixFile,
   createPlayerWorldView,
   createWorldRuntime,
   loadWorldFile
 } from "@worlddesc/world";
 
 import type { ReplConfig } from "./config.js";
-import { buildDefaultSystemPrompt } from "./systemPrompt.js";
+import { buildRunnerSystemPrompt } from "./promptAssembly.js";
 import { runToolLoop } from "./toolLoop.js";
 import { createUsageTracker } from "./usageTracker.js";
 
@@ -24,7 +25,13 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
 
   const world = await loadWorldFile(config.worldPath);
   const runtime = createWorldRuntime(world);
-  const playerView = createPlayerWorldView({ runtime });
+  const narrativeProviderResult = config.narrativeGuideMixPath
+    ? await loadNarrativeGuideProviderFromMixFile(config.narrativeGuideMixPath, world)
+    : undefined;
+  const playerView = createPlayerWorldView({
+    runtime,
+    narrativeContextProvider: narrativeProviderResult?.provider
+  });
   const host = createLlmToolHost(playerView);
   const client = new OpenAI({ apiKey });
   const usageTracker = createUsageTracker(config.usageFilePath);
@@ -34,6 +41,11 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
   const systemPrompt = await buildRunnerSystemPrompt(config);
 
   printBanner(config);
+  if (narrativeProviderResult?.warnings.length) {
+    for (const warning of narrativeProviderResult.warnings) {
+      output.write(`[narrative warning] ${warning}\n`);
+    }
+  }
 
   try {
     while (true) {
@@ -91,26 +103,13 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
 
 function printBanner(config: ReplConfig): void {
   output.write(`World: ${config.worldPath}\n`);
+  output.write(`Narrative mix: ${config.narrativeGuideMixPath ?? "none"}\n`);
   output.write(`Model: ${config.model}\n`);
   output.write(`Debug: ${config.debug ? "on" : "off"}\n`);
   output.write(`Max history messages: ${config.maxHistoryMessages}\n`);
   output.write(`Sample actions for LLM: ${config.includeSampleActions ? "visible" : "hidden"}\n`);
   output.write(`Character: ${config.character ?? "none"}\n`);
+  output.write(`Print system prompt only: ${config.printSystemPrompt ? "yes" : "no"}\n`);
   output.write(`Usage file: ${config.usageFilePath}\n`);
   output.write('Commands: /scene, /events, /tools, /usage, /quit\n');
-}
-
-async function buildRunnerSystemPrompt(config: ReplConfig): Promise<string> {
-  const parts = [buildDefaultSystemPrompt()];
-
-  if (config.character) {
-    const characterPath = resolve(process.cwd(), "prompts", `${config.character}.character.txt`);
-    parts.push(await readFile(characterPath, "utf8"));
-  }
-
-  if (config.systemPromptFile) {
-    parts.push(await readFile(config.systemPromptFile, "utf8"));
-  }
-
-  return parts.join("\n\n");
 }

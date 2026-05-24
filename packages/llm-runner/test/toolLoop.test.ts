@@ -25,6 +25,30 @@ function loadSampleHost() {
   return createLlmToolHost(createPlayerWorldView({ runtime }));
 }
 
+function loadNarrativeHost() {
+  const source = readFileSync(resolve(testDir, "../../../sample/test.world.yaml"), "utf8");
+  const runtime = createWorldRuntime(loadWorldDocument(source));
+  return createLlmToolHost(
+    createPlayerWorldView({
+      runtime,
+      narrativeContextProvider: {
+        getSceneNarrativeContext() {
+          return {
+            mixId: "testMix",
+            world: {
+              tone: ["quiet"]
+            },
+            room: {
+              tone: ["warm"]
+            },
+            objects: {}
+          };
+        }
+      }
+    })
+  );
+}
+
 describe("llm-runner tool loop policy", () => {
   it("requires resolve_intent before perform_action", () => {
     const host = loadSampleHost();
@@ -92,6 +116,113 @@ describe("llm-runner tool loop policy", () => {
     };
 
     expect(result.sampleActions).toEqual([]);
+  });
+
+  it("keeps narrativeContext visible even when sampleActions are hidden", () => {
+    const host = loadNarrativeHost();
+    const state = createToolExecutionState();
+
+    const result = callToolWithPolicy(host, "get_current_scene", {}, state, false) as {
+      sampleActions: unknown[];
+      narrativeContext?: { mixId?: string };
+    };
+
+    expect(result.sampleActions).toEqual([]);
+    expect(result.narrativeContext).toEqual({
+      mixId: "testMix",
+      world: {
+        tone: ["quiet"]
+      },
+      room: {
+        tone: ["warm"]
+      },
+      objects: {}
+    });
+  });
+
+  it("trims narrativeContext to a small prioritized slice for the model", () => {
+    const host = createLlmToolHost(
+      createPlayerWorldView({
+        runtime: createWorldRuntime(
+          loadWorldDocument(readFileSync(resolve(testDir, "../../../sample/test.world.yaml"), "utf8"))
+        ),
+        narrativeContextProvider: {
+          getSceneNarrativeContext() {
+            return {
+              mixId: "testMix",
+              world: {
+                tone: ["quiet", "rustic", "watchful"],
+                associations: ["threshold", "curiosity", "small-discoveries"],
+                narrativeHints: ["too-much"]
+              },
+              room: {
+                tone: ["warm", "open", "safe"],
+                sensoryHints: ["sun-on-skin", "soft-grass", "bright-air"],
+                narrativeHints: ["last-light", "gentle-start", "too-much"],
+                associations: ["too-much"]
+              },
+              objects: {
+                sonne: {
+                  tone: ["distant", "constant"],
+                  associations: ["daylight", "summer"],
+                  sensoryHints: ["too-much"]
+                },
+                kiste: {
+                  tone: ["humble", "promising"],
+                  narrativeHints: ["first-discovery", "reward"],
+                  associations: ["secret", "curiosity"]
+                },
+                beutel: {
+                  tone: ["plain", "empty"],
+                  narrativeHints: ["false-lead"],
+                  associations: ["craftsmanship"]
+                },
+                schluessel: {
+                  tone: ["useful"],
+                  narrativeHints: ["next-step"]
+                }
+              }
+            };
+          }
+        }
+      })
+    );
+    const state = createToolExecutionState();
+
+    const result = callToolWithPolicy(host, "get_current_scene", {}, state, false) as {
+      narrativeContext?: {
+        world?: Record<string, unknown>;
+        room?: Record<string, unknown>;
+        objects: Record<string, Record<string, unknown>>;
+      };
+    };
+
+    expect(result.narrativeContext).toEqual({
+      mixId: "testMix",
+      world: {
+        tone: ["quiet", "rustic"],
+        associations: ["threshold", "curiosity"]
+      },
+      room: {
+        tone: ["warm", "open"],
+        sensoryHints: ["sun-on-skin", "soft-grass"],
+        narrativeHints: ["last-light", "gentle-start"]
+      },
+      objects: {
+        sonne: {
+          tone: ["distant", "constant"],
+          associations: ["daylight", "summer"]
+        },
+        kiste: {
+          tone: ["humble", "promising"],
+          narrativeHints: ["first-discovery", "reward"]
+        },
+        beutel: {
+          tone: ["plain", "empty"],
+          narrativeHints: ["false-lead"]
+        }
+      }
+    });
   });
 
   it("can hide sampleActions from perform_action scene results for the llm", () => {

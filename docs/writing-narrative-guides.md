@@ -178,19 +178,22 @@ Fuer diesen Teil sind wir jetzt auf einem guten Phase-0/1-Zwischenstand:
 - eigenes Mix-Schema
 - Beispiel-Guides und Mix-Datei
 - klare Mischregeln
+- echter Loader fuer Guide- und Mix-Dateien
+- Referenzvalidierung gegen eine World beim Mischen
+- Warnungen fuer wirkungslose Layer
+- `narrativeContextProvider` aus einem echten Mix
 - erster `narrativeContext`-Andockpunkt in der Player-Sicht
 
 Noch nicht umgesetzt sind dagegen:
 
-- echter Loader fuer Guide- und Mix-Dateien
-- Referenzvalidierung gegen eine World beim Laden
-- automatische Warnungen fuer wirkungslose Layer
 - echtes Einspeisen eines gemischten Guide-Ausschnitts in den Runner
+- ein eigener CLI-Checkpfad fuer Guides und Mixe
+- das Laden eines Mixes direkt aus World- oder Runner-Konfiguration ohne Hilfscode
 
 Das heisst:
 
-- als Authoring- und Interface-Schnitt sind wir schon gut aufgestellt
-- als vollstaendige Laufzeitkette noch nicht ganz fertig
+- als Authoring-, Mix- und Provider-Schnitt sind wir schon gut aufgestellt
+- als komplett durchverdrahtete Laufzeit- und Runner-Kette noch nicht ganz fertig
 
 ## Verwandte Dokumente
 

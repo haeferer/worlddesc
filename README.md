@@ -31,6 +31,7 @@ Wichtige Dateien:
 - `docs/llm-runner.md`
 - `docs/first-llm-contract.md`
 - `docs/first-llm-tool-schemas.md`
+- `docs/prompt-optimization.md`
 - `docs/action-feedback.md`
 - `docs/pre-llm-topics.md`
 - `docs/worldusage.md`
@@ -68,3 +69,4 @@ Geplanter Startpunkt:
 
 - `packages/world` kapselt das Domaenenmodell und das Laden/Validieren von Welten.
 - `packages/llm-runner` kapselt den ersten OpenAI-basierten REPL-Runner ueber der Player-Sicht.
+- der REPL-Runner kann optional ueber `--narrative-guide-mix` einen gemischten `narrativeContext` aus Guide-Dateien laden

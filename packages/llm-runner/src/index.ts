@@ -1,4 +1,5 @@
 export * from "./config.js";
+export * from "./promptAssembly.js";
 export * from "./repl.js";
 export * from "./systemPrompt.js";
 export * from "./toolLoop.js";

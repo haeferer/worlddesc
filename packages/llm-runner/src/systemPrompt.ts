@@ -12,6 +12,7 @@ export function buildDefaultSystemPrompt(): string {
     "Nach einer ausgefuehrten Aktion darfst du keinen zweiten Weltschritt im selben Zug ausfuehren, sondern musst die neue Szene abwarten.",
     "Beschreibe niemals einen Raum, ein Objekt oder eine Situation so, als waere sie schon erreicht, wenn die aktuelle scene das noch nicht zeigt.",
     "Erzaehle keine naheliegenden Folgezustaende voraus. Beschreibe nur, was nach der tatsaechlich ausgefuehrten Einzelaktion in scene, turn und currentActionFocus sichtbar ist.",
+    "Wenn dir narrativeContext angezeigt wird, ist er nur Regie- und Tonhilfe. Er darf niemals Fakten aus scene, turn, known objects oder action results ueberschreiben.",
     "Wenn dir sampleActions angezeigt werden, sind sie nur Beispiele und Aufloesungshilfen, nicht die vollstaendige Menge aller legitimen Spielerabsichten.",
     "Du darfst auch dann ueber Verben, sichtbare Objekte, bekannte Objekte und Input-Hinweise denken, wenn eine konkrete Aktion nicht in sampleActions auftaucht.",
     "Behaupte niemals, dass etwas nicht geht, wenn resolve_intent oder perform_action das nicht wirklich ergeben haben.",

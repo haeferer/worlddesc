@@ -54,6 +54,7 @@ Gruende:
 Die REPL unterstuetzt derzeit:
 
 - `--world <path>`
+- `--narrative-guide-mix <path>`
 - `--model <name>`
 - `--debug`
 - `--max-tool-rounds <number>`
@@ -71,6 +72,17 @@ Zusatzlich:
 Standard fuer den Usage-Counter:
 
 - `tokens.usage.json` im aktuellen Projekt-Root
+
+Wenn `--narrative-guide-mix` gesetzt ist:
+
+- wird der Mix gegen die geladene World geprueft
+- werden Warnungen fuer wirkungslose Layer im Banner ausgegeben
+- bekommt das LLM ueber `get_current_scene()` und `perform_action()` den gemischten `narrativeContext`
+
+Wichtig:
+
+- `narrativeContext` ist nur Regiehilfe
+- er darf keine Fakten aus `scene`, `turn` oder `currentActionFocus` ueberschreiben
 
 ## Empfohlener Start
 
@@ -140,6 +152,12 @@ Beispielaufruf:
 
 ```bash
 npm run llm:repl -- --debug --character warm-guide
+```
+
+Mit Narrative-Guide-Mix:
+
+```bash
+npm run llm:repl -- --debug --character warm-guide --narrative-guide-mix ./sample/test.narrative-guide-mix.yaml
 ```
 
 Additiv mit einem freien Extra-Prompt:

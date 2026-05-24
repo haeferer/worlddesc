@@ -174,5 +174,13 @@ Aktuelle Phase-0-Dateien:
 - [narrative-guide-mix.schema.json](C:/remoterep/worlddesc/schema/narrative-guide-mix.schema.json:1)
 - [test.narrative-guide-mix.yaml](C:/remoterep/worlddesc/sample/test.narrative-guide-mix.yaml:1)
 
-Diese Ebene ist derzeit noch Authoring- und Modellierungsgrundlage.
-Eine echte Loader- oder Runtime-Mischung ist noch nicht umgesetzt.
+Diese Ebene ist jetzt nicht mehr nur Authoring-Grundlage.
+
+Aktuell bereits vorhanden sind:
+
+- Loader fuer `narrative guide`- und `narrative guide mix`-Dateien
+- World-gebundene Referenzpruefung beim Mischen
+- Warnungen fuer Layer ohne effektive Aenderung
+- ein daraus gebauter `narrativeContextProvider` fuer die Player-Sicht
+
+Noch nicht vollstaendig durchverdrahtet ist vor allem die automatische Nutzung im Runner.

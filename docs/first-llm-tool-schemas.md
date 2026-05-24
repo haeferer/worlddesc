@@ -289,3 +289,5 @@ Eine erste duenne Laufzeit-Fassade fuer genau diese Tools liegt jetzt in:
 Damit ist der Contract nicht mehr nur dokumentiert, sondern bereits als testbarer Adapter auf `PlayerWorldView` vorhanden.
 
 Auf Runner-Ebene gibt es zusaetzlich einen persistenten Usage-Counter in `tokens.usage.json`, damit reale OpenAI-Tokenkosten ueber REPL-Sessions hinweg beobachtbar bleiben.
+
+Optional kann der Runner ausserdem einen `narrative guide mix` laden und den resultierenden `narrativeContext` automatisch in diese Tool-Rueckgaben einspeisen.
