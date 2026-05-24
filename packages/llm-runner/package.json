@@ -1,6 +1,6 @@
 {
   "name": "@worlddesc/llm-runner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -10,7 +10,7 @@
     "README.md"
   ],
   "bin": {
-    "worlddesc-llm-repl": "./dist/cli.js"
+    "worlddesc-llm-repl": "dist/cli.js"
   },
   "publishConfig": {
     "access": "public"
@@ -22,7 +22,7 @@
     "repl": "node ./dist/cli.js"
   },
   "dependencies": {
-    "@worlddesc/world": "0.1.0",
+    "@worlddesc/world": "0.1.1",
     "dotenv": "^16.4.5",
     "openai": "^4.104.0"
   },

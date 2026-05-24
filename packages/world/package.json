@@ -1,6 +1,6 @@
 {
   "name": "@worlddesc/world",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -9,7 +9,9 @@
     "dist",
     "README.md"
   ],
-  "bin": "./dist/cli.js",
+  "bin": {
+    "world": "dist/cli.js"
+  },
   "publishConfig": {
     "access": "public"
   },
