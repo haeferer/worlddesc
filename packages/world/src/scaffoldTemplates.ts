@@ -62,6 +62,7 @@ export function buildScaffoldTemplateFiles(context: ScaffoldTemplateContext): Sc
         "- `world/main.world.yaml` fuer harte Weltlogik",
         "- `world/guides/` fuer narrative Guides und Mixes",
         "- `world/prompts/project-guide.character.txt` fuer die Persoenlichkeit des Begleiters",
+        "- `docs/character-guide.md` fuer die Regeln der Begleiterstimme",
         "- `AGENTS.md` fuer Arbeitsregeln fuer Codex und andere Agenten",
         "",
         "## Naechste sinnvolle Schritte",
@@ -95,11 +96,13 @@ export function buildScaffoldTemplateFiles(context: ScaffoldTemplateContext): Sc
         "- `world/main.world.yaml` ist die harte Weltwahrheit.",
         "- `world/guides/*.narrative-guide.yaml` enthalten nur Regie, Ton und semantische Hinweise.",
         "- `world/prompts/project-guide.character.txt` steuert den sprachlichen Begleiter, nicht die Weltlogik.",
+        "- `docs/character-guide.md` haelt fest, wie der Begleiter klingen und was er bevorzugen soll.",
         "",
         "## Arbeitsregeln",
         "",
         "- Neue Fakten, Objekte, Raume und Interaktionen gehoeren in die World-Datei.",
         "- Stimmung, sensorische Leitplanken und Ton gehoeren in Narrative Guides.",
+        "- Stimme, Fuehrungsstil und Redundanzregeln gehoeren in Prompt-Datei plus Character-Guide, nicht in die World.",
         "- Versteckte Weltregeln, Locks oder Konsequenzen duerfen nicht nur in Guides oder Promptdateien auftauchen.",
         "- Nach Aenderungen an der World immer `npm run checkworld` ausfuehren.",
         "",
@@ -108,7 +111,8 @@ export function buildScaffoldTemplateFiles(context: ScaffoldTemplateContext): Sc
         "1. Projektziel in `docs/project-intent.md` lesen oder schärfen.",
         "2. World-Struktur in `world/main.world.yaml` aendern.",
         "3. Narrative Guide in `world/guides/` angleichen.",
-        "4. Mit `npm run checkworld` pruefen."
+        "4. Character-Stimme in `world/prompts/` und `docs/character-guide.md` angleichen.",
+        "5. Mit `npm run checkworld` pruefen."
       ].join("\n") + "\n"
     },
     {
@@ -404,7 +408,8 @@ layers:
         "Du bist ein warmer, ruhiger und zugewandter Begleiter.",
         "Du beschreibst klar, freundlich und atmosphaerisch, ohne die Weltlogik zu verlassen.",
         "Bleibe eher knapp als ausufernd.",
-        "Halte die Stimmung praesent, aber behaupte keine neuen Fakten."
+        "Halte die Stimmung praesent, aber behaupte keine neuen Fakten.",
+        "Vermeide unnoetige Wiederholung und zaehle Wege nur auf, wenn sie fuer den Moment wirklich wichtig sind."
       ].join("\n") + "\n"
     },
     {
@@ -428,8 +433,39 @@ layers:
         "- Die World-Datei ist harte Wahrheit.",
         "- Narrative Guides enthalten Regie, keine versteckten Fakten.",
         "- Prompt-Dateien formen nur den Begleiter, nicht die Weltlogik.",
+        "- Der Character-Guide haelt fest, wie der Begleiter spricht und was er bevorzugt.",
         "- Neue Objekte, Wege und Interaktionen gehoeren in `world/main.world.yaml`.",
         "- IDs sollten stabil und sprechend in `camelCase` gehalten werden."
+      ].join("\n") + "\n"
+    },
+    {
+      path: "docs/character-guide.md",
+      content: [
+        "# Character Guide",
+        "",
+        "Halte hier fest, wie der Begleiter in diesem Projekt klingen soll.",
+        "",
+        "Empfohlene Klaerungen:",
+        "",
+        "- Wie warm, sachlich oder feierlich soll die Stimme sein?",
+        "- Soll der Begleiter eher fuehren oder eher zuruecktreten?",
+        "- Wie stark soll er Wege aktiv anbieten?",
+        "- Wieviel Wiederholung ist stoerend und was darf bewusst weggelassen werden?",
+        "- Soll das aktuelle Objekt meist wichtiger sein als Navigation?",
+        "- Braucht dieses Projekt eher eine knappe History oder profitiert es von `--max-history-messages 8`?",
+        "",
+        "Arbeitsregel:",
+        "",
+        "- World = Wahrheit",
+        "- Narrative Guide = Regie",
+        "- Character = Stimme",
+        "",
+        "Gerade fuer Fuehrungs- oder Museumswelten ist zusaetzlich oft sinnvoll:",
+        "",
+        "- beim aktuellen Werk oder Objekt verweilen",
+        "- nicht dauernd alle Wege mitreflektieren",
+        "- Hintergrundwissen gezielt statt enzyklopaedisch einsetzen",
+        "- fuer laengere Vertiefungsgespraeche eine etwas groessere freie History einplanen"
       ].join("\n") + "\n"
     },
     {
@@ -440,8 +476,9 @@ layers:
         "1. Projektziel in `docs/project-intent.md` schaerfen.",
         "2. World in `world/main.world.yaml` erweitern oder aendern.",
         "3. Narrative Guide in `world/guides/` anpassen.",
-        "4. Mit `npm run checkworld` pruefen.",
-        "5. Optional mit `npm run repl` den Begleiter testen."
+        "4. Character-Stimme in `world/prompts/project-guide.character.txt` und `docs/character-guide.md` nachziehen.",
+        "5. Mit `npm run checkworld` pruefen.",
+        "6. Optional mit `npm run repl` den Begleiter testen."
       ].join("\n") + "\n"
     },
     {

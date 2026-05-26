@@ -33,6 +33,7 @@ Wichtige Dateien:
 - `docs/narrative-guide-mixing.md`
 - `docs/writing-narrative-guides.md`
 - `docs/project-scaffold.md`
+- `docs/character-guide.md`
 - `docs/museum-world-prototype.md`
 - `docs/knowledge-layer.md`
 - `docs/llm-interface.md`

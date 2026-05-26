@@ -24,7 +24,7 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
     printSystemPrompt: false,
     debug: false,
     maxToolRounds: 8,
-    maxHistoryMessages: 4,
+    maxHistoryMessages: 6,
     includeSampleActions: true,
     usageFilePath: resolve(cwd, "tokens.usage.json")
   };
@@ -115,7 +115,7 @@ export function buildHelpText(): string {
     "  --print-system-prompt        Print the fully assembled runner system prompt and exit",
     "  --debug                      Print tool calls and internal summaries",
     "  --max-tool-rounds <number>   Maximum tool-call loops per user turn. Default: 8",
-    "  --max-history-messages <n>   Maximum persisted chat history messages between turns. Default: 4",
+    "  --max-history-messages <n>   Maximum persisted chat history messages between turns. Default: 6",
     "  --hide-sample-actions        Hide sampleActions from the LLM-facing scene and action results",
     "  --usage-file <path>          Path to the persistent token usage file. Default: tokens.usage.json",
     "  --character <name>           Load prompts/<name>.character.txt and append it to the base system prompt",

@@ -77,6 +77,16 @@ Standard fuer den Usage-Counter:
 
 - `tokens.usage.json` im aktuellen Projekt-Root
 
+Standard fuer die persistierte freie Gespraechshistory:
+
+- `6` Nachrichten
+
+Arbeitsfaustregel:
+
+- `4` fuer eher knappe Adventure-Loops mit wenig Vertiefung
+- `6` als guter allgemeiner Default
+- `8` oder mehr fuer Museums-, Fuehrungs- oder Wissenswelten, in denen das Modell ueber mehrere Zuege beim selben Objekt bleiben soll
+
 Wenn `--narrative-guide-mix` gesetzt ist:
 
 - wird der Mix gegen die geladene World geprueft
@@ -94,6 +104,18 @@ Wenn `--knowledge-dir` gesetzt ist:
 - gibt das Toolset zusaetzlich `get_object_knowledge(objectId)` frei
 - bleibt dieses Wissen bewusst ausserhalb von `scene` und `narrativeContext`
 - wird es nur bei Bedarf geholt, statt permanent in die Turn-Sicht geschuettet
+
+Gerade bei Wissens- und Museumswelten ist zusaetzlich wichtig:
+
+- zu kurze freie History fuehrt leichter dazu, dass das Modell den Gespraechsfaden am selben Objekt verliert
+- dann kippt es schneller zurueck in Navigation, Wegangebote oder erneutes Szenen-Neustarten
+- fuer solche Welten ist `--max-history-messages 8` oft sinnvoller als der knappere Adventure-Wert
+
+Beobachtung aus den bisherigen Tests:
+
+- eine Erhoehung der freien History von `4` auf `8` hat Museums- und Vertiefungsdialoge deutlich stabiler gemacht
+- dabei blieb das Kostenbild dank hoher `cachedTokens` weiterhin gut
+- etwas mehr History ist fuer betrachtungs- und wissensorientierte Welten daher nicht nur Komfort, sondern oft funktional relevant
 
 ## Empfohlener Start
 

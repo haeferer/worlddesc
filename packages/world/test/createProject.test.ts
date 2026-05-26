@@ -28,6 +28,7 @@ describe("createProjectScaffold", () => {
     expect(result.createdFiles).toContain("world/main.world.yaml");
     expect(result.createdFiles).toContain("world/guides/main.narrative-guide.yaml");
     expect(result.createdFiles).toContain("AGENTS.md");
+    expect(result.createdFiles).toContain("docs/character-guide.md");
 
     const packageJson = JSON.parse(await readFile(join(targetDir, "package.json"), "utf8")) as {
       scripts: Record<string, string>;
@@ -39,6 +40,10 @@ describe("createProjectScaffold", () => {
 
     const npmrc = await readFile(join(targetDir, ".npmrc"), "utf8");
     expect(npmrc).toContain("registry=https://ttnpm.ttdev.local/");
+
+    const characterGuide = await readFile(join(targetDir, "docs", "character-guide.md"), "utf8");
+    expect(characterGuide).toContain("World = Wahrheit");
+    expect(characterGuide).toContain("Character = Stimme");
 
     const world = await loadWorldFile(join(targetDir, "world", "main.world.yaml"));
     expect(world.world.title).toBe("Forest Notes");

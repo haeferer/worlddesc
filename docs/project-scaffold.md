@@ -49,6 +49,7 @@ my-world/
   docs/
     project-intent.md
     authoring-rules.md
+    character-guide.md
     workflow.md
     world-idea.md
     todo.md
@@ -219,6 +220,12 @@ Nicht zu speziell, eher:
 - nicht zu ausschweifend
 - kompatibel mit spaeteren A/B-Tests
 
+Wichtig:
+
+- diese Datei sollte mit `docs/character-guide.md` zusammengedacht werden
+- der Prompt selbst bleibt kurz, waehrend die Guideline die Projektentscheidungen zur Stimme festhaelt
+- fuer Fuehrungs- oder Museumswelten sollte zusaetzlich frueh mitgedacht werden, ob `--max-history-messages 8` sinnvoller ist als ein knapperer Adventure-Wert
+
 ### `docs/project-intent.md`
 
 Zweck:
@@ -239,6 +246,17 @@ Soll die wichtigsten Regeln kurz wiederholen:
 - Prompt = Persoenlichkeit
 - keine Stimmung direkt in harte Weltzustandsregeln mischen
 - IDs stabil halten
+
+### `docs/character-guide.md`
+
+Soll festhalten:
+
+- wie der Begleiter klingen soll
+- ob er eher fuehrt oder eher zuruecktritt
+- wie stark er Wege aktiv anbietet
+- wie viel Wiederholung vermieden werden soll
+- ob das aktuelle Objekt meist wichtiger ist als Navigation
+- welche History-Tiefe fuer dieses Projekt sinnvoll ist, etwa `4`, `6` oder `8`
 
 ### `docs/workflow.md`
 

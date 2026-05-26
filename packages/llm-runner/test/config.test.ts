@@ -17,7 +17,7 @@ describe("llm-runner config", () => {
       printSystemPrompt: false,
       debug: false,
       maxToolRounds: 8,
-      maxHistoryMessages: 4,
+      maxHistoryMessages: 6,
       includeSampleActions: true,
       usageFilePath: "C:\\repo\\tokens.usage.json",
       character: undefined,
