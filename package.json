@@ -6,14 +6,17 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner",
+    "build": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner && npm run build -w @worlddesc/web-ui",
     "sync:schemas": "node ./scripts/sync-package-schemas.mjs",
     "check:schemas": "node ./scripts/sync-package-schemas.mjs --check",
-    "typecheck": "npm run typecheck -w @worlddesc/world && npm run typecheck -w @worlddesc/llm-runner",
+    "typecheck": "npm run typecheck -w @worlddesc/world && npm run typecheck -w @worlddesc/llm-runner && npm run typecheck -w @worlddesc/web-ui",
     "checkasset": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkAsset.js",
     "checkworld": "npm run build -w @worlddesc/world && node ./packages/world/dist/checkWorld.js",
     "test": "npm run test -w @worlddesc/world && npm run test -w @worlddesc/llm-runner",
     "llm:repl": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner && node ./packages/llm-runner/dist/cli.js",
+    "llm:web": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner && npm run build -w @worlddesc/web-ui && node ./packages/llm-runner/dist/cli.js --web --web-ui-dist ./packages/web-ui/dist",
+    "llm:web:api": "npm run build -w @worlddesc/world && npm run build -w @worlddesc/llm-runner && node ./packages/llm-runner/dist/cli.js --web",
+    "web:dev": "npm run dev -w @worlddesc/web-ui",
     "release:version": "node ./scripts/release-version.mjs",
     "release:build": "node ./scripts/release-build.mjs",
     "release:publish": "node ./scripts/release-publish.mjs"

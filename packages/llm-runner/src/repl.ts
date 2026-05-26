@@ -1,58 +1,22 @@
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
-
-import OpenAI from "openai";
-import {
-  createLlmToolHost,
-  createPlayerWorldView,
-  createWorldRuntime,
-  loadKnowledgeProviderFromDirectory,
-  loadNarrativeGuideProviderFromMixFile,
-  loadWorldFile
-} from "@worlddesc/world";
 
 import type { ReplConfig } from "./config.js";
-import { buildRunnerSystemPrompt } from "./promptAssembly.js";
-import { runToolLoop } from "./toolLoop.js";
-import { createUsageTracker } from "./usageTracker.js";
+import { createRunnerSession } from "./runnerSession.js";
 
 export async function runConsoleRepl(config: ReplConfig): Promise<void> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not set. Put it into .env or your environment before starting the REPL.");
-  }
-
-  const world = await loadWorldFile(config.worldPath);
-  const runtime = createWorldRuntime(world);
-  const narrativeProviderResult = config.narrativeGuideMixPath
-    ? await loadNarrativeGuideProviderFromMixFile(config.narrativeGuideMixPath, world)
-    : undefined;
-  const knowledgeProviderResult = config.knowledgeDirPath
-    ? await loadKnowledgeProviderFromDirectory(config.knowledgeDirPath, world)
-    : undefined;
-  const playerView = createPlayerWorldView({
-    runtime,
-    narrativeContextProvider: narrativeProviderResult?.provider,
-    knowledgeProvider: knowledgeProviderResult?.provider
-  });
-  const host = createLlmToolHost(playerView);
-  const client = new OpenAI({ apiKey });
-  const usageTracker = createUsageTracker(config.usageFilePath);
+  const session = await createRunnerSession(config);
   const rl = createInterface({ input, output });
-
-  let history: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
-  const systemPrompt = await buildRunnerSystemPrompt(config);
+  const initialSnapshot = await session.getSnapshot();
 
   printBanner(config);
-  if (narrativeProviderResult?.warnings.length) {
-    for (const warning of narrativeProviderResult.warnings) {
+  if (initialSnapshot.warnings.narrative.length) {
+    for (const warning of initialSnapshot.warnings.narrative) {
       output.write(`[narrative warning] ${warning}\n`);
     }
   }
-  if (knowledgeProviderResult?.warnings.length) {
-    for (const warning of knowledgeProviderResult.warnings) {
+  if (initialSnapshot.warnings.knowledge.length) {
+    for (const warning of initialSnapshot.warnings.knowledge) {
       output.write(`[knowledge warning] ${warning}\n`);
     }
   }
@@ -69,46 +33,34 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
       }
 
       if (line === "/scene") {
-        output.write(`${JSON.stringify(host.callTool("get_current_scene", {}), null, 2)}\n`);
+        output.write(`${JSON.stringify((await session.getSnapshot()).currentScene, null, 2)}\n`);
         continue;
       }
 
       if (line === "/events") {
-        output.write(`${JSON.stringify(host.callTool("get_new_events", {}), null, 2)}\n`);
+        output.write(`${JSON.stringify(await session.getNewEvents(), null, 2)}\n`);
         continue;
       }
 
       if (line === "/tools") {
-        output.write(`${JSON.stringify(host.listTools(), null, 2)}\n`);
+        output.write(`${JSON.stringify(session.listTools(), null, 2)}\n`);
         continue;
       }
 
       if (line === "/usage") {
-        output.write(`${JSON.stringify(await usageTracker.readSnapshot(), null, 2)}\n`);
+        output.write(`${JSON.stringify((await session.getSnapshot()).usage, null, 2)}\n`);
         continue;
       }
 
-      const result = await runToolLoop({
-        client,
-        host,
-        apiMode: config.apiMode,
-        model: config.model,
-        systemPrompt,
-        userMessage: line,
-        debug: config.debug,
-        maxToolRounds: config.maxToolRounds,
-        maxHistoryMessages: config.maxHistoryMessages,
-        includeSampleActions: config.includeSampleActions,
-        usageTracker,
-        history,
-        onDebugLog: (debugLine) => output.write(`[debug] ${debugLine}\n`)
-      });
-
-      history = result.history;
+      const result = await session.submitTurn(line);
+      for (const debugLine of result.debugLines) {
+        output.write(`[debug] ${debugLine}\n`);
+      }
       output.write(`${result.assistantText}\n`);
     }
   } finally {
     rl.close();
+    await session.dispose();
   }
 }
 

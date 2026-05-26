@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 
 export interface ReplConfig {
+  web: boolean;
   worldPath: string;
   narrativeGuideMixPath?: string;
   knowledgeDirPath?: string;
@@ -14,10 +15,13 @@ export interface ReplConfig {
   usageFilePath: string;
   character?: string;
   systemPromptFile?: string;
+  webPort: number;
+  webUiDistPath?: string;
 }
 
 export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process.env): ReplConfig {
   const defaults: ReplConfig = {
+    web: false,
     worldPath: resolve(cwd, "sample/test.world.yaml"),
     model: env.OPENAI_MODEL ?? "gpt-5.4-mini",
     apiMode: env.OPENAI_API_MODE === "responses" ? "responses" : "chat",
@@ -26,7 +30,8 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
     maxToolRounds: 8,
     maxHistoryMessages: 6,
     includeSampleActions: true,
-    usageFilePath: resolve(cwd, "tokens.usage.json")
+    usageFilePath: resolve(cwd, "tokens.usage.json"),
+    webPort: 4315
   };
 
   const args = [...argv];
@@ -38,6 +43,18 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
     switch (arg) {
       case "--world":
         defaults.worldPath = resolve(cwd, requireValue(args, index, "--world"));
+        index += 2;
+        continue;
+      case "--web":
+        defaults.web = true;
+        index += 1;
+        continue;
+      case "--web-port":
+        defaults.webPort = parsePositiveInteger(requireValue(args, index, "--web-port"), "--web-port");
+        index += 2;
+        continue;
+      case "--web-ui-dist":
+        defaults.webUiDistPath = resolve(cwd, requireValue(args, index, "--web-ui-dist"));
         index += 2;
         continue;
       case "--narrative-guide-mix":
@@ -107,6 +124,9 @@ export function buildHelpText(): string {
     "Usage: worlddesc-llm-repl [options]",
     "",
     "Options:",
+    "  --web                        Start the local web server instead of the console REPL",
+    "  --web-port <number>          Port for the local web server. Default: 4315",
+    "  --web-ui-dist <path>         Optional path to built static web assets for the web mode",
     "  --world <path>               Path to the world file. Default: sample/test.world.yaml",
     "  --narrative-guide-mix <path> Optional narrative guide mix file to build the LLM-facing narrativeContext",
     "  --knowledge-dir <path>       Optional knowledge directory with objects/<objectId>.md and rooms/<roomId>.md",

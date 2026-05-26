@@ -9,6 +9,7 @@ describe("llm-runner config", () => {
     } as NodeJS.ProcessEnv);
 
     expect(config).toEqual({
+      web: false,
       worldPath: "C:\\repo\\sample\\test.world.yaml",
       narrativeGuideMixPath: undefined,
       knowledgeDirPath: undefined,
@@ -21,7 +22,9 @@ describe("llm-runner config", () => {
       includeSampleActions: true,
       usageFilePath: "C:\\repo\\tokens.usage.json",
       character: undefined,
-      systemPromptFile: undefined
+      systemPromptFile: undefined,
+      webPort: 4315,
+      webUiDistPath: undefined
     });
   });
 
@@ -54,6 +57,7 @@ describe("llm-runner config", () => {
     );
 
     expect(config).toEqual({
+      web: false,
       worldPath: "C:\\repo\\sample\\interaction-lab.world.yaml",
       narrativeGuideMixPath: "C:\\repo\\sample\\test.narrative-guide-mix.yaml",
       knowledgeDirPath: "C:\\repo\\sample\\louvre-salon-carre.knowledge",
@@ -66,7 +70,9 @@ describe("llm-runner config", () => {
       includeSampleActions: true,
       usageFilePath: "C:\\repo\\tmp\\usage.json",
       character: "warm-guide",
-      systemPromptFile: undefined
+      systemPromptFile: undefined,
+      webPort: 4315,
+      webUiDistPath: undefined
     });
   });
 
@@ -84,6 +90,9 @@ describe("llm-runner config", () => {
 
   it("mentions the gpt-5.4-mini default in help text", () => {
     expect(buildHelpText()).toContain("OPENAI_MODEL or gpt-5.4-mini");
+    expect(buildHelpText()).toContain("--web");
+    expect(buildHelpText()).toContain("--web-port");
+    expect(buildHelpText()).toContain("--web-ui-dist");
     expect(buildHelpText()).toContain("--print-system-prompt");
     expect(buildHelpText()).toContain("--hide-sample-actions");
     expect(buildHelpText()).toContain("--narrative-guide-mix");

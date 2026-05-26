@@ -35,6 +35,7 @@ Es enthaelt aktuell:
 - OpenAI-Client-Anbindung
 - den ersten Tool-Loop mit den 5 vorgesehenen Tools
 - eine einfache Console-REPL
+- einen kleinen lokalen Web-Server ueber denselben Session-Kern
 - kleine Tests fuer Config und Tool-Schemas
 
 ## Warum zuerst eine Console-REPL
@@ -49,10 +50,19 @@ Gruende:
 - Tool-Aufrufe und Rueckgaben lassen sich leicht beobachten
 - Prompt- und Tool-Verhalten koennen isoliert beurteilt werden
 
+Inzwischen gibt es zusaetzlich einen ersten Web-Pfad:
+
+- `packages/web-ui` als eigenes Vite-/React-/Tailwind-Package
+- lokaler Session-Server in `@worlddesc/llm-runner`
+- derselbe Runner-Kern fuer Console und Web
+
 ## Unterstuetzte Parameter
 
 Die REPL unterstuetzt derzeit:
 
+- `--web`
+- `--web-port <number>`
+- `--web-ui-dist <path>`
 - `--world <path>`
 - `--narrative-guide-mix <path>`
 - `--knowledge-dir <path>`
@@ -80,6 +90,10 @@ Standard fuer den Usage-Counter:
 Standard fuer die persistierte freie Gespraechshistory:
 
 - `6` Nachrichten
+
+Standard fuer den lokalen Web-Server:
+
+- Port `4315`
 
 Arbeitsfaustregel:
 
@@ -189,6 +203,19 @@ Beispielaufruf:
 
 ```bash
 npm run llm:repl -- --debug --character warm-guide
+```
+
+Web-Oberflaeche aus dem Repo heraus:
+
+```bash
+npm run llm:web -- --world ./sample/louvre-salon-carre.world.yaml --narrative-guide-mix ./sample/louvre-salon-carre.narrative-guide-mix.yaml --knowledge-dir ./sample/louvre-salon-carre.knowledge --character museum-guide-grand
+```
+
+API-only fuer lokale Frontend-Entwicklung:
+
+```bash
+npm run llm:web:api -- --world ./sample/test.world.yaml --character warm-guide
+npm run web:dev
 ```
 
 Direkt aus dem npm-Paket:
@@ -396,7 +423,6 @@ npm run llm:repl -- --debug --api-mode responses --narrative-guide-mix ./sample/
 
 Noch bewusst nicht Teil dieses ersten Schritts:
 
-- Web-UI
 - Savegame-Management
 - Mehrspieler- oder Session-Server
 - komplexes Conversation-Memory ausserhalb des Modellverlaufs
@@ -459,3 +485,7 @@ Aber nur mit klaren Leitplanken:
 - neue Szene nach jedem Schritt
 - sofortiger Stopp bei Fehlschlag, Mehrdeutigkeit oder fehlender neuer Evidenz
 - keine Wiederholung derselben Aktion ohne triftigen neuen Grund
+
+Die geplante naechste Web-Schicht ist separat beschrieben in:
+
+- `docs/web-ui-architecture.md`
