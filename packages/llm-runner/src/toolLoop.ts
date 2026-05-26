@@ -169,7 +169,10 @@ async function runResponsesToolLoop(options: ToolLoopOptions): Promise<ToolLoopR
       instructions: buildResponsesInstructions(options.systemPrompt, scene),
       input: pendingInput,
       previous_response_id: previousResponseId,
-      tools: tools as unknown as never[]
+      tools: tools as unknown as never[],
+      tool_choice: getResponsesToolChoice(round, toolState),
+      parallel_tool_calls: false,
+      max_tool_calls: 1
     })) as {
       id: string;
       usage?: Parameters<typeof fromOpenAiUsage>[1];
@@ -326,7 +329,7 @@ function buildResponsesInstructions(systemPrompt: string, scene: PlayerSceneView
 }
 
 function serializeCommand(command: PlayerActionCommand): string {
-  return JSON.stringify(command);
+  return JSON.stringify(normalizeCommandForComparison(command));
 }
 
 function sanitizeSceneForModel(scene: PlayerSceneView, includeSampleActions: boolean): PlayerSceneView {
@@ -399,7 +402,7 @@ function isActionResultWithScene(value: unknown): value is { scene: PlayerSceneV
   return typeof value === "object" && value !== null && "scene" in value;
 }
 
-function buildResponsesInputFromHistory(history: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): unknown[] {
+export function buildResponsesInputFromHistory(history: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): unknown[] {
   return history
     .filter(isPersistableConversationMessage)
     .map((message) => ({
@@ -407,7 +410,7 @@ function buildResponsesInputFromHistory(history: OpenAI.Chat.Completions.ChatCom
       role: message.role,
       content: [
         {
-          type: "input_text",
+          type: message.role === "assistant" ? "output_text" : "input_text",
           text: typeof message.content === "string" ? message.content : ""
         }
       ]
@@ -545,4 +548,39 @@ function trimNarrativeNode(
 
 function uniqueIds(ids: Array<string | undefined>): string[] {
   return [...new Set(ids.filter((value): value is string => typeof value === "string" && value.length > 0))];
+}
+
+export function getResponsesToolChoice(
+  round: number,
+  state: ToolExecutionState
+): "auto" | "required" | { type: "function"; name: "perform_action" } {
+  if (state.resolvedCommandKey) {
+    return {
+      type: "function",
+      name: "perform_action"
+    };
+  }
+
+  return round === 0 ? "required" : "auto";
+}
+
+function normalizeCommandForComparison(command: PlayerActionCommand): PlayerActionCommand {
+  if (command.kind === "way") {
+    return {
+      kind: "way",
+      actionId: command.actionId
+    };
+  }
+
+  const normalized: PlayerActionCommand = {
+    kind: "interaction",
+    objectId: command.objectId,
+    actionId: command.actionId
+  };
+
+  if (typeof command.additionalText === "string" && command.additionalText.trim().length > 0) {
+    normalized.additionalText = command.additionalText;
+  }
+
+  return normalized;
 }

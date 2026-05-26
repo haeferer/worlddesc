@@ -493,6 +493,58 @@ describe("PlayerWorldView", () => {
     });
   });
 
+  it("resolves go intents from visible way titles, not only way ids", async () => {
+    const view = await loadSamplePlayerView();
+
+    view.getNewEvents();
+    view.performAction({
+      kind: "interaction",
+      objectId: "kiste",
+      actionId: "oeffnen"
+    });
+    view.performAction({
+      kind: "interaction",
+      objectId: "schluessel",
+      actionId: "nehmen"
+    });
+    view.performAction({
+      kind: "way",
+      actionId: "nord"
+    });
+    view.performAction({
+      kind: "interaction",
+      objectId: "huettenTuer",
+      actionId: "entriegeln"
+    });
+    view.performAction({
+      kind: "interaction",
+      objectId: "huettenTuer",
+      actionId: "oeffnen"
+    });
+    view.performAction({
+      kind: "way",
+      actionId: "huette"
+    });
+
+    const resolution = view.resolveIntent({
+      verb: "go",
+      object1: "Huette verlassen"
+    });
+
+    expect(resolution).toEqual({
+      status: "resolved",
+      command: {
+        kind: "way",
+        actionId: "raus"
+      },
+      verb: "go",
+      object1: "Huette verlassen",
+      object2: undefined,
+      usedObject2AsHint: false,
+      sourceActionId: "way:raus"
+    });
+  });
+
   it("supports object2 as a validated hint on unlock intents", async () => {
     const view = await loadSamplePlayerView();
 

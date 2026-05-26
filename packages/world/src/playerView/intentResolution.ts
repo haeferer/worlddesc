@@ -41,6 +41,24 @@ export function resolvePlayerIntent(scene: PlayerSceneView, intent: PlayerIntent
     return rejected(intent, "missing-object1", `Intent verb "${intent.verb}" requires object1`, true);
   }
 
+  if (intent.verb === "go") {
+    const wayAction = findWayAction(scene, intent.object1);
+
+    if (!wayAction) {
+      return rejected(intent, "intent-not-available", `No available way matches "${intent.object1}"`, true);
+    }
+
+    return {
+      status: "resolved",
+      command: wayAction.command,
+      verb: intent.verb,
+      object1: intent.object1,
+      object2: intent.object2,
+      usedObject2AsHint: false,
+      sourceActionId: wayAction.commandId
+    };
+  }
+
   if (!knownTargetIds.has(intent.object1)) {
     return rejected(intent, "unknown-object1", `Unknown target "${intent.object1}" for intent resolution`, true);
   }
@@ -56,26 +74,6 @@ export function resolvePlayerIntent(scene: PlayerSceneView, intent: PlayerIntent
       `Intent verb "${intent.verb}" does not currently support object2`,
       true
     );
-  }
-
-  if (intent.verb === "go") {
-    const wayAction = scene.sampleActions.find(
-      (action) => action.kind === "way" && action.actionId === intent.object1
-    );
-
-    if (!wayAction) {
-      return rejected(intent, "intent-not-available", `No available way matches "${intent.object1}"`, true);
-    }
-
-    return {
-      status: "resolved",
-      command: wayAction.command,
-      verb: intent.verb,
-      object1: intent.object1,
-      object2: intent.object2,
-      usedObject2AsHint: false,
-      sourceActionId: wayAction.commandId
-    };
   }
 
   const candidates = scene.sampleActions.filter(
@@ -150,4 +148,29 @@ function rejected(
       candidateActionIds
     }
   };
+}
+
+function findWayAction(scene: PlayerSceneView, target: string) {
+  const normalizedTarget = normalizeIntentTarget(target);
+  if (!normalizedTarget) {
+    return undefined;
+  }
+
+  return scene.sampleActions.find((action) => {
+    if (action.kind !== "way") {
+      return false;
+    }
+
+    const way = scene.ways.find((candidate) => candidate.wayId === action.actionId);
+    const terms = [action.actionId, action.title, action.desc, way?.title, way?.desc];
+
+    return terms.some((term) => normalizeIntentTarget(term) === normalizedTarget);
+  });
+}
+
+function normalizeIntentTarget(value: string | undefined): string {
+  return (value ?? "")
+    .trim()
+    .toLocaleLowerCase("de-DE")
+    .replace(/\s+/g, " ");
 }

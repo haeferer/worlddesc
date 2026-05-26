@@ -7,9 +7,11 @@ import {
   loadWorldDocument
 } from "@worlddesc/world";
 import {
+  buildResponsesInputFromHistory,
   buildPersistedConversationHistory,
   callToolWithPolicy,
   createToolExecutionState,
+  getResponsesToolChoice,
   trimConversationHistory
 } from "../src/index.js";
 
@@ -99,6 +101,40 @@ describe("llm-runner tool loop policy", () => {
       "perform_action",
       {
         command: resolution.command as Record<string, unknown>
+      },
+      state
+    ) as { accepted: boolean; turn?: { newlyVisibleObjectIds: string[] } };
+
+    expect(result.accepted).toBe(true);
+    expect(result.turn?.newlyVisibleObjectIds).toEqual(["schluessel"]);
+  });
+
+  it("accepts perform_action when the model adds empty additionalText", () => {
+    const host = loadSampleHost();
+    const state = createToolExecutionState();
+
+    const resolution = callToolWithPolicy(
+      host,
+      "resolve_intent",
+      {
+        intent: {
+          verb: "open",
+          object1: "kiste"
+        }
+      },
+      state
+    ) as { status: string; command?: unknown };
+
+    expect(resolution.status).toBe("resolved");
+
+    const result = callToolWithPolicy(
+      host,
+      "perform_action",
+      {
+        command: {
+          ...(resolution.command as Record<string, unknown>),
+          additionalText: ""
+        }
       },
       state
     ) as { accepted: boolean; turn?: { newlyVisibleObjectIds: string[] } };
@@ -312,5 +348,48 @@ describe("llm-runner tool loop policy", () => {
       { role: "assistant", content: "Du hebst den Deckel." },
       { role: "user", content: "nimm den schluessel" }
     ]);
+  });
+
+  it("maps persisted responses history to role-correct content item types", () => {
+    const input = buildResponsesInputFromHistory([
+      { role: "user", content: "oeffne die kiste" },
+      { role: "assistant", content: "Du hebst den Deckel." }
+    ]);
+
+    expect(input).toEqual([
+      {
+        type: "message",
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: "oeffne die kiste"
+          }
+        ]
+      },
+      {
+        type: "message",
+        role: "assistant",
+        content: [
+          {
+            type: "output_text",
+            text: "Du hebst den Deckel."
+          }
+        ]
+      }
+    ]);
+  });
+
+  it("forces perform_action in responses mode after a successful resolve_intent", () => {
+    const state = createToolExecutionState();
+
+    expect(getResponsesToolChoice(0, state)).toBe("required");
+
+    state.resolvedCommandKey = "{\"kind\":\"interaction\",\"objectId\":\"kiste\",\"actionId\":\"oeffnen\"}";
+
+    expect(getResponsesToolChoice(1, state)).toEqual({
+      type: "function",
+      name: "perform_action"
+    });
   });
 });
