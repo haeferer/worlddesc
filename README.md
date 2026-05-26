@@ -23,6 +23,7 @@ Wichtige Dateien:
 - `sample/louvre-salon-carre.narrative-guide.yaml`
 - `sample/louvre-salon-carre.narrative-guide-mix.yaml`
 - `sample/louvre-salon-carre.artwork-dossiers.md`
+- `sample/louvre-salon-carre.knowledge/`
 - `sample/interaction-lab.world.yaml`
 - `sample/assets/safe.object-asset.yaml`
 - `docs/world.md`
@@ -33,6 +34,7 @@ Wichtige Dateien:
 - `docs/writing-narrative-guides.md`
 - `docs/project-scaffold.md`
 - `docs/museum-world-prototype.md`
+- `docs/knowledge-layer.md`
 - `docs/llm-interface.md`
 - `docs/llm-runner.md`
 - `docs/first-llm-contract.md`
@@ -86,6 +88,7 @@ Geplanter Startpunkt:
 - `packages/world` kapselt das Domaenenmodell und das Laden/Validieren von Welten.
 - `packages/llm-runner` kapselt den ersten OpenAI-basierten REPL-Runner ueber der Player-Sicht.
 - der REPL-Runner kann optional ueber `--narrative-guide-mix` einen gemischten `narrativeContext` aus Guide-Dateien laden
+- der REPL-Runner kann optional ueber `--knowledge-dir` eine separate kuratierte Wissensschicht laden
 - der REPL-Runner kann aktuell zwischen `--api-mode chat` und `--api-mode responses` umgeschaltet werden
 - `worlddesc create <dir>` scaffoldet jetzt ein neues Authoring-Projekt mit World, Guide, Prompt, Docs und npm-Skripten
 

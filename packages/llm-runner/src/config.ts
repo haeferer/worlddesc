@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 export interface ReplConfig {
   worldPath: string;
   narrativeGuideMixPath?: string;
+  knowledgeDirPath?: string;
   apiMode: "chat" | "responses";
   model: string;
   printSystemPrompt: boolean;
@@ -41,6 +42,10 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
         continue;
       case "--narrative-guide-mix":
         defaults.narrativeGuideMixPath = resolve(cwd, requireValue(args, index, "--narrative-guide-mix"));
+        index += 2;
+        continue;
+      case "--knowledge-dir":
+        defaults.knowledgeDirPath = resolve(cwd, requireValue(args, index, "--knowledge-dir"));
         index += 2;
         continue;
       case "--model":
@@ -104,6 +109,7 @@ export function buildHelpText(): string {
     "Options:",
     "  --world <path>               Path to the world file. Default: sample/test.world.yaml",
     "  --narrative-guide-mix <path> Optional narrative guide mix file to build the LLM-facing narrativeContext",
+    "  --knowledge-dir <path>       Optional knowledge directory with objects/<objectId>.md and rooms/<roomId>.md",
     "  --api-mode <chat|responses>  OpenAI API mode. Default: OPENAI_API_MODE or chat",
     "  --model <name>               OpenAI model name. Default: OPENAI_MODEL or gpt-5.4-mini",
     "  --print-system-prompt        Print the fully assembled runner system prompt and exit",

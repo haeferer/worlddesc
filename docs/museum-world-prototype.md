@@ -78,6 +78,7 @@ Im Sample-Prototyp:
 - `sample/louvre-salon-carre.narrative-guide.yaml`
 - `sample/louvre-salon-carre.narrative-guide-mix.yaml`
 - `sample/louvre-salon-carre.artwork-dossiers.md`
+- `sample/louvre-salon-carre.knowledge/`
 
 ist der Raum als **Mitte plus vier Bild-Standpunkte** modelliert.
 
@@ -94,3 +95,18 @@ Wegregeln:
 3. eigener strukturierter `artwork dossier`-Dateityp
 4. eine Runner-seitige Wissenseinspeisung fuer den Museumsfuehrer
 5. Regeln, wann das LLM frei auf Kunstwissen antworten darf und wann nicht
+
+## Wissensschicht
+
+Fuer diesen Museumsfall ist jetzt zusaetzlich eine getrennte Wissensschicht vorgemerkt.
+
+Sie soll:
+
+- nicht Teil der World sein
+- aber als Authoring-Material im Projekt liegen
+- ueber `roomId` und `objectId` adressierbar sein
+- nur bei Bedarf an das LLM gegeben werden
+
+Siehe dazu auch:
+
+- [knowledge-layer.md](C:/remoterep/worlddesc/docs/knowledge-layer.md:1)

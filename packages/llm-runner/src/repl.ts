@@ -6,9 +6,10 @@ import { resolve } from "node:path";
 import OpenAI from "openai";
 import {
   createLlmToolHost,
-  loadNarrativeGuideProviderFromMixFile,
   createPlayerWorldView,
   createWorldRuntime,
+  loadKnowledgeProviderFromDirectory,
+  loadNarrativeGuideProviderFromMixFile,
   loadWorldFile
 } from "@worlddesc/world";
 
@@ -28,9 +29,13 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
   const narrativeProviderResult = config.narrativeGuideMixPath
     ? await loadNarrativeGuideProviderFromMixFile(config.narrativeGuideMixPath, world)
     : undefined;
+  const knowledgeProviderResult = config.knowledgeDirPath
+    ? await loadKnowledgeProviderFromDirectory(config.knowledgeDirPath, world)
+    : undefined;
   const playerView = createPlayerWorldView({
     runtime,
-    narrativeContextProvider: narrativeProviderResult?.provider
+    narrativeContextProvider: narrativeProviderResult?.provider,
+    knowledgeProvider: knowledgeProviderResult?.provider
   });
   const host = createLlmToolHost(playerView);
   const client = new OpenAI({ apiKey });
@@ -44,6 +49,11 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
   if (narrativeProviderResult?.warnings.length) {
     for (const warning of narrativeProviderResult.warnings) {
       output.write(`[narrative warning] ${warning}\n`);
+    }
+  }
+  if (knowledgeProviderResult?.warnings.length) {
+    for (const warning of knowledgeProviderResult.warnings) {
+      output.write(`[knowledge warning] ${warning}\n`);
     }
   }
 
@@ -105,6 +115,7 @@ export async function runConsoleRepl(config: ReplConfig): Promise<void> {
 function printBanner(config: ReplConfig): void {
   output.write(`World: ${config.worldPath}\n`);
   output.write(`Narrative mix: ${config.narrativeGuideMixPath ?? "none"}\n`);
+  output.write(`Knowledge dir: ${config.knowledgeDirPath ?? "none"}\n`);
   output.write(`API mode: ${config.apiMode}\n`);
   output.write(`Model: ${config.model}\n`);
   output.write(`Debug: ${config.debug ? "on" : "off"}\n`);

@@ -11,6 +11,7 @@ Der erste Versuch soll auf einem kleinen Satz deterministischer Funktionen aufse
 Diese Funktionen sollen:
 
 - die Spielersicht liefern
+- bei Bedarf kuratiertes Hintergrundwissen liefern
 - eine breite Absicht in eine konkrete Aktion uebersetzen
 - diese Aktion ausfuehren
 - neue Wahrnehmungen kontrolliert zurueckgeben
@@ -106,6 +107,33 @@ Rueckgabe:
 - bekannte Texte
 - bekannte Wissensmarker
 - aktuelle Wahrnehmungs- und Zugaenglichkeitssicht auf dieses Objekt
+
+### `get_object_knowledge`
+
+Beschreibung:
+
+- liefert `PlayerKnowledgeEntryView | null`
+- ist fuer kuratiertes externes Objektwissen gedacht
+
+Argumente:
+
+```json
+{
+  "objectId": "cimabueMaesta"
+}
+```
+
+Rueckgabe:
+
+- `scope`
+- `targetId`
+- `format`
+- `markdown`
+
+Wichtig:
+
+- das ist keine harte Weltwahrheit
+- das Tool ist fuer erklaerenden Kontext gedacht, nicht fuer Navigation oder Aktionspruefung
 
 ### `resolve_intent`
 

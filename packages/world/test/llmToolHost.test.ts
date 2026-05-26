@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createLlmToolHost,
+  loadKnowledgeProviderFromDirectory,
   createPlayerWorldView,
   createWorldRuntime,
   loadWorldDocument
@@ -48,6 +49,21 @@ async function loadNarrativeToolHost() {
   );
 }
 
+async function loadKnowledgeToolHost() {
+  const source = await readFile(resolve(testDir, "../../../sample/louvre-salon-carre.world.yaml"), "utf8");
+  const runtime = createWorldRuntime(loadWorldDocument(source));
+  const providerResult = await loadKnowledgeProviderFromDirectory(
+    resolve(testDir, "../../../sample/louvre-salon-carre.knowledge"),
+    runtime.world
+  );
+  return createLlmToolHost(
+    createPlayerWorldView({
+      runtime,
+      knowledgeProvider: providerResult.provider
+    })
+  );
+}
+
 describe("LlmToolHost", () => {
   it("lists the first tool contract in a stable order", async () => {
     const host = await loadSampleToolHost();
@@ -55,6 +71,7 @@ describe("LlmToolHost", () => {
     expect(host.listTools().map((tool) => tool.name)).toEqual([
       "get_current_scene",
       "get_known_object",
+      "get_object_knowledge",
       "resolve_intent",
       "perform_action",
       "get_new_events"
@@ -152,6 +169,29 @@ describe("LlmToolHost", () => {
         currentlyAccessible: true
       })
     );
+  });
+
+  it("returns curated object knowledge through the tool host", async () => {
+    const host = await loadKnowledgeToolHost();
+
+    host.callTool("perform_action", {
+      command: {
+        kind: "way",
+        actionId: "zuCimabue"
+      }
+    });
+    const knowledge = host.callTool("get_object_knowledge", {
+      objectId: "cimabueMaesta"
+    });
+
+    expect(knowledge).toEqual(
+      expect.objectContaining({
+        scope: "object",
+        targetId: "cimabueMaesta",
+        format: "markdown"
+      })
+    );
+    expect(knowledge?.markdown).toContain("Cimabue");
   });
 
   it("drains new events through the tool host", async () => {

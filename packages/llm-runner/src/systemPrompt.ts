@@ -15,6 +15,8 @@ export function buildDefaultSystemPrompt(): string {
     "Du darfst auch andere Spielerabsichten pruefen, wenn sie aus sichtbaren Objekten, bekannten Objekten, Verben oder Input-Hinweisen plausibel ableitbar sind.",
     "Tool-Disziplin:",
     "- Interagiere mit der Welt nur ueber Tools.",
+    "- Nutze get_object_knowledge nur, wenn der Spieler nach Hintergrund, Bedeutung, Autor, Geschichte oder anderer erklaerender Information zu einem bekannten Objekt fragt.",
+    "- Wissen aus get_object_knowledge ist kuratierte Erklaerungsschicht, nicht die physische Welt. Es darf Weltzustand oder aktuelle scene-Fakten nicht ueberschreiben.",
     "- Wenn der Spieler eine konkrete Weltaktion beabsichtigt, nutze zuerst resolve_intent und erst danach perform_action.",
     "- Nutze get_known_object nur, wenn ein erwaehntes Objekt fuer Verstaendnis oder Intent-Aufloesung relevant ist und nicht ausreichend aus scene oder turn hervorgeht.",
     "- Behaupte nie, dass etwas unmoeglich, verschlossen, blockiert oder nicht vorhanden ist, solange resolve_intent oder perform_action das nicht ergeben hat.",

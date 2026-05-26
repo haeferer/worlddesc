@@ -11,6 +11,7 @@ describe("llm-runner config", () => {
     expect(config).toEqual({
       worldPath: "C:\\repo\\sample\\test.world.yaml",
       narrativeGuideMixPath: undefined,
+      knowledgeDirPath: undefined,
       apiMode: "chat",
       model: "gpt-test",
       printSystemPrompt: false,
@@ -19,7 +20,8 @@ describe("llm-runner config", () => {
       maxHistoryMessages: 4,
       includeSampleActions: true,
       usageFilePath: "C:\\repo\\tokens.usage.json",
-      character: undefined
+      character: undefined,
+      systemPromptFile: undefined
     });
   });
 
@@ -30,6 +32,8 @@ describe("llm-runner config", () => {
         "./sample/interaction-lab.world.yaml",
         "--narrative-guide-mix",
         "./sample/test.narrative-guide-mix.yaml",
+        "--knowledge-dir",
+        "./sample/louvre-salon-carre.knowledge",
         "--api-mode",
         "responses",
         "--model",
@@ -52,6 +56,7 @@ describe("llm-runner config", () => {
     expect(config).toEqual({
       worldPath: "C:\\repo\\sample\\interaction-lab.world.yaml",
       narrativeGuideMixPath: "C:\\repo\\sample\\test.narrative-guide-mix.yaml",
+      knowledgeDirPath: "C:\\repo\\sample\\louvre-salon-carre.knowledge",
       apiMode: "responses",
       model: "gpt-x",
       printSystemPrompt: true,
@@ -60,7 +65,8 @@ describe("llm-runner config", () => {
       maxHistoryMessages: 6,
       includeSampleActions: true,
       usageFilePath: "C:\\repo\\tmp\\usage.json",
-      character: "warm-guide"
+      character: "warm-guide",
+      systemPromptFile: undefined
     });
   });
 
@@ -81,6 +87,7 @@ describe("llm-runner config", () => {
     expect(buildHelpText()).toContain("--print-system-prompt");
     expect(buildHelpText()).toContain("--hide-sample-actions");
     expect(buildHelpText()).toContain("--narrative-guide-mix");
+    expect(buildHelpText()).toContain("--knowledge-dir");
     expect(buildHelpText()).toContain("--api-mode");
     expect(buildHelpText()).toContain("--usage-file");
     expect(buildHelpText()).toContain("--character");

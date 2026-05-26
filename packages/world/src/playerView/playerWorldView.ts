@@ -18,10 +18,12 @@ import type {
   KnownObjectView,
   PerceptionEvent,
   PlayerActionResultView,
+  PlayerKnowledgeEntryView,
   PlayerMemory,
   PlayerNarrativeContextProvider,
   PlayerSceneView,
   PlayerWorldView,
+  PlayerKnowledgeProvider,
   WorldRuntimePort
 } from "./types.js";
 import type { PlayerIntentCommand, PlayerIntentResolution, PlayerIntentSurfaceView } from "./intentTypes.js";
@@ -30,6 +32,7 @@ export interface PlayerWorldViewContext {
   runtime: WorldRuntimePort;
   memory?: PlayerMemory;
   narrativeContextProvider?: PlayerNarrativeContextProvider;
+  knowledgeProvider?: PlayerKnowledgeProvider;
 }
 
 export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
@@ -104,6 +107,32 @@ export class RuntimeBackedPlayerWorldView implements PlayerWorldView {
         currentActionFocus: this.memory.currentActionFocus?.objectId === objectId
       })
     };
+  }
+
+  getObjectKnowledge(objectId: string): PlayerKnowledgeEntryView | null {
+    this.capturePassiveObservations();
+
+    const object = this.context.runtime.world.objects[objectId];
+    if (!object) {
+      return null;
+    }
+
+    const known = this.memory.knownObjects[objectId];
+    if (!known) {
+      return null;
+    }
+
+    const perception = describeObjectPerception(this.context.runtime, objectId);
+
+    return (
+      this.context.knowledgeProvider?.getObjectKnowledge?.({
+        objectId,
+        roomId: this.context.runtime.getCurrentRoomId(),
+        currentlyVisible: perception.visible,
+        currentlyAccessible: perception.accessible,
+        lastSeenAt: known.lastSeenAt
+      }) ?? null
+    );
   }
 
   getNewEvents(): PerceptionEvent[] {

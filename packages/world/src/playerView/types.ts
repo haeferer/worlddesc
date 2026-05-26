@@ -10,6 +10,7 @@ import type {
   WorldDocument
 } from "../types.js";
 import type { PlayerIntentCommand, PlayerIntentResolution, PlayerIntentSurfaceView } from "./intentTypes.js";
+import type { PlayerKnowledgeEntryView, PlayerKnowledgeProvider } from "../knowledgeTypes.js";
 
 export interface WorldRuntimePort {
   readonly world: WorldDocument;
@@ -320,8 +321,11 @@ export interface PlayerWorldView {
   getCurrentScene(): PlayerSceneView;
   getIntentSurface(): PlayerIntentSurfaceView;
   getKnownObject(objectId: string): KnownObjectView | null;
+  getObjectKnowledge(objectId: string): PlayerKnowledgeEntryView | null;
   getNewEvents(): PerceptionEvent[];
   resolveIntent(intent: PlayerIntentCommand): PlayerIntentResolution;
   performIntent(intent: PlayerIntentCommand): PlayerActionResultView;
   performAction(action: PlayerActionCommand): PlayerActionResultView;
 }
+
+export type { PlayerKnowledgeEntryView, PlayerKnowledgeProvider };

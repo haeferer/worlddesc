@@ -6,6 +6,7 @@ import type {
   FirstLlmToolSpec,
   GetKnownObjectArgs,
   PerformActionArgs,
+  GetObjectKnowledgeArgs,
   ResolveIntentArgs
 } from "./llmToolContract.js";
 import type { PlayerWorldView } from "./types.js";
@@ -28,6 +29,8 @@ export class RuntimeBackedLlmToolHost implements LlmToolHost {
         return this.playerView.getCurrentScene() as FirstLlmToolResult<TName>;
       case "get_known_object":
         return this.playerView.getKnownObject((args as GetKnownObjectArgs).objectId) as FirstLlmToolResult<TName>;
+      case "get_object_knowledge":
+        return this.playerView.getObjectKnowledge((args as GetObjectKnowledgeArgs).objectId) as FirstLlmToolResult<TName>;
       case "resolve_intent":
         return this.playerView.resolveIntent((args as ResolveIntentArgs).intent) as FirstLlmToolResult<TName>;
       case "perform_action":

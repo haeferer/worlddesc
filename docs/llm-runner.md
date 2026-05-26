@@ -55,6 +55,7 @@ Die REPL unterstuetzt derzeit:
 
 - `--world <path>`
 - `--narrative-guide-mix <path>`
+- `--knowledge-dir <path>`
 - `--api-mode <chat|responses>`
 - `--model <name>`
 - `--debug`
@@ -86,6 +87,13 @@ Wichtig:
 
 - `narrativeContext` ist nur Regiehilfe
 - er darf keine Fakten aus `scene`, `turn` oder `currentActionFocus` ueberschreiben
+
+Wenn `--knowledge-dir` gesetzt ist:
+
+- werden Markdown-Wissensdateien ueber `objectId` und `roomId` geladen
+- gibt das Toolset zusaetzlich `get_object_knowledge(objectId)` frei
+- bleibt dieses Wissen bewusst ausserhalb von `scene` und `narrativeContext`
+- wird es nur bei Bedarf geholt, statt permanent in die Turn-Sicht geschuettet
 
 ## Empfohlener Start
 
@@ -168,6 +176,12 @@ Mit Narrative-Guide-Mix:
 
 ```bash
 npm run llm:repl -- --debug --character warm-guide --narrative-guide-mix ./sample/test.narrative-guide-mix.yaml
+```
+
+Mit Wissensschicht, zum Beispiel fuer den Museumsprototyp:
+
+```bash
+npm run llm:repl -- --debug --world ./sample/louvre-salon-carre.world.yaml --narrative-guide-mix ./sample/louvre-salon-carre.narrative-guide-mix.yaml --knowledge-dir ./sample/louvre-salon-carre.knowledge --character dry-curator
 ```
 
 Direkt aus dem npm-Paket:

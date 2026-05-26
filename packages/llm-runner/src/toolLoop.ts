@@ -267,6 +267,10 @@ export function callToolWithPolicy(
       return host.callTool("get_known_object", {
         objectId: String(args.objectId ?? "")
       });
+    case "get_object_knowledge":
+      return host.callTool("get_object_knowledge", {
+        objectId: String(args.objectId ?? "")
+      });
     case "resolve_intent": {
       const result = host.callTool("resolve_intent", {
         intent: args.intent as never

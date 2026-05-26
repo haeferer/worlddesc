@@ -1,6 +1,7 @@
 import type {
   KnownObjectView,
   PerceptionEvent,
+  PlayerKnowledgeEntryView,
   PlayerActionCommand,
   PlayerActionResultView,
   PlayerSceneView
@@ -24,6 +25,10 @@ export interface ResolveIntentArgs {
   intent: PlayerIntentCommand;
 }
 
+export interface GetObjectKnowledgeArgs {
+  objectId: string;
+}
+
 export interface PerformActionArgs {
   command: PlayerActionCommand;
 }
@@ -35,6 +40,7 @@ export type FirstLlmToolName = FirstLlmToolSpec["name"];
 export type FirstLlmToolSpec =
   | LlmToolSpec<"get_current_scene", GetCurrentSceneArgs, PlayerSceneView>
   | LlmToolSpec<"get_known_object", GetKnownObjectArgs, KnownObjectView | null>
+  | LlmToolSpec<"get_object_knowledge", GetObjectKnowledgeArgs, PlayerKnowledgeEntryView | null>
   | LlmToolSpec<"resolve_intent", ResolveIntentArgs, PlayerIntentResolution>
   | LlmToolSpec<"perform_action", PerformActionArgs, PlayerActionResultView>
   | LlmToolSpec<"get_new_events", GetNewEventsArgs, PerceptionEvent[]>;
@@ -55,6 +61,14 @@ export const FIRST_LLM_TOOL_CONTRACT: FirstLlmToolSpec[] = [
   {
     name: "get_known_object",
     description: "Return known player-facing detail for a specific object.",
+    argsExample: {
+      objectId: "kiste"
+    }
+  },
+  {
+    name: "get_object_knowledge",
+    description:
+      "Return curated external background knowledge for a known object, for example museum-guide context, authorship or interpretation. This is not hard world truth.",
     argsExample: {
       objectId: "kiste"
     }

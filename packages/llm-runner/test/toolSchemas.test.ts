@@ -7,6 +7,7 @@ describe("llm-runner tool schemas", () => {
     expect(buildFirstLlmToolSchemas().map((tool) => tool.function.name)).toEqual([
       "get_current_scene",
       "get_known_object",
+      "get_object_knowledge",
       "resolve_intent",
       "perform_action",
       "get_new_events"
@@ -28,6 +29,7 @@ describe("llm-runner tool schemas", () => {
     expect(buildFirstLlmResponseToolSchemas().map((tool) => tool.name)).toEqual([
       "get_current_scene",
       "get_known_object",
+      "get_object_knowledge",
       "resolve_intent",
       "perform_action",
       "get_new_events"

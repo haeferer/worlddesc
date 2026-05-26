@@ -176,6 +176,42 @@ describe("llm-runner tool loop policy", () => {
     });
   });
 
+  it("can retrieve curated object knowledge through tool policy", () => {
+    const source = readFileSync(resolve(testDir, "../../../sample/test.world.yaml"), "utf8");
+    const runtime = createWorldRuntime(loadWorldDocument(source));
+    const host = createLlmToolHost(
+      createPlayerWorldView({
+        runtime,
+        knowledgeProvider: {
+          getObjectKnowledge({ objectId }) {
+            return {
+              scope: "object",
+              targetId: objectId,
+              format: "markdown",
+              markdown: `# ${objectId}\n\nKuratiertes Wissen.`
+            };
+          }
+        }
+      })
+    );
+    const state = createToolExecutionState();
+
+    host.callTool("get_current_scene", {});
+    const result = callToolWithPolicy(
+      host,
+      "get_object_knowledge",
+      {
+        objectId: "kiste"
+      },
+      state,
+      false
+    ) as { targetId: string; format: string; markdown: string };
+
+    expect(result.targetId).toBe("kiste");
+    expect(result.format).toBe("markdown");
+    expect(result.markdown).toContain("Kuratiertes Wissen");
+  });
+
   it("trims narrativeContext to a small prioritized slice for the model", () => {
     const host = createLlmToolHost(
       createPlayerWorldView({

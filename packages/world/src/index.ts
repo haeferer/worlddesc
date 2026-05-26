@@ -2,6 +2,8 @@ export * from "./assetTypes.js";
 export * from "./createProject.js";
 export * from "./assets/expandWorldAssetInstances.js";
 export * from "./assets/resolveObjectAssetReference.js";
+export * from "./knowledgeTypes.js";
+export * from "./loadKnowledge.js";
 export * from "./loadObjectAsset.js";
 export * from "./loadNarrativeGuide.js";
 export * from "./loadNarrativeGuideMix.js";

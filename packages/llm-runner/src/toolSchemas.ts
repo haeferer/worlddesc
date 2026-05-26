@@ -59,6 +59,25 @@ export function buildFirstLlmToolSchemas(): ChatToolSchema[] {
     {
       type: "function",
       function: {
+        name: "get_object_knowledge",
+        description:
+          "Return curated external background knowledge for a known object. Use this for explanation or guide context, not for hard scene facts.",
+        parameters: {
+          type: "object",
+          properties: {
+            objectId: {
+              type: "string",
+              description: "Known object id whose curated background knowledge you want to retrieve."
+            }
+          },
+          required: ["objectId"],
+          additionalProperties: false
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
         name: "resolve_intent",
         description: "Resolve a broad point-and-click style player intent into a structured action command or a structured rejection.",
         parameters: {

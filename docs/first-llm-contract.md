@@ -57,7 +57,23 @@ Wichtig:
 
 - diese Funktion ist nachgelagert und sollte im Normalfall nicht fuer jedes Objekt aufgerufen werden
 
-## 3. `resolve_intent(intent)`
+## 3. `get_object_knowledge(objectId)`
+
+Liefert kuratiertes externes Hintergrundwissen zu einem bekannten Objekt.
+
+Zweck:
+
+- fuer Museumsfuehrer, historische Einordnung, Autorschaft oder Deutung
+- bewusst getrennt von harter World-Truth
+- on-demand statt als Dauerbestandteil der Szene
+
+Wichtig:
+
+- dieses Wissen ist Erklaerungsschicht, nicht Raumlogik
+- es darf `scene`, `turn` und konkrete Tool-Ergebnisse nicht ueberstimmen
+- der Retrieval-Pfad ist bewusst separiert, damit das Wissen nicht blind in der normalen Turn-History akkumuliert
+
+## 4. `resolve_intent(intent)`
 
 Nimmt eine breitere Spielerabsicht entgegen und versucht, sie deterministisch auf eine konkrete Aktion zurueckzufuehren.
 
@@ -79,7 +95,7 @@ Zweck:
 - das LLM kann freie Spielerabsicht in die Weltsprache uebersetzen
 - die Engine prueft danach, ob diese Absicht in der aktuellen Szene konkret aufloesbar ist
 
-## 4. `perform_action(command)`
+## 5. `perform_action(command)`
 
 Fuehrt nur bereits strukturierte Player-Aktionen aus.
 
@@ -99,7 +115,7 @@ Zweck:
 
 - die eigentliche Weltveraenderung bleibt auf einer engen, testbaren Kommandoebene
 
-## 5. `get_new_events()`
+## 6. `get_new_events()`
 
 Liefert neue Wahrnehmungsereignisse seit dem letzten Abruf.
 
@@ -113,11 +129,12 @@ Zweck:
 Der erste LLM-Versuch sollte idealerweise diesem Muster folgen:
 
 1. `get_current_scene()`
-2. das LLM formuliert intern eine Absicht
-3. `resolve_intent(intent)`
-4. wenn `resolved`: `perform_action(command)`
-5. wenn `rejected`: Rueckfrage, Umformulierung oder Alternativvorschlag
-6. das LLM nutzt `turn` und `scene` fuer seine Antwort an den Spieler
+2. optional `get_known_object(objectId)` oder `get_object_knowledge(objectId)`
+3. das LLM formuliert intern eine Absicht
+4. `resolve_intent(intent)`
+5. wenn `resolved`: `perform_action(command)`
+6. wenn `rejected`: Rueckfrage, Umformulierung oder Alternativvorschlag
+7. das LLM nutzt `turn` und `scene` fuer seine Antwort an den Spieler
 
 ## Empfohlenes Startmodell
 
@@ -146,6 +163,7 @@ Der vorgeschlagene erste Satz an Funktionen ist:
 
 - `get_current_scene()`
 - `get_known_object(objectId)`
+- `get_object_knowledge(objectId)`
 - `resolve_intent(intent)`
 - `perform_action(command)`
 - `get_new_events()`
