@@ -6,6 +6,7 @@ Dieses Projekt trennt bewusst zwischen harter Weltlogik und narrativer Regie.
 
 - `world/main.world.yaml` ist die harte Weltwahrheit.
 - `world/guides/*.narrative-guide.yaml` enthalten nur Regie, Ton und semantische Hinweise.
+- `knowledge/` oder spaetere Wissensdateien enthalten nur erklaerenden Zusatzkontext, nicht die Grundstimmung der Welt.
 - `world/prompts/project-guide.character.txt` steuert den sprachlichen Begleiter, nicht die Weltlogik.
 - `docs/character-guide.md` haelt fest, wie der Begleiter klingen und was er bevorzugen soll.
 
@@ -13,6 +14,8 @@ Dieses Projekt trennt bewusst zwischen harter Weltlogik und narrativer Regie.
 
 - Neue Fakten, Objekte, Raeume und Interaktionen gehoeren in die World-Datei.
 - Stimmung, sensorische Leitplanken und Ton gehoeren in Narrative Guides.
+- Geruch, Licht, Materialwirkung und Raumklima gehoeren in der Regel ebenfalls in Narrative Guides.
+- Hintergrundwissen, Deutung und erklaerender Kontext gehoeren in die Knowledge-Schicht.
 - Stimme, Fuehrungsstil und Redundanzregeln gehoeren in Prompt-Datei plus Character-Guide, nicht in die World.
 - Versteckte Weltregeln, Locks oder Konsequenzen duerfen nicht nur in Guides oder Promptdateien auftauchen.
 - Nach Aenderungen an der World immer `npm run checkworld` ausfuehren.

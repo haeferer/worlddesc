@@ -96,6 +96,13 @@ Geplanter Startpunkt:
 - der REPL-Runner kann aktuell zwischen `--api-mode chat` und `--api-mode responses` umgeschaltet werden
 - `worlddesc create <dir>` scaffoldet jetzt ein neues Authoring-Projekt mit World, Guide, Prompt, Docs und npm-Skripten
 
+Wichtige inhaltliche Trennung dabei:
+
+- World = was existiert, wo etwas ist und was wirklich geht
+- Narrative Guide = wie sich Raum und Objekt anfuehlen
+- Knowledge = was der Guide zusaetzlich darueber wissen und erklaeren kann
+- Character = wie der Begleiter sprachlich klingt
+
 Release-Ablauf:
 
 - `npm run release:version -- patch`

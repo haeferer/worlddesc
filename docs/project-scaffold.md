@@ -244,8 +244,15 @@ Soll die wichtigsten Regeln kurz wiederholen:
 - World = harte Wahrheit
 - Guide = Regie
 - Prompt = Persoenlichkeit
+- Knowledge = zusaetzliche Erklaerung
 - keine Stimmung direkt in harte Weltzustandsregeln mischen
 - IDs stabil halten
+
+Wichtig ist dabei nicht nur **dass** diese Trennung genannt wird, sondern auch **warum**:
+
+- mehr Geruch, Luft, Licht, Materialwirkung -> Narrative Guide
+- mehr Hintergrund, Deutung, Kontextwissen -> Knowledge
+- neue Tuer, neuer Weg, neue Interaktion -> World
 
 ### `docs/character-guide.md`
 

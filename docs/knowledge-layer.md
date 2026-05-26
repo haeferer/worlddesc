@@ -61,10 +61,27 @@ Die Wissensschicht beschreibt:
 - kuenstlerische Einordnung
 - didaktische Vermittlungspunkte
 
+Typische richtige Inhalte sind zum Beispiel:
+
+- warum ein Ort bedeutsam ist
+- wie ein Gegenstand kulturgeschichtlich gelesen werden kann
+- was ein Werk, ein Brauch oder eine Person zusaetzlich erklaert
+- kuratierte Deutungen, die der Guide auf Nachfrage einflechten kann
+
 Wichtig:
 
 - diese Schicht darf die Welt nicht veraendern
 - sie erklaert nur, sie schaltet nichts frei
+
+Wichtig ebenso:
+
+- sie ist **kein Ersatz** fuer sinnliche Raum- oder Objektwirkung
+- Geruch, Luft, Licht und Materialeindruck gehoeren in aller Regel zuerst in den Narrative Guide, nicht in Knowledge
+
+Faustregel:
+
+- Narrative Guide = wie sich etwas anfuehlt
+- Knowledge = was man darueber zusaetzlich wissen kann
 
 ## Gehoert das in die Authoring-Schicht?
 

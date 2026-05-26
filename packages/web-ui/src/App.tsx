@@ -338,7 +338,7 @@ function TranscriptBubble(props: {
             : "border border-stone-100/10 bg-stone-900/80 text-stone-100"
         ].join(" ")}
       >
-        <p className="whitespace-pre-wrap leading-7">{props.entry.text}</p>
+        <p className="whitespace-pre-wrap leading-7">{renderInlineMarkdown(props.entry.text)}</p>
         {isUser && props.entry.pending ? (
           <p className="mt-2 text-xs uppercase tracking-[0.16em] text-stone-700/75">Wird gesendet…</p>
         ) : null}
@@ -388,4 +388,20 @@ function SuggestionButton(props: {
       {props.suggestion.label}
     </button>
   );
+}
+
+function renderInlineMarkdown(text: string): ReactNode[] {
+  const segments = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
+
+  return segments.map((segment, index) => {
+    if (segment.startsWith("**") && segment.endsWith("**") && segment.length > 4) {
+      return (
+        <strong key={`md-${index}`} className="font-semibold">
+          {segment.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return <span key={`md-${index}`}>{segment}</span>;
+  });
 }

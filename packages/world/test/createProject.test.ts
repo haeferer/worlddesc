@@ -44,6 +44,11 @@ describe("createProjectScaffold", () => {
     const characterGuide = await readFile(join(targetDir, "docs", "character-guide.md"), "utf8");
     expect(characterGuide).toContain("World = Wahrheit");
     expect(characterGuide).toContain("Character = Stimme");
+    expect(characterGuide).toContain("Knowledge = Erklaerung");
+
+    const authoringRules = await readFile(join(targetDir, "docs", "authoring-rules.md"), "utf8");
+    expect(authoringRules).toContain("Knowledge-Dateien");
+    expect(authoringRules).toContain("Narrative Guides");
 
     const world = await loadWorldFile(join(targetDir, "world", "main.world.yaml"));
     expect(world.world.title).toBe("Forest Notes");

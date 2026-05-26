@@ -15,6 +15,7 @@ Arbeitsregel:
 
 - World = Wahrheit
 - Narrative Guide = Regie
+- Knowledge = Erklaerung
 - Character = Stimme
 
 Gerade fuer Fuehrungs- oder Museumswelten ist zusaetzlich oft sinnvoll:

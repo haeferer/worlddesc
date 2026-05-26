@@ -13,37 +13,42 @@ world:
 rooms:
   wiese:
     tone: [warm, open, safe]
-    associations: [summer, breath, daylight]
-    sensoryHints: [sun-on-skin, soft-grass, bright-air]
+    associations: [summer, breath, daylight, first-step]
+    sensoryHints: [sun-on-skin, soft-grass, bright-air, dry-seedheads]
+    narrativeHints: [offener-anfang, noch-kein-widerstand]
   wieseVorDemWald:
     tone: [threshold, watchful, uncertain]
-    associations: [border, hesitation, decision]
-    narrativeHints: [letzter-heller-ort, uebergang-zur-gefahr]
+    associations: [border, hesitation, decision, cooler-air]
+    sensoryHints: [longer-shadows, bark-scent, thinner-light]
+    narrativeHints: [letzter-heller-ort, uebergang-zur-gefahr, helligkeit-verliert-boden]
   huetteInnen:
-    tone: [musty, enclosed, forgotten]
-    associations: [stale-air, paused-time, old-wood]
-    sensoryHints: [damp-wood, muffled-air, dust]
+    tone: [musty, enclosed, forgotten, held]
+    associations: [stale-air, paused-time, old-wood, abandoned-shelter]
+    sensoryHints: [damp-wood, muffled-air, dust, old-smoke, warped-boards]
+    narrativeHints: [nicht-gemuetlich-sondern-zurueckgehalten, ein-raum-der-mehr-haelt-als-zeigt]
   dunklerWald:
     tone: [eerie, close, listening]
-    associations: [disorientation, wet-ground, hidden-paths]
-    sensoryHints: [cold-shadow, damp-earth, swallowed-sound]
+    associations: [disorientation, wet-ground, hidden-paths, swallowed-distance]
+    sensoryHints: [cold-shadow, damp-earth, swallowed-sound, branch-creak]
+    narrativeHints: [richtung-wird-unsicher, mut-kostet-hier-mehr]
 
 objects:
   kiste:
     tone: [humble, promising]
-    associations: [small-secret, first-discovery]
+    associations: [small-secret, first-discovery, handmade-use]
     narrativeHints: [einfaches-abenteuerobjekt, fruehe-belohnung]
   beutel:
     tone: [plain, empty, careful]
-    associations: [false-lead, craftsmanship]
+    associations: [false-lead, craftsmanship, careful-knot]
   schluessel:
     tone: [useful, tactile, transitional]
-    associations: [permission, access, next-step]
+    associations: [permission, access, next-step, cool-metal]
   huettenTuer:
     tone: [stubborn, old, significant]
-    associations: [threshold, resistance, permission]
-    narrativeHints: [nicht-nur-holz-sondern-grenze]
+    associations: [threshold, resistance, permission, swollen-wood]
+    sensoryHints: [rough-grain, dry-creak]
+    narrativeHints: [nicht-nur-holz-sondern-grenze, erst-widerstand-dann-nachgeben]
   laterne:
     tone: [fragile, hopeful]
-    associations: [guidance, courage, borrowed-light]
+    associations: [guidance, courage, borrowed-light, soot-on-glass]
     narrativeHints: [licht-gegen-dunkelheit, tragbare-orientierung]

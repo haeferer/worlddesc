@@ -36,6 +36,14 @@ Der `narrative guide` beschreibt dagegen:
 - welche Assoziationen daran haengen
 - welche erzählerischen Lesarten stabil nahegelegt werden
 
+Typische richtige Inhalte im Guide sind zum Beispiel:
+
+- Geruch
+- Lichtstimmung
+- Materialwirkung
+- Temperatur- oder Luft-Eindruck
+- die semantische Rolle eines Gegenstands im Erleben
+
 Wichtig:
 
 - der `narrative guide` darf harte Weltwahrheit nicht ueberschreiben
@@ -108,6 +116,11 @@ Der Guide sagt:
 - sie traegt erzählerisch Hoffnung, Orientierung und Uebergang
 
 ## Mixing-Idee
+
+Ein guter Merksatz ist:
+
+- World sagt, **dass** etwas da ist oder geht
+- Narrative Guide sagt, **wie** es sich anfuehlt
 
 Der bevorzugte Gedanke ist aktuell:
 

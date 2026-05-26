@@ -32,8 +32,8 @@ describe("narrative guide mixing", () => {
     expect(result.document.layerIds).toEqual(["base", "twilight"]);
     expect(result.document.rooms.huetteInnen).toEqual({
       tone: ["musty", "enclosed", "uneasy"],
-      associations: ["stale-air", "paused-time", "old-wood"],
-      sensoryHints: ["damp-wood", "muffled-air", "dust"],
+      associations: ["stale-air", "paused-time", "old-wood", "abandoned-shelter"],
+      sensoryHints: ["damp-wood", "muffled-air", "dust", "old-smoke", "warped-boards"],
       narrativeHints: ["nicht-gemutlich-sondern-zurueckgehalten"]
     });
 
@@ -54,23 +54,24 @@ describe("narrative guide mixing", () => {
       },
       room: {
         tone: ["warm", "open", "safe"],
-        associations: ["summer", "breath", "daylight"],
-        sensoryHints: ["sun-on-skin", "soft-grass", "bright-air"]
+        associations: ["summer", "breath", "daylight", "first-step"],
+        sensoryHints: ["sun-on-skin", "soft-grass", "bright-air", "dry-seedheads"],
+        narrativeHints: ["offener-anfang", "noch-kein-widerstand"]
       },
       objects: {
         kiste: {
           tone: ["humble", "promising"],
-          associations: ["small-secret", "first-discovery"],
+          associations: ["small-secret", "first-discovery", "handmade-use"],
           narrativeHints: ["einfaches-abenteuerobjekt", "fruehe-belohnung"]
         },
         beutel: {
           tone: ["plain", "empty", "careful"],
-          associations: ["false-lead", "craftsmanship"]
+          associations: ["false-lead", "craftsmanship", "careful-knot"]
         }
       },
       currentActionFocusObject: {
         tone: ["humble", "promising"],
-        associations: ["small-secret", "first-discovery"],
+        associations: ["small-secret", "first-discovery", "handmade-use"],
         narrativeHints: ["einfaches-abenteuerobjekt", "fruehe-belohnung"]
       }
     });
