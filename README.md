@@ -40,6 +40,7 @@ Wichtige Dateien:
 - `docs/design-decisions.md`
 - `prompts/warm-guide.character.txt`
 - `prompts/dry-curator.character.txt`
+- `prompts/opulent-guide.character.txt`
 - `packages/world/src/loadWorld.ts`
 - `packages/world/src/loadObjectAsset.ts`
 

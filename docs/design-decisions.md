@@ -412,3 +412,10 @@ Als bewusst spaetere Ausbaustufe ist vorgemerkt:
 - das LLM darf eventuell spaeter eng begrenzte Mikroabfolgen aus mehreren Einzelschritten steuern
 - das ist aber keine Aufgabe der Engine selbst
 - ein solcher Modus braucht harte Schrittgrenzen, Szenen-Neubewertung nach jedem Schritt und klare Abbruchregeln gegen Kreisverhalten
+
+Zusaetzliche aktuelle Leitplanke:
+
+- fuer kurze Zustimmungsantworten wie `ja`, `ja bitte`, `mach das` oder `gern` auf einen zuvor vorgeschlagenen naechsten Schritt wird vorerst keine eigene Pending-Mechanik im Runner gebaut
+- insbesondere wird kein `pendingSuggestedAction` stillschweigend eingefuehrt
+- solche Faelle sollen zuerst ueber Modellwahl und Prompting verbessert werden
+- erst wenn staerkere Modelle diese Rueckbindung nicht ausreichend tragen, darf die Frage einer sehr engen, explizit dokumentierten Bestaetigungsmechanik neu aufgemacht werden

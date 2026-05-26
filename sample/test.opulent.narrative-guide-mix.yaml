@@ -1,0 +1,17 @@
+mix:
+  kind: narrativeGuideMix
+  id: waldpfadOpulentMix
+  title: Opulenter Mix fuer die Adventure-Referenzwelt
+  desc: Mischt den Standardton des Waldpfads mit einer bewusst stark ausgeschmueckten Overlay-Schicht.
+  forWorld: Der Waldpfad
+
+layers:
+  - id: base
+    guide: ./test.narrative-guide.yaml
+    desc: Grundton und erste semantische Verankerung der Referenzwelt.
+  - id: twilight
+    guide: ./test.twilight.narrative-guide.yaml
+    desc: Abendliche Nachschaerfung fuer dunklere und vorsichtigere Szenen.
+  - id: opulent
+    guide: ./test.opulent.narrative-guide.yaml
+    desc: Ueberzeichnete Overlay-Schicht fuer sehr reiches, sinnliches Erzaehlen.

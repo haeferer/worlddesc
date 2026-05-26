@@ -1,0 +1,64 @@
+guide:
+  kind: narrativeGuide
+  id: waldpfadOpulentGuide
+  title: Opulente Erzaehlschicht fuer den Waldpfad
+  desc: Ein bewusst ueberzeichneter Overlay-Guide fuer reiche, sinnliche und stark aufgeladene Erzaehlung.
+  forWorld: Der Waldpfad
+
+world:
+  tone: [hushed, luminous, fable-soaked]
+  associations: [threshold-ritual, held-breath, old-wood, amber-light]
+  narrativeHints: [jede-kleine-handlung-bekommt-gewicht, helligkeit-und-dunkelheit-ringen-um-raum]
+  sensoryHints: [air-that-seems-to-listen, light-that-clings-to-edges]
+
+rooms:
+  wiese:
+    tone: [golden, expansive, deceptively-gentle]
+    associations: [sun-warmth, meadow-breath, pastoral-surface]
+    narrativeHints: [ruhe-die-einen-ersten-schritt-erlaubt, offene-welt-mit-verdeckter-richtung]
+    sensoryHints: [sunlit-grass, warm-air, slow-brightness]
+  wieseVorDemWald:
+    tone: [threshold, watchful, theatrically-poised]
+    associations: [pause-before-descent, border-air, listening-shadows]
+    narrativeHints: [hier-wird-entschieden-ob-die-welt-enger-wird, der-rand-ist-fast-ein-vorhang]
+    sensoryHints: [cooler-breath, longer-shadows, bark-scent]
+  huetteInnen:
+    tone: [muffled, close, sepia-dark]
+    associations: [kept-silence, stale-wood, old-neglect]
+    narrativeHints: [kein-gemuetlicher-schutzraum-sondern-ein-angehaltener-ort, staub-und-wartezeit-liegen-in-der-luft]
+    sensoryHints: [dry-dust, muffled-air, wood-sourness]
+  dunklerWald:
+    tone: [swallowing, wet, close-listening]
+    associations: [depth-without-horizon, root-dark, damp-echo]
+    narrativeHints: [der-wald-will-nicht-beschrieben-sondern-betreten-werden, licht-wird-hier-zur-haltung]
+    sensoryHints: [cold-shadow, damp-earth, swallowed-sound]
+
+objects:
+  sonne:
+    tone: [remote, sovereign]
+    associations: [glare, high-noon, untouchable-clarity]
+    narrativeHints: [zu-hell-fuer-laenges-hinsehen, eine-ordnung-die-sich-nicht-erklaeren-muss]
+  kiste:
+    tone: [modest, promising, quietly-theatrical]
+    associations: [small-secret, held-breath, first-reveal]
+    narrativeHints: [die-art-von-kleinem-gegenstand-an-dem-abenteuer-aufklappen, unscheinbar-bis-zur-ersten-beruehrung]
+  beutel:
+    tone: [plain, careful, misleadingly-humble]
+    associations: [false-promise, craft-touch, empty-purpose]
+    narrativeHints: [ein-gegenstand-der-erst-bedeutsam-scheint-und-dann-still-zuruecktritt]
+  schluessel:
+    tone: [tactile, transitional, exact]
+    associations: [permission, fit, metal-memory]
+    narrativeHints: [klein-aber-entscheidend, eine-form-von-erlaubnis-in-metall]
+  huette:
+    tone: [weathered, watchful, old]
+    associations: [shelter-shape, waiting-timber, human-trace]
+    narrativeHints: [mehr-spur-als-zuflucht, ein-bauwerk-das-fast-zur-geste-wird]
+  huettenTuer:
+    tone: [stubborn, reluctant, ceremonial]
+    associations: [threshold, resistance, earned-entry]
+    narrativeHints: [keine-blosse-tuer-sondern-ein-kleines-ritual-aus-holz-und-schloss, erst-widerstand-dann-nachgeben]
+  laterne:
+    tone: [fragile, hopeful, ember-like]
+    associations: [borrowed-light, courage, hand-held-orientation]
+    narrativeHints: [licht-als-entscheidung, etwas-kleines-das-den-raum-trotzdem-veraendert]

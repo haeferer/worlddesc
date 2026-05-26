@@ -150,6 +150,7 @@ Beispiel-Dateien im Repo:
 - `prompts/dry-curator.character.txt`
 - `prompts/playful-poet.character.txt`
 - `prompts/minimal-operator.character.txt`
+- `prompts/opulent-guide.character.txt`
 
 Beispielaufruf:
 
@@ -331,6 +332,13 @@ Wichtige Einschraenkung aktuell:
 - er ersetzt den Chat-Pfad noch nicht als Default
 - die eigentliche Welt- und Tool-Disziplin ist in beiden Modi gleich
 
+Wichtige Grenze fuer Bestaetigungen:
+
+- kurze Antworten wie `ja`, `ja bitte`, `mach das` oder `gern` nach einem vom Modell vorgeschlagenen naechsten Schritt werden aktuell nicht ueber eine eigene Pending-Mechanik im Runner aufgeloest
+- das ist eine bewusste Entscheidung, damit keine versteckte Dialogintelligenz in den Code rutscht
+- wenn solche Bestaetigungen holprig wirken, soll zuerst mit Modellwahl und Prompting gearbeitet werden, bevor eine zusaetzliche Runner-Mechanik ueberhaupt neu bewertet wird
+- insbesondere soll vorerst kein `pendingSuggestedAction`-Mechanismus stillschweigend eingefuehrt werden
+
 Empfohlener A/B-Vergleich:
 
 ```bash
@@ -367,6 +375,7 @@ Zusaetzliche Grenze fuer den ersten Versuch:
 - der Runner soll keine Mehrfachaktionen oder Batch-Kommandos an die Welt weiterreichen
 - wenn ein Spieler mehrere Schritte in einem Satz nennt, muss das LLM zuerst nur den naechsten konkreten Einzelschritt auswaehlen
 - nach dessen Ausfuehrung wird die Szene neu bewertet
+- auch Bestaetigungslogik fuer vorgeschlagene Aktionen bleibt zunaechst Aufgabe des Modells, nicht des Runners
 
 ## Debug-Modus
 

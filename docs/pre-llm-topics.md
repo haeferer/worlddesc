@@ -375,6 +375,7 @@ Wichtig:
 - Mehrschrittabsichten dürfen spaeter als moegliche Ausbauidee zurueckkommen
 - fuer den ersten Versuch bleiben sie aber bewusst ausserhalb des direkten Engine-Pfads
 - falls spaeter eine begrenzte Mikroplanung kommt, braucht sie harte Schrittgrenzen, erneute Szenenpruefung nach jedem Schritt und klare Abbruchregeln bei Fehlschlag oder Unsicherheit
+- kurze Zustimmungsantworten auf einen vom Modell selbst vorgeschlagenen naechsten Schritt bleiben vorerst Modellaufgabe; dafuer wird nicht stillschweigend eine Pending-Action-Logik in den Runner verschoben
 
 Ziel:
 
