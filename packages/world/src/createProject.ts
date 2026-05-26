@@ -23,7 +23,7 @@ export async function createProjectScaffold(options: CreateProjectOptions): Prom
 
   await ensureTargetDirectoryIsWritable(targetDir);
 
-  const files = buildScaffoldTemplateFiles({
+  const files = await buildScaffoldTemplateFiles({
     packageName,
     displayName,
     worlddescVersion: versions.worldVersion,

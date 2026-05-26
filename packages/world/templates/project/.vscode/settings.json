@@ -1,0 +1,30 @@
+{
+  "yaml.schemas": {
+    "./node_modules/@worlddesc/world/schema/object-asset.schema.json": [
+      "*.object-asset.yaml",
+      "*.object-asset.yml"
+    ],
+    "./node_modules/@worlddesc/world/schema/narrative-guide.schema.json": [
+      "*.narrative-guide.yaml",
+      "*.narrative-guide.yml"
+    ],
+    "./node_modules/@worlddesc/world/schema/narrative-guide-mix.schema.json": [
+      "*.narrative-guide-mix.yaml",
+      "*.narrative-guide-mix.yml"
+    ],
+    "./node_modules/@worlddesc/world/schema/world.schema.json": [
+      "*.world.yaml",
+      "*.world.yml"
+    ]
+  },
+  "files.associations": {
+    "*.narrative-guide-mix.yaml": "yaml",
+    "*.narrative-guide-mix.yml": "yaml",
+    "*.narrative-guide.yaml": "yaml",
+    "*.narrative-guide.yml": "yaml",
+    "*.object-asset.yaml": "yaml",
+    "*.object-asset.yml": "yaml",
+    "*.world.yaml": "yaml",
+    "*.world.yml": "yaml"
+  }
+}

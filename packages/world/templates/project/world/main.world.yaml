@@ -1,0 +1,185 @@
+world:
+  title: __DISPLAY_NAME__
+  desc: Eine kleine Startwelt fuer ein neues worlddesc-Projekt.
+
+player:
+  initialRoom: lichtung
+
+interactionTypes:
+  examine:
+    title: Ansehen
+    desc: Etwas genauer betrachten.
+  open:
+    title: Oeffnen
+    desc: Ein Objekt oeffnen.
+  take:
+    title: Nehmen
+    desc: Ein tragbares Objekt aufnehmen.
+  unlock:
+    title: Entriegeln
+    desc: Ein verschlossenes Objekt mit einem passenden Mittel entriegeln.
+
+objects:
+  kiste:
+    title: Kiste
+    desc: Eine schlichte Holzkiste steht am Rand der Lichtung.
+    aliases: [kiste, holzkiste]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Kiste ansehen
+        aliases: [kiste ansehen]
+        result:
+          text: Die Kiste ist alt, aber noch solide.
+      oeffnen:
+        type: open
+        title: Kiste oeffnen
+        aliases: [kiste oeffnen]
+        availableWhen:
+          all:
+            - ref: kiste
+              path: state.closed
+              equals: true
+        effects:
+          - type: set
+            ref: kiste
+            path: state.closed
+            value: false
+        result:
+          text: In der Kiste liegt ein kleiner Messingschluessel.
+
+  schluessel:
+    title: Messingschluessel
+    desc: Ein kleiner Messingschluessel mit einfachem Bart.
+    aliases: [schluessel, messingschluessel]
+    portable: true
+    interactions:
+      ansehen:
+        type: examine
+        title: Schluessel ansehen
+        aliases: [schluessel ansehen]
+        result:
+          text: Der Schluessel wirkt oft benutzt, aber noch verlaesslich.
+      nehmen:
+        type: take
+        title: Schluessel nehmen
+        aliases: [schluessel nehmen, aufheben]
+        availableWhen:
+          all:
+            - ref: schluessel
+              placement:
+                object: kiste
+            - ref: kiste
+              path: state.closed
+              equals: false
+        effects:
+          - type: move
+            ref: schluessel
+            to:
+              inventory: player
+        result:
+          text: Du nimmst den kleinen Messingschluessel an dich.
+
+  tuer:
+    title: Holztuer
+    desc: Eine alte Holztuer fuehrt in die Huette.
+    aliases: [tuer, holztuer]
+    stateSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        closed:
+          type: boolean
+          default: true
+        lockState:
+          type: string
+          enum: [locked, unlocked]
+          default: locked
+    interactions:
+      ansehen:
+        type: examine
+        title: Tuer ansehen
+        aliases: [tuer ansehen]
+        result:
+          text: Die Tuer ist alt und mit einem einfachen Schloss verriegelt.
+      entriegeln:
+        type: unlock
+        title: Tuer entriegeln
+        aliases: [tuer entriegeln, aufschliessen]
+        availableWhen:
+          all:
+            - ref: tuer
+              path: state.lockState
+              equals: locked
+            - ref: schluessel
+              placement:
+                inventory: player
+        effects:
+          - type: set
+            ref: tuer
+            path: state.lockState
+            value: unlocked
+        result:
+          text: Das Schloss klickt leise auf.
+      oeffnen:
+        type: open
+        title: Tuer oeffnen
+        aliases: [tuer oeffnen]
+        availableWhen:
+          all:
+            - ref: tuer
+              path: state.closed
+              equals: true
+            - ref: tuer
+              path: state.lockState
+              equals: unlocked
+        effects:
+          - type: set
+            ref: tuer
+            path: state.closed
+            value: false
+        result:
+          text: Die Tuer schwingt mit einem dumpfen Knarren auf.
+
+rooms:
+  lichtung:
+    title: Lichtung
+    desc: Eine kleine Lichtung mit einer Kiste und einer verlassenen Huette.
+    ways:
+      hinein:
+        title: In die Huette
+        desc: Durch die geoeffnete Tuer gelangst du in die Huette.
+        aliases: [in die huette, hinein, huette betreten]
+        availableWhen:
+          all:
+            - ref: tuer
+              path: state.closed
+              equals: false
+        target:
+          room: huetteInnen
+
+  huetteInnen:
+    title: Huette
+    desc: Ein kleiner stiller Raum mit kalter Luft und altem Holzgeruch.
+    ways:
+      hinaus:
+        title: Zurueck zur Lichtung
+        desc: Durch die offene Tuer geht es wieder hinaus.
+        aliases: [hinaus, zurueck, lichtung]
+        target:
+          room: lichtung
+
+placement:
+  kiste:
+    room: lichtung
+  schluessel:
+    object: kiste
+  tuer:
+    room: lichtung

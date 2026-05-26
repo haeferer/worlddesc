@@ -1,0 +1,8 @@
+mix:
+  kind: narrativeGuideMix
+  id: __MIX_ID__
+  title: Basis-Mix fuer __DISPLAY_NAME__
+
+layers:
+  - id: base
+    guide: ./main.narrative-guide.yaml

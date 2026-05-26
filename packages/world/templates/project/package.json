@@ -1,0 +1,14 @@
+{
+  "name": "__PACKAGE_NAME__",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "checkworld": "worlddesc checkworld ./world/main.world.yaml",
+    "repl": "worlddesc-llm-repl --world ./world/main.world.yaml --narrative-guide-mix ./world/guides/main.narrative-guide-mix.yaml --character project-guide",
+    "print-prompt": "worlddesc-llm-repl --world ./world/main.world.yaml --narrative-guide-mix ./world/guides/main.narrative-guide-mix.yaml --character project-guide --print-system-prompt"
+  },
+  "dependencies": {
+    "@worlddesc/world": "^__WORLDDESC_VERSION__",
+    "@worlddesc/llm-runner": "^__LLM_RUNNER_VERSION__"
+  }
+}

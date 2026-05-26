@@ -1,0 +1,5 @@
+{
+  "world": "./world/main.world.yaml",
+  "narrativeGuideMix": "./world/guides/main.narrative-guide-mix.yaml",
+  "characterPrompt": "./world/prompts/project-guide.character.txt"
+}

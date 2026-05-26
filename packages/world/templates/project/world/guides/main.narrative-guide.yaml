@@ -1,0 +1,32 @@
+guide:
+  kind: narrativeGuide
+  id: __GUIDE_ID__
+  title: Narrative Guide fuer __DISPLAY_NAME__
+  desc: Ein kleiner semantischer Ausgangspunkt fuer dieses Projekt.
+  forWorld: __DISPLAY_NAME__
+
+world:
+  tone: [quiet, curious]
+  associations: [threshold, small-discoveries]
+
+rooms:
+  lichtung:
+    tone: [open, calm, expectant]
+    associations: [daylight, pause, first-step]
+    sensoryHints: [soft-grass, mild-air]
+  huetteInnen:
+    tone: [still, enclosed, old]
+    associations: [dust, wood, held-breath]
+    sensoryHints: [cold-air, dry-wood]
+
+objects:
+  kiste:
+    tone: [humble, promising]
+    associations: [first-secret, simple-reward]
+  schluessel:
+    tone: [useful, transitional]
+    associations: [permission, next-step]
+  tuer:
+    tone: [stubborn, significant]
+    associations: [threshold, resistance]
+    narrativeHints: [eine-grenze-die-erst-verdient-werden-muss]
