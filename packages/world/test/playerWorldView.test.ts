@@ -24,6 +24,12 @@ async function loadInteractionLabPlayerView() {
   return createPlayerWorldView({ runtime });
 }
 
+async function loadLouvrePlayerView() {
+  const source = await readFile(resolve(testDir, "../../../sample/louvre-salon-carre.world.yaml"), "utf8");
+  const runtime = createWorldRuntime(loadWorldDocument(source));
+  return createPlayerWorldView({ runtime });
+}
+
 async function loadSamplePlayerViewWithNarrative() {
   const source = await readFile(resolve(testDir, "../../../sample/test.world.yaml"), "utf8");
   const runtime = createWorldRuntime(loadWorldDocument(source));
@@ -542,6 +548,28 @@ describe("PlayerWorldView", () => {
       object2: undefined,
       usedObject2AsHint: false,
       sourceActionId: "way:raus"
+    });
+  });
+
+  it("can resolve a unique partial visible way phrase without world knowledge", async () => {
+    const view = await loadLouvrePlayerView();
+
+    const resolution = view.resolveIntent({
+      verb: "go",
+      object1: "Angelico"
+    });
+
+    expect(resolution).toEqual({
+      status: "resolved",
+      command: {
+        kind: "way",
+        actionId: "zuFraAngelico"
+      },
+      verb: "go",
+      object1: "Angelico",
+      object2: undefined,
+      usedObject2AsHint: false,
+      sourceActionId: "way:zuFraAngelico"
     });
   });
 

@@ -156,7 +156,7 @@ function findWayAction(scene: PlayerSceneView, target: string) {
     return undefined;
   }
 
-  return scene.sampleActions.find((action) => {
+  const exactMatch = scene.sampleActions.find((action) => {
     if (action.kind !== "way") {
       return false;
     }
@@ -166,6 +166,23 @@ function findWayAction(scene: PlayerSceneView, target: string) {
 
     return terms.some((term) => normalizeIntentTarget(term) === normalizedTarget);
   });
+
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  const partialMatches = scene.sampleActions.filter((action) => {
+    if (action.kind !== "way") {
+      return false;
+    }
+
+    const way = scene.ways.find((candidate) => candidate.wayId === action.actionId);
+    const terms = [action.title, action.desc, way?.title, way?.desc];
+
+    return terms.some((term) => containsWholePhrase(normalizeIntentTarget(term), normalizedTarget));
+  });
+
+  return partialMatches.length === 1 ? partialMatches[0] : undefined;
 }
 
 function normalizeIntentTarget(value: string | undefined): string {
@@ -173,4 +190,14 @@ function normalizeIntentTarget(value: string | undefined): string {
     .trim()
     .toLocaleLowerCase("de-DE")
     .replace(/\s+/g, " ");
+}
+
+function containsWholePhrase(term: string, target: string): boolean {
+  if (!term || !target) {
+    return false;
+  }
+
+  const paddedTerm = ` ${term} `;
+  const paddedTarget = ` ${target} `;
+  return paddedTerm.includes(paddedTarget);
 }

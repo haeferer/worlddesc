@@ -156,6 +156,9 @@ Beispiel-Dateien im Repo:
 
 - `prompts/warm-guide.character.txt`
 - `prompts/dry-curator.character.txt`
+- `prompts/museum-guide.character.txt`
+- `prompts/museum-guide-warm.character.txt`
+- `prompts/museum-guide-grand.character.txt`
 - `prompts/playful-poet.character.txt`
 - `prompts/minimal-operator.character.txt`
 - `prompts/opulent-guide.character.txt`
