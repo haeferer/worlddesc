@@ -3,7 +3,7 @@ import type { FirstLlmToolSpec } from "@worlddesc/world";
 import type { PlayerActionCommand, PlayerSceneView } from "@worlddesc/world";
 
 import type { ReplConfig } from "./config.js";
-import type { TokenUsageFile } from "./usageTracker.js";
+import type { TokenUsageAggregate, TokenUsageFile } from "./usageTracker.js";
 
 export interface RunnerSessionConfigSummary {
   worldPath: string;
@@ -43,6 +43,7 @@ export interface RunnerSessionSnapshot {
   currentScene: PlayerSceneView;
   suggestions: RunnerUiSuggestion[];
   usage: TokenUsageFile;
+  sessionUsage: TokenUsageAggregate;
   warnings: {
     narrative: string[];
     knowledge: string[];

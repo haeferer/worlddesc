@@ -1,5 +1,5 @@
-import type { FormEvent, ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import type { FormEvent, KeyboardEvent, ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { fetchSession, submitTurn } from "./lib/api";
 import type { SessionSnapshot, TranscriptEntry, UiSuggestion } from "./lib/types";
@@ -16,6 +16,9 @@ export function App() {
   const [optimisticEntries, setOptimisticEntries] = useState<LocalTranscriptEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showDebug, setShowDebug] = useState(false);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const transcriptScrollRef = useRef<HTMLElement | null>(null);
+  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
 
   const stt = useSpeechToText((transcript) => {
     if (pending) {
@@ -38,6 +41,29 @@ export function App() {
     return [...transcriptEntries].reverse().find((entry) => entry.role === "assistant") ?? null;
   }, [transcriptEntries]);
 
+  useEffect(() => {
+    if (!shouldAutoScroll) {
+      return;
+    }
+
+    transcriptEndRef.current?.scrollIntoView({
+      block: "end",
+      behavior: pending ? "smooth" : "auto"
+    });
+  }, [pending, shouldAutoScroll, transcriptEntries]);
+
+  const formatNumber = useMemo(() => new Intl.NumberFormat("de-DE"), []);
+
+  function handleTranscriptScroll() {
+    const element = transcriptScrollRef.current;
+    if (!element) {
+      return;
+    }
+
+    const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
+    setShouldAutoScroll(distanceFromBottom < 96);
+  }
+
   async function loadInitialSession() {
     try {
       setError(null);
@@ -55,6 +81,20 @@ export function App() {
     }
 
     await sendTurn(nextInput);
+  }
+
+  function handleInputKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    const nextInput = input.trim();
+    if (!nextInput || pending) {
+      return;
+    }
+
+    void sendTurn(nextInput);
   }
 
   async function sendTurn(nextInput: string) {
@@ -90,9 +130,9 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#2f261f,_#17120e_56%,_#0d0a08)] text-stone-100">
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-6 lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]">
-        <main className="flex min-h-[72vh] flex-col overflow-hidden rounded-[28px] border border-amber-200/10 bg-stone-950/65 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur">
+    <div className="h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_#2f261f,_#17120e_56%,_#0d0a08)] text-stone-100">
+      <div className="mx-auto grid h-full max-w-7xl grid-rows-[minmax(0,1fr)] gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)]">
+        <main className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-amber-200/10 bg-stone-950/65 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur">
           <header className="border-b border-amber-200/10 px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -107,7 +147,12 @@ export function App() {
             </div>
           </header>
 
-          <section className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+          <section
+            ref={transcriptScrollRef}
+            onScroll={handleTranscriptScroll}
+            className="flex-1 overflow-y-auto px-5 py-5"
+          >
+            <div className="space-y-4">
             {error ? (
               <div className="rounded-2xl border border-red-400/20 bg-red-950/40 px-4 py-3 text-sm text-red-100">
                 {error}
@@ -130,6 +175,8 @@ export function App() {
                 Die Session ist bereit. Sprich die Welt an, oder probiere einen Vorschlag aus dem rechten Bereich.
               </div>
             )}
+              <div ref={transcriptEndRef} />
+            </div>
           </section>
 
           <footer className="border-t border-amber-200/10 px-5 py-4">
@@ -138,6 +185,7 @@ export function App() {
                 <textarea
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
+                  onKeyDown={handleInputKeyDown}
                   placeholder="Was moechtest du tun?"
                   className="min-h-[84px] flex-1 resize-y rounded-2xl border border-amber-100/15 bg-stone-900/80 px-4 py-3 text-sm text-stone-50 outline-none transition focus:border-amber-200/40 focus:ring-2 focus:ring-amber-300/20"
                 />
@@ -160,12 +208,15 @@ export function App() {
                   ) : null}
                 </div>
               </div>
-              {stt.error ? <p className="text-sm text-red-200/80">{stt.error}</p> : null}
+              <div className="flex flex-wrap items-center gap-3 text-xs text-stone-400/85">
+                {stt.supported ? <p>STT: {stt.debugState}</p> : null}
+                {stt.error ? <p className="text-red-200/80">{stt.error}</p> : null}
+              </div>
             </form>
           </footer>
         </main>
 
-        <aside className="space-y-5">
+        <aside className="min-h-0 space-y-5 overflow-y-auto pr-1">
           <Panel title="Naechste Vorschlaege" eyebrow="clickable">
             {latestAssistantEntry?.suggestions?.length ? (
               <div className="flex flex-wrap gap-2">
@@ -223,7 +274,13 @@ export function App() {
                 <p>World: {snapshot.config.worldPath}</p>
                 <p>History: {snapshot.config.maxHistoryMessages}</p>
                 <p>
-                  Tokens: {snapshot.usage.totals.totalTokens} total · {snapshot.usage.totals.cachedTokens} cached
+                  Session:
+                  {" "}
+                  In {formatNumber.format(snapshot.sessionUsage.promptTokens)}
+                  {" "}
+                  · Out {formatNumber.format(snapshot.sessionUsage.completionTokens)}
+                  {" "}
+                  · Cached {formatNumber.format(snapshot.sessionUsage.cachedTokens)}
                 </p>
                 <button
                   type="button"

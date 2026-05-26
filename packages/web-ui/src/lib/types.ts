@@ -58,6 +58,14 @@ export interface SessionSnapshot {
       cachedTokens: number;
     };
   };
+  sessionUsage: {
+    requests: number;
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    cachedTokens: number;
+    reasoningTokens: number;
+  };
   warnings: {
     narrative: string[];
     knowledge: string[];

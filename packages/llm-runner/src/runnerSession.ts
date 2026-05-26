@@ -20,7 +20,7 @@ import type {
   RunnerUiSuggestion
 } from "./sessionTypes.js";
 import { runToolLoop } from "./toolLoop.js";
-import { createUsageTracker } from "./usageTracker.js";
+import { createEmptyUsageFile, createUsageTracker, type TokenUsageAggregate } from "./usageTracker.js";
 
 export async function createRunnerSession(config: ReplConfig): Promise<RunnerSession> {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -44,6 +44,7 @@ export async function createRunnerSession(config: ReplConfig): Promise<RunnerSes
   const host = createLlmToolHost(playerView);
   const client = new OpenAI({ apiKey });
   const usageTracker = createUsageTracker(config.usageFilePath);
+  const usageBaseline = (await usageTracker.readSnapshot()).totals;
   const systemPrompt = await buildRunnerSystemPrompt(config);
   const sessionId = createSessionId();
   const transcript: RunnerTranscriptEntry[] = [];
@@ -59,6 +60,7 @@ export async function createRunnerSession(config: ReplConfig): Promise<RunnerSes
         host,
         transcript,
         usageTracker,
+        usageBaseline,
         narrativeWarnings: narrativeProviderResult?.warnings ?? [],
         knowledgeWarnings: knowledgeProviderResult?.warnings ?? []
       });
@@ -109,6 +111,7 @@ export async function createRunnerSession(config: ReplConfig): Promise<RunnerSes
         host,
         transcript,
         usageTracker,
+        usageBaseline,
         assistantText: result.assistantText,
         assistantDebugLines: debugLines,
         narrativeWarnings: narrativeProviderResult?.warnings ?? [],
@@ -133,6 +136,7 @@ async function buildSnapshot(input: {
   host: ReturnType<typeof createLlmToolHost>;
   transcript: RunnerTranscriptEntry[];
   usageTracker: ReturnType<typeof createUsageTracker>;
+  usageBaseline: TokenUsageAggregate;
   assistantText?: string;
   assistantDebugLines?: string[];
   narrativeWarnings: string[];
@@ -140,6 +144,7 @@ async function buildSnapshot(input: {
 }): Promise<RunnerSessionSnapshot> {
   const currentScene = hostGetCurrentScene(input.host);
   const suggestions = buildUiSuggestions(currentScene);
+  const usage = await input.usageTracker.readSnapshot();
 
   if (input.assistantText) {
     input.transcript.push({
@@ -162,7 +167,8 @@ async function buildSnapshot(input: {
     })),
     currentScene,
     suggestions,
-    usage: await input.usageTracker.readSnapshot(),
+    usage,
+    sessionUsage: subtractUsageAggregate(usage.totals, input.usageBaseline),
     warnings: {
       narrative: [...input.narrativeWarnings],
       knowledge: [...input.knowledgeWarnings]
@@ -206,4 +212,18 @@ function createSessionId(): string {
 
 function createTranscriptEntryId(role: RunnerTranscriptEntry["role"], index: number): string {
   return `${role}_${index + 1}`;
+}
+
+function subtractUsageAggregate(
+  current: TokenUsageAggregate,
+  baseline: TokenUsageAggregate = createEmptyUsageFile().totals
+): TokenUsageAggregate {
+  return {
+    requests: Math.max(0, current.requests - baseline.requests),
+    promptTokens: Math.max(0, current.promptTokens - baseline.promptTokens),
+    completionTokens: Math.max(0, current.completionTokens - baseline.completionTokens),
+    totalTokens: Math.max(0, current.totalTokens - baseline.totalTokens),
+    cachedTokens: Math.max(0, current.cachedTokens - baseline.cachedTokens),
+    reasoningTokens: Math.max(0, current.reasoningTokens - baseline.reasoningTokens)
+  };
 }
