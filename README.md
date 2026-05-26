@@ -19,6 +19,10 @@ Wichtige Dateien:
 - `sample/test.narrative-guide.yaml`
 - `sample/test.twilight.narrative-guide.yaml`
 - `sample/test.narrative-guide-mix.yaml`
+- `sample/louvre-salon-carre.world.yaml`
+- `sample/louvre-salon-carre.narrative-guide.yaml`
+- `sample/louvre-salon-carre.narrative-guide-mix.yaml`
+- `sample/louvre-salon-carre.artwork-dossiers.md`
 - `sample/interaction-lab.world.yaml`
 - `sample/assets/safe.object-asset.yaml`
 - `docs/world.md`
@@ -28,6 +32,7 @@ Wichtige Dateien:
 - `docs/narrative-guide-mixing.md`
 - `docs/writing-narrative-guides.md`
 - `docs/project-scaffold.md`
+- `docs/museum-world-prototype.md`
 - `docs/llm-interface.md`
 - `docs/llm-runner.md`
 - `docs/first-llm-contract.md`

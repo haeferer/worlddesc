@@ -1,0 +1,189 @@
+world:
+  title: Salon Carre im Louvre
+  desc: Ein museumsartiger Prototyp fuer einen virtuellen Saal mit italienischen Altmeistern.
+
+player:
+  initialRoom: salonCarreMitte
+
+interactionTypes:
+  examine:
+    title: Betrachten
+    desc: Ein Bild oder Detail genauer betrachten.
+
+objects:
+  cimabueMaesta:
+    title: Cimabue - Maesta
+    desc: Eine monumentale thronende Madonna mit sechs Engeln.
+    aliases: [cimabue, maesta, madonna von cimabue]
+    tags: [painting, italian, medieval, altarpiece]
+    interactions:
+      ansehen:
+        type: examine
+        title: Cimabue betrachten
+        aliases: [bild ansehen, cimabue ansehen, maesta betrachten]
+        result:
+          text: Vor dir erhebt sich eine strenge, leuchtende Maesta - frontal, feierlich und von goldener Wuerde getragen.
+
+  giottoStigmata:
+    title: Giotto - Der heilige Franziskus empfaengt die Stigmata
+    desc: Franziskus steht in einer felsigen Landschaft und empfaengt die Wundmale Christi.
+    aliases: [giotto, franziskus, stigmata]
+    tags: [painting, italian, early-renaissance, saint]
+    interactions:
+      ansehen:
+        type: examine
+        title: Giotto betrachten
+        aliases: [giotto ansehen, franziskus betrachten, stigmata betrachten]
+        result:
+          text: Giottos Bild zieht den Blick in eine stille, klare Szene, in der Landschaft, Koerper und Geste schon ungewoehnlich greifbar wirken.
+
+  fraAngelicoCoronation:
+    title: Fra Angelico - Kroenung der Jungfrau
+    desc: Eine lichte himmlische Versammlung rund um die Kroenung Marias.
+    aliases: [fra angelico, kroenung, jungfrau maria]
+    tags: [painting, italian, devotional, heavenly]
+    interactions:
+      ansehen:
+        type: examine
+        title: Fra Angelico betrachten
+        aliases: [fra angelico ansehen, kroenung betrachten]
+        result:
+          text: Das Bild oeffnet sich wie ein kostbares liturgisches Leuchten - zart, geordnet und fast schwerelos.
+
+  uccelloSanRomano:
+    title: Uccello - Die Schlacht von San Romano
+    desc: Lanzen, Pferde und Ruestungen ordnen das Kampfgeschehen in ein seltsam klares Bildfeld.
+    aliases: [uccello, san romano, schlacht]
+    tags: [painting, italian, battle, perspective]
+    interactions:
+      ansehen:
+        type: examine
+        title: Uccello betrachten
+        aliases: [uccello ansehen, san romano betrachten, schlacht betrachten]
+        result:
+          text: Die Schlacht erscheint zugleich bewegt und eigentümlich geordnet - fast wie ein dramatisches Schachspiel aus Pferden, Lanzen und Linien.
+
+rooms:
+  salonCarreMitte:
+    title: Mitte des Salon Carre
+    desc: Du stehst in der Mitte des Salon Carre. Von hier aus kannst du mehrere beruehmte italienische Gemaelde ansteuern.
+    tags: [museum, gallery, center, old-masters]
+    ways:
+      zuCimabue:
+        title: Zu Cimabue
+        desc: Zum Standpunkt vor Cimabues Maesta.
+        aliases: [zu cimabue, cimabue, maesta, linke seite]
+        target:
+          room: cimabueStandpunkt
+      zuGiotto:
+        title: Zu Giotto
+        desc: Zum Standpunkt vor Giottos Franziskus.
+        aliases: [zu giotto, giotto, franziskus]
+        target:
+          room: giottoStandpunkt
+      zuFraAngelico:
+        title: Zu Fra Angelico
+        desc: Zum Standpunkt vor Fra Angelicos Kroenung.
+        aliases: [zu fra angelico, fra angelico, kroenung]
+        target:
+          room: fraAngelicoStandpunkt
+      zuUccello:
+        title: Zu Uccello
+        desc: Zum Standpunkt vor Uccellos Schlacht von San Romano.
+        aliases: [zu uccello, uccello, san romano, schlacht]
+        target:
+          room: uccelloStandpunkt
+
+  cimabueStandpunkt:
+    title: Vor Cimabue
+    desc: Du stehst nah vor Cimabues Maesta. Von hier aus kannst du zur Mitte zurueck oder entlang der Hängung weitergehen.
+    tags: [museum, painting-view, cimabue]
+    ways:
+      mitte:
+        title: Zurueck zur Mitte
+        desc: Wieder in die Mitte des Saals treten.
+        aliases: [mitte, zurueck, in die mitte]
+        target:
+          room: salonCarreMitte
+      weiterZuGiotto:
+        title: Weiter zu Giotto
+        desc: Zum benachbarten Bild von Giotto wechseln.
+        aliases: [weiter zu giotto, zu giotto, rechts]
+        target:
+          room: giottoStandpunkt
+
+  giottoStandpunkt:
+    title: Vor Giotto
+    desc: Du stehst vor Giottos Franziskus. Die Nachbarbilder lassen sich von hier aus entlang der Wand erreichen.
+    tags: [museum, painting-view, giotto]
+    ways:
+      mitte:
+        title: Zurueck zur Mitte
+        desc: Wieder in die Mitte des Saals treten.
+        aliases: [mitte, zurueck, in die mitte]
+        target:
+          room: salonCarreMitte
+      weiterZuCimabue:
+        title: Weiter zu Cimabue
+        desc: Zum benachbarten Bild von Cimabue wechseln.
+        aliases: [weiter zu cimabue, zu cimabue, links]
+        target:
+          room: cimabueStandpunkt
+      weiterZuFraAngelico:
+        title: Weiter zu Fra Angelico
+        desc: Zum benachbarten Bild von Fra Angelico wechseln.
+        aliases: [weiter zu fra angelico, zu fra angelico, rechts]
+        target:
+          room: fraAngelicoStandpunkt
+
+  fraAngelicoStandpunkt:
+    title: Vor Fra Angelico
+    desc: Du stehst vor Fra Angelicos Kroenung der Jungfrau. Die Mitte und die benachbarten Bilder bleiben von hier aus erreichbar.
+    tags: [museum, painting-view, fra-angelico]
+    ways:
+      mitte:
+        title: Zurueck zur Mitte
+        desc: Wieder in die Mitte des Saals treten.
+        aliases: [mitte, zurueck, in die mitte]
+        target:
+          room: salonCarreMitte
+      weiterZuGiotto:
+        title: Weiter zu Giotto
+        desc: Zum benachbarten Bild von Giotto wechseln.
+        aliases: [weiter zu giotto, zu giotto, links]
+        target:
+          room: giottoStandpunkt
+      weiterZuUccello:
+        title: Weiter zu Uccello
+        desc: Zum benachbarten Bild von Uccello wechseln.
+        aliases: [weiter zu uccello, zu uccello, rechts]
+        target:
+          room: uccelloStandpunkt
+
+  uccelloStandpunkt:
+    title: Vor Uccello
+    desc: Du stehst vor Uccellos Schlacht von San Romano. Von hier aus kannst du wieder in die Mitte oder zum Nachbarbild zurueck.
+    tags: [museum, painting-view, uccello]
+    ways:
+      mitte:
+        title: Zurueck zur Mitte
+        desc: Wieder in die Mitte des Saals treten.
+        aliases: [mitte, zurueck, in die mitte]
+        target:
+          room: salonCarreMitte
+      weiterZuFraAngelico:
+        title: Weiter zu Fra Angelico
+        desc: Zum benachbarten Bild von Fra Angelico wechseln.
+        aliases: [weiter zu fra angelico, zu fra angelico, links]
+        target:
+          room: fraAngelicoStandpunkt
+
+placement:
+  cimabueMaesta:
+    room: cimabueStandpunkt
+  giottoStigmata:
+    room: giottoStandpunkt
+  fraAngelicoCoronation:
+    room: fraAngelicoStandpunkt
+  uccelloSanRomano:
+    room: uccelloStandpunkt

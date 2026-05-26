@@ -1,0 +1,11 @@
+mix:
+  kind: narrativeGuideMix
+  id: salonCarreMuseumMix
+  title: Basis-Mix fuer den Salon Carre
+  desc: Ein einfacher einlagiger Narrative-Guide-Mix fuer den Museumsprototypen.
+  forWorld: Salon Carre im Louvre
+
+layers:
+  - id: base
+    guide: ./louvre-salon-carre.narrative-guide.yaml
+    desc: Grundton fuer den musealen Betrachtungsraum.

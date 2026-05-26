@@ -1,0 +1,43 @@
+guide:
+  kind: narrativeGuide
+  id: salonCarreMuseumGuide
+  title: Narrative Guide fuer den Salon Carre
+  desc: Ein ruhiger musealer Deutungsrahmen fuer einen Saal mit italienischen Altmeistern.
+  forWorld: Salon Carre im Louvre
+
+world:
+  tone: [hushed, attentive, museum-like]
+  associations: [slow-looking, old-gold, measured-distance]
+  narrativeHints: [betrachtung-statt-abenteuerdruck, jeder-standpunkt-ist-ein-neuer-rahmen]
+
+rooms:
+  salonCarreMitte:
+    tone: [poised, open, observant]
+    associations: [orientation, choice, central-axis]
+    sensoryHints: [soft-footsteps, quiet-air, dispersed-light]
+  cimabueStandpunkt:
+    tone: [solemn, frontal, iconic]
+    associations: [gold-ground, majesty, stillness]
+  giottoStandpunkt:
+    tone: [clear, human, grounded]
+    associations: [landscape, body, encounter]
+  fraAngelicoStandpunkt:
+    tone: [luminous, ordered, devotional]
+    associations: [heavenly-light, ceremony, grace]
+  uccelloStandpunkt:
+    tone: [martial, geometric, dramatic]
+    associations: [lances, perspective, tension]
+
+objects:
+  cimabueMaesta:
+    tone: [solemn, monumental]
+    associations: [throne, gold, icon-presence]
+  giottoStigmata:
+    tone: [clear, intimate]
+    associations: [saint, revelation, rock]
+  fraAngelicoCoronation:
+    tone: [radiant, ceremonial]
+    associations: [crowns, angels, liturgy]
+  uccelloSanRomano:
+    tone: [tense, formal, dazzling]
+    associations: [battle-order, horses, spears]
