@@ -75,7 +75,8 @@ export const FIRST_LLM_TOOL_CONTRACT: FirstLlmToolSpec[] = [
   },
   {
     name: "resolve_intent",
-    description: "Resolve a broad point-and-click-like player intent into a concrete player action command or a structured rejection.",
+    description:
+      "Resolve a broad point-and-click-like player intent from free user language into a concrete player action command or a structured rejection. Use this before perform_action whenever the input did not already come from a structured resolved command.",
     argsExample: {
       intent: {
         verb: "open",
@@ -85,7 +86,8 @@ export const FIRST_LLM_TOOL_CONTRACT: FirstLlmToolSpec[] = [
   },
   {
     name: "perform_action",
-    description: "Execute a concrete structured player action and return the new scene, events and turn summary.",
+    description:
+      "Execute a concrete structured player action and return the new scene, events and turn summary. Do not use this as the first step for free user language; use it only after a matching resolve_intent result.",
     argsExample: {
       command: {
         kind: "interaction",

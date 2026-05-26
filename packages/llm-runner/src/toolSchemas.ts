@@ -79,7 +79,8 @@ export function buildFirstLlmToolSchemas(): ChatToolSchema[] {
       type: "function",
       function: {
         name: "resolve_intent",
-        description: "Resolve a broad point-and-click style player intent into a structured action command or a structured rejection.",
+        description:
+          "Resolve a broad point-and-click style player intent from free user language into a structured action command or a structured rejection. Use this before perform_action for normal player input.",
         parameters: {
           type: "object",
           properties: {
@@ -116,7 +117,8 @@ export function buildFirstLlmToolSchemas(): ChatToolSchema[] {
       type: "function",
       function: {
         name: "perform_action",
-        description: "Execute a concrete structured player action command.",
+        description:
+          "Execute a concrete structured player action command. Do not use this directly from free user language; use it only after a matching resolve_intent result.",
         parameters: {
           type: "object",
           properties: {

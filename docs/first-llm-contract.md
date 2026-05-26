@@ -95,6 +95,12 @@ Zweck:
 - das LLM kann freie Spielerabsicht in die Weltsprache uebersetzen
 - die Engine prueft danach, ob diese Absicht in der aktuellen Szene konkret aufloesbar ist
 
+Wichtig:
+
+- bei freier Nutzereingabe soll `resolve_intent` immer vor `perform_action` stehen
+- auch sichtbare `sampleActions` oder offensichtliche Wege sind kein Grund, diesen Schritt zu ueberspringen
+- wenn mehrere Wege oder Aktionen gleich plausibel sind, soll die LLM-Schicht kurz nachfragen statt zu raten
+
 ## 5. `perform_action(command)`
 
 Fuehrt nur bereits strukturierte Player-Aktionen aus.

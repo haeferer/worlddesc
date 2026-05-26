@@ -142,6 +142,12 @@ Beschreibung:
 - nimmt eine breitere Spielerabsicht entgegen
 - liefert entweder eine konkrete `PlayerActionCommand`-Aufloesung oder eine strukturierte Ablehnung
 
+Wichtig:
+
+- dieses Tool ist der normale erste Schritt fuer freie Nutzereingaben
+- auch bei sichtbaren `sampleActions` sollte das LLM nicht direkt `perform_action` aufrufen
+- wenn mehrere Wege gleich plausibel sind, sollte das LLM lieber kurz nachfragen als still einen Kandidaten zu waehlen
+
 Argumente:
 
 ```json
@@ -215,6 +221,11 @@ Rueckgabe bei Ablehnung:
 Beschreibung:
 
 - fuehrt einen bereits konkreten `PlayerActionCommand` aus
+
+Wichtig:
+
+- dieses Tool ist kein Ersatz fuer `resolve_intent`
+- bei freier Nutzereingabe soll es erst nach einem passenden `resolve_intent`-Ergebnis benutzt werden
 
 Argumente:
 
