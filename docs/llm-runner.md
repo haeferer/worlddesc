@@ -66,6 +66,7 @@ Die REPL unterstuetzt derzeit:
 - `--world <path>`
 - `--narrative-guide-mix <path>`
 - `--knowledge-dir <path>`
+- `--pricing-file <path>`
 - `--api-mode <chat|responses>`
 - `--model <name>`
 - `--debug`
@@ -86,6 +87,16 @@ Zusatzlich:
 Standard fuer den Usage-Counter:
 
 - `tokens.usage.json` im aktuellen Projekt-Root
+
+Standard fuer die Preisquelle:
+
+- `pricing.json` im aktuellen Projekt-Root
+
+Wichtig:
+
+- `tokens.usage.json` enthaelt nur Tokenzahlen
+- echte Modellpreise und Kostensaetze gehoeren in `pricing.json`
+- Session-Kosten im Web-UI werden aus `sessionUsage` plus `pricing.json` berechnet, nicht in die Usage-Datei hineingeschrieben
 
 Standard fuer die persistierte freie Gespraechshistory:
 

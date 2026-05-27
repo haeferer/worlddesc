@@ -4,8 +4,14 @@ export function useSpeechToText(onTranscript: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [debugState, setDebugState] = useState("idle");
+  const [autoRestart, setAutoRestart] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const transcriptHandlerRef = useRef(onTranscript);
+  const restartTimerRef = useRef<number | null>(null);
+  const shouldRestartRef = useRef(false);
+  const lastErrorRef = useRef<string | null>(null);
+  const startingRef = useRef(false);
+  const activeRef = useRef(false);
 
   transcriptHandlerRef.current = onTranscript;
 
@@ -29,6 +35,10 @@ export function useSpeechToText(onTranscript: (text: string) => void) {
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.onstart = () => {
+      clearRestartTimer();
+      startingRef.current = false;
+      activeRef.current = true;
+      lastErrorRef.current = null;
       setDebugState("listening");
       setListening(true);
     };
@@ -46,17 +56,34 @@ export function useSpeechToText(onTranscript: (text: string) => void) {
       }
     };
     recognition.onerror = (event) => {
-      setError(event.error || "Speech recognition failed");
+      const nextError = event.error || "Speech recognition failed";
+      startingRef.current = false;
+      activeRef.current = false;
+      lastErrorRef.current = nextError;
+      setError(nextError);
       setListening(false);
-      setDebugState(`error: ${event.error || "unknown"}`);
+      setDebugState(`error: ${nextError}`);
     };
     recognition.onend = () => {
+      startingRef.current = false;
+      activeRef.current = false;
       setListening(false);
-       setDebugState("ended");
+      const lastError = lastErrorRef.current;
+      if (shouldRestartRef.current && canAutoRestartAfter(lastError)) {
+        setDebugState("ended, restarting");
+        scheduleRestart();
+        return;
+      }
+
+      setDebugState("ended");
     };
     recognitionRef.current = recognition;
 
     return () => {
+      shouldRestartRef.current = false;
+      clearRestartTimer();
+      startingRef.current = false;
+      activeRef.current = false;
       recognition.stop();
       recognitionRef.current = null;
       setListening(false);
@@ -68,13 +95,22 @@ export function useSpeechToText(onTranscript: (text: string) => void) {
     supported,
     listening,
     error,
+    autoRestart,
     debugState,
     start() {
+      if (startingRef.current || activeRef.current) {
+        return;
+      }
+
       setError(null);
+      startingRef.current = true;
+      lastErrorRef.current = null;
       setDebugState("starting");
       try {
         recognitionRef.current?.start();
       } catch (startError) {
+        startingRef.current = false;
+        activeRef.current = false;
         const message = startError instanceof Error ? startError.message : String(startError);
         setError(message);
         setListening(false);
@@ -82,9 +118,69 @@ export function useSpeechToText(onTranscript: (text: string) => void) {
       }
     },
     stop() {
+      shouldRestartRef.current = false;
+      setAutoRestart(false);
+      clearRestartTimer();
+      startingRef.current = false;
+      activeRef.current = false;
       recognitionRef.current?.stop();
       setListening(false);
       setDebugState("stopped");
+    },
+    enableAutoRestart() {
+      shouldRestartRef.current = true;
+      setAutoRestart(true);
+    },
+    disableAutoRestart() {
+      shouldRestartRef.current = false;
+      setAutoRestart(false);
+      clearRestartTimer();
     }
   };
+
+  function scheduleRestart() {
+    clearRestartTimer();
+    restartTimerRef.current = window.setTimeout(() => {
+      if (!shouldRestartRef.current) {
+        return;
+      }
+
+      if (startingRef.current || activeRef.current) {
+        return;
+      }
+
+      setDebugState("restarting");
+      try {
+        startingRef.current = true;
+        lastErrorRef.current = null;
+        recognitionRef.current?.start();
+      } catch (startError) {
+        startingRef.current = false;
+        activeRef.current = false;
+        const message = startError instanceof Error ? startError.message : String(startError);
+        setError(message);
+        setDebugState(`restart-error: ${message}`);
+      }
+    }, 100);
+  }
+
+  function clearRestartTimer() {
+    if (restartTimerRef.current !== null) {
+      window.clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
+  }
+}
+
+function canAutoRestartAfter(error: string | null): boolean {
+  if (!error) {
+    return true;
+  }
+
+  return ![
+    "not-allowed",
+    "service-not-allowed",
+    "audio-capture",
+    "language-not-supported"
+  ].some((blockedCode) => error.includes(blockedCode));
 }

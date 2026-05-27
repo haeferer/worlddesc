@@ -3,6 +3,7 @@ import type { FirstLlmToolSpec } from "@worlddesc/world";
 import type { PlayerActionCommand, PlayerSceneView } from "@worlddesc/world";
 
 import type { ReplConfig } from "./config.js";
+import type { PricingCatalog, SessionCostBreakdown } from "./pricing.js";
 import type { TokenUsageAggregate, TokenUsageFile } from "./usageTracker.js";
 
 export interface RunnerSessionConfigSummary {
@@ -44,6 +45,8 @@ export interface RunnerSessionSnapshot {
   suggestions: RunnerUiSuggestion[];
   usage: TokenUsageFile;
   sessionUsage: TokenUsageAggregate;
+  pricing?: PricingCatalog;
+  sessionCost?: SessionCostBreakdown;
   warnings: {
     narrative: string[];
     knowledge: string[];

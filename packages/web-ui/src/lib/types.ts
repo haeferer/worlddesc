@@ -66,6 +66,14 @@ export interface SessionSnapshot {
     cachedTokens: number;
     reasoningTokens: number;
   };
+  sessionCost?: {
+    currency: string;
+    model: string;
+    inputCost: number;
+    cachedInputCost: number;
+    outputCost: number;
+    totalCost: number;
+  };
   warnings: {
     narrative: string[];
     knowledge: string[];

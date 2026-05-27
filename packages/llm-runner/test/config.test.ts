@@ -13,6 +13,7 @@ describe("llm-runner config", () => {
       worldPath: "C:\\repo\\sample\\test.world.yaml",
       narrativeGuideMixPath: undefined,
       knowledgeDirPath: undefined,
+      pricingFilePath: "C:\\repo\\pricing.json",
       apiMode: "chat",
       model: "gpt-test",
       printSystemPrompt: false,
@@ -37,6 +38,8 @@ describe("llm-runner config", () => {
         "./sample/test.narrative-guide-mix.yaml",
         "--knowledge-dir",
         "./sample/louvre-salon-carre.knowledge",
+        "--pricing-file",
+        "./tmp/pricing.json",
         "--api-mode",
         "responses",
         "--model",
@@ -61,6 +64,7 @@ describe("llm-runner config", () => {
       worldPath: "C:\\repo\\sample\\interaction-lab.world.yaml",
       narrativeGuideMixPath: "C:\\repo\\sample\\test.narrative-guide-mix.yaml",
       knowledgeDirPath: "C:\\repo\\sample\\louvre-salon-carre.knowledge",
+      pricingFilePath: "C:\\repo\\tmp\\pricing.json",
       apiMode: "responses",
       model: "gpt-x",
       printSystemPrompt: true,
@@ -97,6 +101,7 @@ describe("llm-runner config", () => {
     expect(buildHelpText()).toContain("--hide-sample-actions");
     expect(buildHelpText()).toContain("--narrative-guide-mix");
     expect(buildHelpText()).toContain("--knowledge-dir");
+    expect(buildHelpText()).toContain("--pricing-file");
     expect(buildHelpText()).toContain("--api-mode");
     expect(buildHelpText()).toContain("--usage-file");
     expect(buildHelpText()).toContain("--character");

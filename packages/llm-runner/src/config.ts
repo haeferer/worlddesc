@@ -5,6 +5,7 @@ export interface ReplConfig {
   worldPath: string;
   narrativeGuideMixPath?: string;
   knowledgeDirPath?: string;
+  pricingFilePath: string;
   apiMode: "chat" | "responses";
   model: string;
   printSystemPrompt: boolean;
@@ -23,6 +24,7 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
   const defaults: ReplConfig = {
     web: false,
     worldPath: resolve(cwd, "sample/test.world.yaml"),
+    pricingFilePath: resolve(cwd, "pricing.json"),
     model: env.OPENAI_MODEL ?? "gpt-5.4-mini",
     apiMode: env.OPENAI_API_MODE === "responses" ? "responses" : "chat",
     printSystemPrompt: false,
@@ -63,6 +65,10 @@ export function parseReplArgs(argv: string[], cwd = process.cwd(), env = process
         continue;
       case "--knowledge-dir":
         defaults.knowledgeDirPath = resolve(cwd, requireValue(args, index, "--knowledge-dir"));
+        index += 2;
+        continue;
+      case "--pricing-file":
+        defaults.pricingFilePath = resolve(cwd, requireValue(args, index, "--pricing-file"));
         index += 2;
         continue;
       case "--model":
@@ -130,6 +136,7 @@ export function buildHelpText(): string {
     "  --world <path>               Path to the world file. Default: sample/test.world.yaml",
     "  --narrative-guide-mix <path> Optional narrative guide mix file to build the LLM-facing narrativeContext",
     "  --knowledge-dir <path>       Optional knowledge directory with objects/<objectId>.md and rooms/<roomId>.md",
+    "  --pricing-file <path>        Path to model pricing JSON. Default: pricing.json",
     "  --api-mode <chat|responses>  OpenAI API mode. Default: OPENAI_API_MODE or chat",
     "  --model <name>               OpenAI model name. Default: OPENAI_MODEL or gpt-5.4-mini",
     "  --print-system-prompt        Print the fully assembled runner system prompt and exit",

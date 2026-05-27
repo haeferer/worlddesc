@@ -16,11 +16,16 @@ export function App() {
   const [optimisticEntries, setOptimisticEntries] = useState<LocalTranscriptEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showDebug, setShowDebug] = useState(false);
+  const [handsFreeMode, setHandsFreeMode] = useState(false);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const transcriptScrollRef = useRef<HTMLElement | null>(null);
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
 
   const stt = useSpeechToText((transcript) => {
+    if (handsFreeMode) {
+      stt.disableAutoRestart();
+    }
+
     if (pending) {
       setInput((current) => (current ? `${current} ${transcript}` : transcript));
       return;
@@ -34,8 +39,20 @@ export function App() {
   }, []);
 
   const transcriptEntries = useMemo<LocalTranscriptEntry[]>(() => {
-    return [...(snapshot?.transcript ?? []), ...optimisticEntries];
-  }, [optimisticEntries, snapshot]);
+    const entries: LocalTranscriptEntry[] = [...(snapshot?.transcript ?? []), ...optimisticEntries];
+
+    if (handsFreeMode && stt.listening) {
+      entries.push({
+        id: "hands-free-listening",
+        role: "system",
+        text: "Hoert zu …",
+        createdAt: new Date().toISOString(),
+        pending: true
+      });
+    }
+
+    return entries;
+  }, [handsFreeMode, optimisticEntries, snapshot, stt.listening]);
 
   const latestAssistantEntry = useMemo(() => {
     return [...transcriptEntries].reverse().find((entry) => entry.role === "assistant") ?? null;
@@ -53,6 +70,16 @@ export function App() {
   }, [pending, shouldAutoScroll, transcriptEntries]);
 
   const formatNumber = useMemo(() => new Intl.NumberFormat("de-DE"), []);
+  const formatCost = useMemo(
+    () =>
+      new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 6
+      }),
+    []
+  );
 
   function handleTranscriptScroll() {
     const element = transcriptScrollRef.current;
@@ -120,12 +147,32 @@ export function App() {
       const result = await submitTurn(trimmedInput);
       setSnapshot(result.snapshot);
       setOptimisticEntries([]);
+      if (handsFreeMode && stt.supported) {
+        stt.enableAutoRestart();
+        stt.start();
+      }
     } catch (nextError) {
       setOptimisticEntries([]);
       setInput(trimmedInput);
       setError(nextError instanceof Error ? nextError.message : String(nextError));
     } finally {
       setPending(false);
+    }
+  }
+
+  function toggleHandsFreeMode() {
+    if (handsFreeMode) {
+      setHandsFreeMode(false);
+      stt.disableAutoRestart();
+      stt.stop();
+      return;
+    }
+
+    setError(null);
+    setHandsFreeMode(true);
+    stt.enableAutoRestart();
+    if (!pending && stt.supported && !stt.listening) {
+      stt.start();
     }
   }
 
@@ -200,15 +247,16 @@ export function App() {
                   {stt.supported ? (
                     <button
                       type="button"
-                      onClick={() => (stt.listening ? stt.stop() : stt.start())}
+                      onClick={toggleHandsFreeMode}
                       className="rounded-2xl border border-amber-100/15 bg-stone-900/80 px-4 py-3 text-sm text-stone-100 transition hover:border-amber-200/30 hover:bg-stone-800"
                     >
-                      {stt.listening ? "Stopp" : "Sprechen"}
+                      {handsFreeMode ? "Freihand aus" : "Freihand"}
                     </button>
                   ) : null}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-stone-400/85">
+                {stt.supported ? <p>Mode: {handsFreeMode ? "freihand" : "manuell"}</p> : null}
                 {stt.supported ? <p>STT: {stt.debugState}</p> : null}
                 {stt.error ? <p className="text-red-200/80">{stt.error}</p> : null}
               </div>
@@ -282,6 +330,19 @@ export function App() {
                   {" "}
                   · Cached {formatNumber.format(snapshot.sessionUsage.cachedTokens)}
                 </p>
+                {snapshot.sessionCost ? (
+                  <p>
+                    Cost:
+                    {" "}
+                    In {formatCost.format(snapshot.sessionCost.inputCost)}
+                    {" "}
+                    · Cached {formatCost.format(snapshot.sessionCost.cachedInputCost)}
+                    {" "}
+                    · Out {formatCost.format(snapshot.sessionCost.outputCost)}
+                    {" "}
+                    · Total {formatCost.format(snapshot.sessionCost.totalCost)}
+                  </p>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => setShowDebug((current) => !current)}
@@ -325,9 +386,12 @@ function TranscriptBubble(props: {
   onSuggestion: (inputText: string) => Promise<void>;
 }) {
   const isUser = props.entry.role === "user";
+  const isSystem = props.entry.role === "system";
 
   return (
-    <article className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <article
+      className={`flex ${isUser ? "justify-end" : isSystem ? "justify-center" : "justify-start"}`}
+    >
       <div
         className={[
           "max-w-[92%] rounded-[24px] px-4 py-3 shadow-[0_16px_48px_rgba(0,0,0,0.18)]",
@@ -335,6 +399,8 @@ function TranscriptBubble(props: {
             ? props.entry.pending
               ? "bg-amber-100 text-stone-900 ring-2 ring-amber-200/40"
               : "bg-amber-200 text-stone-950"
+            : isSystem
+              ? "border border-sky-200/15 bg-sky-100/10 text-sky-50"
             : "border border-stone-100/10 bg-stone-900/80 text-stone-100"
         ].join(" ")}
       >

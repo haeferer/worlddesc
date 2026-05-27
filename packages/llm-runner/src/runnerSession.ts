@@ -9,6 +9,7 @@ import {
 } from "@worlddesc/world";
 
 import type { ReplConfig } from "./config.js";
+import { calculateSessionCost, loadPricingCatalog } from "./pricing.js";
 import { buildRunnerSystemPrompt } from "./promptAssembly.js";
 import type {
   RunnerSession,
@@ -45,6 +46,7 @@ export async function createRunnerSession(config: ReplConfig): Promise<RunnerSes
   const client = new OpenAI({ apiKey });
   const usageTracker = createUsageTracker(config.usageFilePath);
   const usageBaseline = (await usageTracker.readSnapshot()).totals;
+  const pricingCatalog = await loadPricingCatalog(config.pricingFilePath);
   const systemPrompt = await buildRunnerSystemPrompt(config);
   const sessionId = createSessionId();
   const transcript: RunnerTranscriptEntry[] = [];
@@ -61,6 +63,7 @@ export async function createRunnerSession(config: ReplConfig): Promise<RunnerSes
         transcript,
         usageTracker,
         usageBaseline,
+        pricingCatalog,
         narrativeWarnings: narrativeProviderResult?.warnings ?? [],
         knowledgeWarnings: knowledgeProviderResult?.warnings ?? []
       });
@@ -112,6 +115,7 @@ export async function createRunnerSession(config: ReplConfig): Promise<RunnerSes
         transcript,
         usageTracker,
         usageBaseline,
+        pricingCatalog,
         assistantText: result.assistantText,
         assistantDebugLines: debugLines,
         narrativeWarnings: narrativeProviderResult?.warnings ?? [],
@@ -137,6 +141,7 @@ async function buildSnapshot(input: {
   transcript: RunnerTranscriptEntry[];
   usageTracker: ReturnType<typeof createUsageTracker>;
   usageBaseline: TokenUsageAggregate;
+  pricingCatalog: Awaited<ReturnType<typeof loadPricingCatalog>>;
   assistantText?: string;
   assistantDebugLines?: string[];
   narrativeWarnings: string[];
@@ -145,6 +150,7 @@ async function buildSnapshot(input: {
   const currentScene = hostGetCurrentScene(input.host);
   const suggestions = buildUiSuggestions(currentScene);
   const usage = await input.usageTracker.readSnapshot();
+  const sessionUsage = subtractUsageAggregate(usage.totals, input.usageBaseline);
 
   if (input.assistantText) {
     input.transcript.push({
@@ -168,7 +174,9 @@ async function buildSnapshot(input: {
     currentScene,
     suggestions,
     usage,
-    sessionUsage: subtractUsageAggregate(usage.totals, input.usageBaseline),
+    sessionUsage,
+    pricing: input.pricingCatalog,
+    sessionCost: calculateSessionCost(input.config.model, sessionUsage, input.pricingCatalog),
     warnings: {
       narrative: [...input.narrativeWarnings],
       knowledge: [...input.knowledgeWarnings]
